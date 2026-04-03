@@ -1,0 +1,122 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+      <h1 class="display-4">
+        <i class="bi bi-graph-up-arrow"></i> Delinquency Data Management
+      </h1>
+      <p class="lead">
+        Generate and manage synthetic data for user profiles, loan information, programs of study, and loan payments.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title mb-0">
+          <i class="bi bi-database-add"></i> Data Generation
+        </h3>
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          Click the button below to generate synthetic data for all entities. This will create sample data for
+          user profiles, loan information, programs of study, and loan payment history.
+        </p>
+        
+        <button 
+          class="btn btn-primary btn-lg"
+          [disabled]="isGenerating"
+          (click)="generateData()">
+          <span *ngIf="isGenerating" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          <i *ngIf="!isGenerating" class="bi bi-play-fill"></i>
+          {{ isGenerating ? 'Generating Data...' : 'Generate Synthetic Data' }}
+        </button>
+        
+        <!-- Success Message -->
+        <div *ngIf="generationComplete && !error" class="alert alert-success mt-3" role="alert">
+          <h5 class="alert-heading">
+            <i class="bi bi-check-circle-fill"></i> Data Generated Successfully!
+          </h5>
+          <div *ngIf="generationStats" class="mt-3">
+            <h6>Generation Statistics:</h6>
+            <ul class="mb-0">
+              <li>User Profiles: <strong>{{ generationStats.user_profiles }}</strong></li>
+              <li>Loan Records: <strong>{{ generationStats.loan_info }}</strong></li>
+              <li>Programs of Study: <strong>{{ generationStats.programs_of_study }}</strong></li>
+              <li>Loan Payments: <strong>{{ generationStats.loan_payments }}</strong></li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Error Message -->
+        <div *ngIf="error" class="alert alert-danger mt-3" role="alert">
+          <h5 class="alert-heading">
+            <i class="bi bi-exclamation-triangle-fill"></i> Error
+          </h5>
+          <p class="mb-0">{{ error }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title mb-0">
+          <i class="bi bi-list-check"></i> Quick Actions
+        </h4>
+      </div>
+      <div class="card-body">
+        <div class="list-group list-group-flush">
+          <a routerLink="/users" class="list-group-item list-group-item-action">
+            <i class="bi bi-people"></i> View User Profiles
+          </a>
+          <a routerLink="/loans" class="list-group-item list-group-item-action">
+            <i class="bi bi-cash-coin"></i> View Loan Information
+          </a>
+          <a routerLink="/programs" class="list-group-item list-group-item-action">
+            <i class="bi bi-book"></i> View Programs of Study
+          </a>
+          <a routerLink="/payments" class="list-group-item list-group-item-action">
+            <i class="bi bi-credit-card"></i> View Loan Payments
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title mb-0">
+          <i class="bi bi-info-circle"></i> About This Application
+        </h4>
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          This application demonstrates a modern full-stack architecture using:
+        </p>
+        <div class="row">
+          <div class="col-md-6">
+            <ul class="list-unstyled">
+              <li><i class="bi bi-check-circle text-success"></i> Angular 17 frontend</li>
+              <li><i class="bi bi-check-circle text-success"></i> Flask REST API</li>
+              <li><i class="bi bi-check-circle text-success"></i> Python backend</li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <ul class="list-unstyled">
+              <li><i class="bi bi-check-circle text-success"></i> SQLite database</li>
+              <li><i class="bi bi-check-circle text-success"></i> Bootstrap styling</li>
+              <li><i class="bi bi-check-circle text-success"></i> Mock data generation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

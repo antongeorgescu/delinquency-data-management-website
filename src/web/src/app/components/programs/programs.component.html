@@ -1,0 +1,55 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+          <i class="bi bi-book"></i> Programs of Study
+        </h3>
+        <button class="btn btn-outline-primary" (click)="loadPrograms()" [disabled]="loading">
+          <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+      </div>
+      <div class="card-body">
+        <!-- Loading Spinner -->
+        <div *ngIf="loading" class="loading-spinner">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        
+        <!-- Error Message -->
+        <div *ngIf="error" class="alert alert-danger" role="alert">
+          <i class="bi bi-exclamation-triangle"></i> {{ error }}
+        </div>
+        
+        <!-- Data Cards -->
+        <div *ngIf="!loading && !error">
+          <div class="row" *ngIf="programs.length > 0">
+            <div class="col-md-6 col-lg-4 mb-3" *ngFor="let program of programs">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h5 class="card-title">{{ program.program_name }}</h5>
+                  <p class="card-text">
+                    <span class="badge" [ngClass]="getBadgeClass(program.degree_level)">
+                      {{ program.degree_level }}
+                    </span>
+                  </p>
+                  <p class="card-text">
+                    <i class="bi bi-calendar"></i>
+                    <strong>Duration:</strong> {{ program.duration_months }} months
+                  </p>
+                  <small class="text-muted">ID: {{ program.id.substring(0, 8) }}...</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div *ngIf="programs.length === 0" class="text-center text-muted py-4">
+            <i class="bi bi-inbox display-4 d-block mb-3"></i>
+            <p>No programs found. Generate some data first.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
