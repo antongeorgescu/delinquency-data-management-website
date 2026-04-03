@@ -8,6 +8,7 @@ import {
   ProgramOfStudy, 
   LoanPayment, 
   ApiResponse,
+  PaginatedApiResponse,
   GenerationStats,
   DatabaseSummaryResponse 
 } from '../interfaces/data.interface';
@@ -41,9 +42,9 @@ export class DataService {
     );
   }
 
-  // Get user profiles
-  getUserProfiles(): Observable<ApiResponse<UserProfile>> {
-    return this.http.get<ApiResponse<UserProfile>>(`${this.baseUrl}/get-user-profiles`);
+  // Get user profiles with pagination
+  getUserProfiles(page: number = 1, perPage: number = 30): Observable<PaginatedApiResponse<UserProfile>> {
+    return this.http.get<PaginatedApiResponse<UserProfile>>(`${this.baseUrl}/get-user-profiles?page=${page}&per_page=${perPage}`);
   }
 
   // Get loan information

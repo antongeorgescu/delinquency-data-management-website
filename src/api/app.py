@@ -101,23 +101,41 @@ def generate_data():
 @app.route('/api/get-user-profiles', methods=['GET'])
 def get_user_profiles():
     """
-    Get all user profiles
+    Get user profiles with pagination
     """
     try:
         db_manager = DatabaseManager()
         
+        # Get pagination parameters
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 30))
+        offset = (page - 1) * per_page
+        
+        # Get total count
+        count_query = "SELECT COUNT(*) as total FROM user_profile"
+        count_result = db_manager.execute_query(count_query)
+        total_count = count_result[0]['total'] if count_result else 0
+        
+        # Get paginated data with all fields from user_profile table
         query = """
-            SELECT id, first_name, last_name, email, created_at
+            SELECT payer_id, first_name, last_name, date_of_birth, age, 
+                   address, city, province, employment_status, 
+                   annual_income_cad, marital_status
             FROM user_profile
-            ORDER BY created_at DESC
+            ORDER BY payer_id ASC
+            LIMIT ? OFFSET ?
         """
         
-        user_profiles = db_manager.execute_query(query)
+        user_profiles = db_manager.execute_query(query, (per_page, offset))
         
         response_data = {
             "success": True,
             "data": user_profiles,
-            "count": len(user_profiles)
+            "count": len(user_profiles),
+            "total": total_count,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": (total_count + per_page - 1) // per_page
         }
         
         return jsonify(response_data), 200

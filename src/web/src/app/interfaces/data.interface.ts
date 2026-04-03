@@ -1,9 +1,15 @@
 export interface UserProfile {
-  id: string;
+  payer_id: number;
   first_name: string;
   last_name: string;
-  email: string;
-  created_at: string;
+  date_of_birth: string;
+  age: number;
+  address: string;
+  city: string;
+  province: string;
+  employment_status: string;
+  annual_income_cad: number;
+  marital_status: string;
 }
 
 export interface LoanInfo {
@@ -42,6 +48,18 @@ export interface ApiResponse<T> {
   success: boolean;
   data: T[];
   count: number;
+  error?: string;
+  message?: string;
+}
+
+export interface PaginatedApiResponse<T> {
+  success: boolean;
+  data: T[];
+  count: number;
+  total: number;
+  page: number;
+  per_page: number;
+  total_pages: number;
   error?: string;
   message?: string;
 }
