@@ -1,86 +1,157 @@
+<!-- Hero Section -->
 <div class="row">
   <div class="col-md-12">
-    <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
-      <h1 class="display-4">
-        <i class="bi bi-graph-up-arrow"></i> Delinquency Data Management
-      </h1>
-      <p class="lead">
-        Generate and manage synthetic data for user profiles, loan information, programs of study, and loan payments.
-      </p>
+    <div class="jumbotron bg-primary text-white p-4 rounded mb-4">
+      <h4>
+        <i class="bi bi-graph-up-arrow me-3"></i>Delinquency Data Management System
+      </h4>
+      <p class="lead mb-0">Generate synthetic student loan data and analyze delinquency patterns with advanced machine learning algorithms.</p>
     </div>
   </div>
 </div>
 
-<div class="row">
-  <div class="col-md-8">
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title mb-0">
-          <i class="bi bi-database-add"></i> Data Generation
-        </h3>
+<!-- Parameter Selection Cards -->
+<div class="row mb-3">
+  <div class="col-md-4">
+    <div class="card h-100 border-primary">
+      <div class="card-header bg-info bg-opacity-10">
+        <h5 class="card-title mb-0 text-dark">
+          <i class="bi bi-people-fill me-2"></i>Number of Borrowers
+        </h5>
       </div>
       <div class="card-body">
-        <p class="card-text">
-          Click the button below to generate synthetic data for all entities. This will create sample data for
-          user profiles, loan information, programs of study, and loan payment history.
+        <p class="card-text small text-muted mb-3">
+          Choose the number of synthetic borrowers to generate. Larger datasets provide more comprehensive analysis but take longer to process.
         </p>
-        
-        <button 
-          class="btn btn-primary btn-lg"
-          [disabled]="isGenerating"
-          (click)="generateData()">
-          <span *ngIf="isGenerating" class="spinner-border spinner-border-sm me-2" role="status"></span>
-          <i *ngIf="!isGenerating" class="bi bi-play-fill"></i>
-          {{ isGenerating ? 'Generating Data...' : 'Generate Synthetic Data' }}
-        </button>
-        
-        <!-- Success Message -->
-        <div *ngIf="generationComplete && !error" class="alert alert-success mt-3" role="alert">
-          <h5 class="alert-heading">
-            <i class="bi bi-check-circle-fill"></i> Data Generated Successfully!
-          </h5>
-          <div *ngIf="generationStats" class="mt-3">
-            <h6>Generation Statistics:</h6>
-            <ul class="mb-0">
-              <li>User Profiles: <strong>{{ generationStats.user_profiles }}</strong></li>
-              <li>Loan Records: <strong>{{ generationStats.loan_info }}</strong></li>
-              <li>Programs of Study: <strong>{{ generationStats.programs_of_study }}</strong></li>
-              <li>Loan Payments: <strong>{{ generationStats.loan_payments }}</strong></li>
-            </ul>
-          </div>
-        </div>
-        
-        <!-- Error Message -->
-        <div *ngIf="error" class="alert alert-danger mt-3" role="alert">
-          <h5 class="alert-heading">
-            <i class="bi bi-exclamation-triangle-fill"></i> Error
-          </h5>
-          <p class="mb-0">{{ error }}</p>
+        <div class="form-floating">
+          <select id="numPayers" class="form-select border-primary" [(ngModel)]="selectedNumPayers">
+            <option value="100">100 (Small Dataset - Quick Testing)</option>
+            <option value="1000">1,000 (Standard Dataset - Recommended)</option>
+            <option value="5000">5,000 (Large Dataset - Comprehensive Analysis)</option>
+          </select>
+          <label for="numPayers">
+            <i class="bi bi-people text-dark me-1"></i>Select Number of Borrowers
+          </label>
         </div>
       </div>
     </div>
   </div>
   
   <div class="col-md-4">
-    <div class="card">
-      <div class="card-header">
-        <h4 class="card-title mb-0">
-          <i class="bi bi-list-check"></i> Quick Actions
-        </h4>
+    <div class="card h-100 border-primary">
+      <div class="card-header bg-success bg-opacity-10">
+        <h5 class="card-title mb-0 text-dark">
+          <i class="bi bi-calendar-event me-2"></i>Start Date
+        </h5>
       </div>
       <div class="card-body">
-        <div class="list-group list-group-flush">
-          <a routerLink="/users" class="list-group-item list-group-item-action">
-            <i class="bi bi-people"></i> View User Profiles
+        <p class="card-text small text-muted mb-3">
+          Define the beginning of the loan origination period. This determines when the first loans in your dataset will be originated.
+        </p>
+        <div class="form-floating">
+          <input 
+            type="date" 
+            id="startDate" 
+            class="form-control border-primary" 
+            [(ngModel)]="selectedStartDate"
+            min="2018-01-01"
+            max="2023-12-31">
+          <label for="startDate">
+            <i class="bi bi-calendar-event text-dark me-1"></i>Analysis Period Start
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card h-100 border-primary">
+      <div class="card-header bg-warning bg-opacity-10">
+        <h5 class="card-title mb-0 text-dark">
+          <i class="bi bi-calendar-check me-2"></i>End Date
+        </h5>
+      </div>
+      <div class="card-body">
+        <p class="card-text small text-muted mb-3">
+          Set the end of the analysis period. This defines the latest date for loan payments and delinquency calculations in your dataset.
+        </p>
+        <div class="form-floating">
+          <input 
+            type="date" 
+            id="endDate" 
+            class="form-control border-primary" 
+            [(ngModel)]="selectedEndDate"
+            min="2020-01-01"
+            max="2024-12-31">
+          <label for="endDate">
+            <i class="bi bi-calendar-check text-dark me-1"></i>Analysis Period End
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Generation Actions with Quick Links -->
+<div class="row mb-3">
+  <!-- Start Data Generation -->
+  <div class="col-md-8">
+    <div class="card border-primary h-100">
+      <div class="card-body text-center p-4">
+        <h5 class="card-title text-dark mb-3">
+          <i class="bi bi-play-circle me-2"></i>Start Data Generation
+        </h5>
+        <p class="card-text mb-4">
+          Generate synthetic student loan data based on your selected parameters. The system will create realistic borrower profiles, loan details, and payment histories.
+        </p>
+        <div class="d-flex flex-column flex-md-row gap-3 align-items-center justify-content-center">
+          <button 
+            class="btn btn-primary btn-lg px-4 py-2 text-nowrap"
+            [disabled]="isGenerating"
+            (click)="generateData()">
+            <span *ngIf="isGenerating" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <i *ngIf="!isGenerating" class="bi bi-database-add me-2"></i>
+            {{ isGenerating ? 'Generating Data...' : 'Generate Synthetic Data' }}
+          </button>
+          <div class="text-muted">
+            <small>
+              <i class="bi bi-info-circle me-1"></i>
+              Processing time varies based on dataset size:
+              <br>
+              <span class="d-inline-block mt-1">
+                100 records (~30 seconds) • 1,000 records (~2 minutes) • 5,000 records (~8 minutes)
+              </span>
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Quick Links -->
+  <div class="col-md-4">
+    <div class="card border-primary h-100">
+      <div class="card-header bg-secondary bg-opacity-10">
+        <h5 class="card-title text-dark mb-0">
+          <i class="bi bi-list me-2"></i>Quick Links
+        </h5>
+      </div>
+      <div class="card-body p-3">
+        <div class="d-grid gap-2">
+          <a routerLink="/summary" class="btn btn-outline-primary btn-sm text-start">
+            <i class="bi bi-bar-chart me-2"></i>Data Summary
           </a>
-          <a routerLink="/loans" class="list-group-item list-group-item-action">
-            <i class="bi bi-cash-coin"></i> View Loan Information
+          <a routerLink="/users" class="btn btn-outline-primary btn-sm text-start">
+            <i class="bi bi-people me-2"></i>Borrowers
           </a>
-          <a routerLink="/programs" class="list-group-item list-group-item-action">
-            <i class="bi bi-book"></i> View Programs of Study
+          <a routerLink="/loans" class="btn btn-outline-primary btn-sm text-start">
+            <i class="bi bi-cash me-2"></i>Loans
           </a>
-          <a routerLink="/payments" class="list-group-item list-group-item-action">
-            <i class="bi bi-credit-card"></i> View Loan Payments
+          <a routerLink="/programs" class="btn btn-outline-primary btn-sm text-start">
+            <i class="bi bi-mortarboard me-2"></i>Programs of Study
+          </a>
+          <a routerLink="/payments" class="btn btn-outline-primary btn-sm text-start">
+            <i class="bi bi-credit-card me-2"></i>Payments
           </a>
         </div>
       </div>
@@ -88,31 +159,23 @@
   </div>
 </div>
 
-<div class="row mt-4">
+<!-- Status Messages -->
+<div *ngIf="generationComplete && !error" class="row mb-2">
   <div class="col-md-12">
-    <div class="card">
-      <div class="card-header">
-        <h4 class="card-title mb-0">
-          <i class="bi bi-info-circle"></i> About This Application
-        </h4>
-      </div>
-      <div class="card-body">
-        <p class="card-text">
-          This application demonstrates a modern full-stack architecture using:
-        </p>
-        <div class="row">
-          <div class="col-md-6">
-            <ul class="list-unstyled">
-              <li><i class="bi bi-check-circle text-success"></i> Angular 17 frontend</li>
-              <li><i class="bi bi-check-circle text-success"></i> Flask REST API</li>
-              <li><i class="bi bi-check-circle text-success"></i> Python backend</li>
-            </ul>
-          </div>
-          <div class="col-md-6">
-            <ul class="list-unstyled">
-              <li><i class="bi bi-check-circle text-success"></i> SQLite database</li>
-              <li><i class="bi bi-check-circle text-success"></i> Bootstrap styling</li>
-              <li><i class="bi bi-check-circle text-success"></i> Mock data generation</li>
+    <div class="alert alert-success border-success" role="alert">
+      <div class="d-flex align-items-start">
+        <i class="bi bi-check-circle-fill fs-4 text-success me-3 mt-1"></i>
+        <div>
+          <h4 class="alert-heading mb-2">Data Generation Completed Successfully!</h4>
+          <p class="mb-2">Your synthetic student loan dataset has been generated and is ready for analysis.</p>
+          <div *ngIf="generationStats" class="small">
+            <strong>Dataset Summary:</strong>
+            <ul class="list-unstyled mt-1 ms-3">
+              <li><i class="bi bi-person-fill me-1"></i>{{ generationStats.user_profiles }} borrower profiles created</li>
+              <li><i class="bi bi-credit-card me-1"></i>{{ generationStats.loan_info }} loan accounts generated</li>
+              <li><i class="bi bi-mortarboard me-1"></i>{{ generationStats.programs_of_study }} programs of study created</li>
+              <li><i class="bi bi-cash-coin me-1"></i>{{ generationStats.loan_payments }} payment records generated</li>
+              <li><i class="bi bi-calendar-range me-1"></i>Period: {{ selectedStartDate }} to {{ selectedEndDate }}</li>
             </ul>
           </div>
         </div>
@@ -120,3 +183,21 @@
     </div>
   </div>
 </div>
+
+<div *ngIf="error" class="row mb-2">
+  <div class="col-md-12">
+    <div class="alert alert-danger border-danger" role="alert">
+      <div class="d-flex align-items-start">
+        <i class="bi bi-exclamation-triangle-fill fs-4 text-danger me-3 mt-1"></i>
+        <div>
+          <h4 class="alert-heading mb-2">Data Generation Failed</h4>
+          <p class="mb-0">{{ error }}</p>
+          <small class="text-muted mt-2 d-block">
+            Please check your parameters and try again. If the problem persists, contact support.
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

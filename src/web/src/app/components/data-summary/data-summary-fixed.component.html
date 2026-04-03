@@ -1,0 +1,47 @@
+<div class="container-fluid">
+  <h1>Data Summary Component</h1>
+  <p>This is a test to see if the component renders at all.</p>
+  
+  <div class="alert alert-info">
+    <h4>Debug Information:</h4>
+    <ul>
+      <li><strong>Loading:</strong> {{ isLoading }}</li>
+      <li><strong>Error:</strong> {{ error || 'None' }}</li>
+      <li><strong>Data Summary:</strong> {{ dataSummary ? 'Loaded' : 'Not loaded' }}</li>
+      <li><strong>Object keys:</strong> {{ dataSummary ? Object.keys(dataSummary).join(', ') : 'None' }}</li>
+    </ul>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading database summary...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    <h4>Error:</h4>
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="dataSummary && !isLoading && !error" class="alert alert-success">
+    <h4>Data Loaded Successfully!</h4>
+    <p>Summary has {{ dataSummary.summary?.total_tables || 0 }} tables</p>
+    <p>Sample profiles count: {{ (dataSummary.sample_user_profiles || []).length }}</p>
+    
+    <h5>Available Data Sections:</h5>
+    <ul>
+      <li>Database Structure: {{ dataSummary.database_structure ? 'Available' : 'Missing' }}</li>
+      <li>Sample Profiles: {{ (dataSummary.sample_user_profiles || []).length }} records</li>
+      <li>Employment Analysis: {{ (dataSummary.employment_income_analysis || []).length }} records</li>
+      <li>Provincial Analysis: {{ (dataSummary.provincial_analysis || []).length }} records</li>
+      <li>Loan Analysis: {{ (dataSummary.loan_amount_analysis || []).length }} records</li>
+      <li>Program Analysis: {{ (dataSummary.program_analysis || []).length }} records</li>
+      <li>Payment Status: {{ (dataSummary.payment_status_analysis || []).length }} records</li>
+      <li>Payment Trends: {{ (dataSummary.payment_trends_analysis || []).length }} records</li>
+    </ul>
+  </div>
+
+  <button class="btn btn-primary me-2" (click)="refreshData()">Refresh Data</button>
+  <button class="btn btn-secondary" (click)="testConnection()">Test Connection</button>
+</div>

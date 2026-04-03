@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-import sqlite3
+import sys
+import os
 import argparse
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -12,42 +13,33 @@ from sklearn.metrics import classification_report, confusion_matrix, roc_auc_sco
 import warnings
 warnings.filterwarnings('ignore')
 
-def load_comprehensive_dataset(db_path="student_loan_data.db"):
+# Add the shared directory to the path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
+
+from database import DatabaseManager
+
+def load_comprehensive_dataset():
     """
-    Load and merge all tables for comprehensive delinquency analysis.
+    Load and merge all tables for comprehensive delinquency analysis using centralized database methods.
     Returns a DataFrame with all relevant features and target variable.
     """
-    conn = sqlite3.connect(db_path)
+    db_manager = DatabaseManager()
     
-    # Comprehensive query joining all 4 tables
-    query = """
-    SELECT 
-        -- User Profile Features
-        up.payer_id,
-        up.age,
-        up.annual_income_cad,
-        up.employment_status,
-        up.marital_status,
-        up.city,
-        up.province,
-        
-        -- Loan Info Features  
-        li.loan_amount,
-        li.interest_rate,
-        li.loan_term_years,
-        li.loan_term_months,
-        li.loan_type,
-        li.institution_name,
-        li.institution_city,
-        li.institution_province,
-        li.education_value,
-        li.down_payment,
-        li.ltv_ratio,
-        li.origination_date,
-        li.disbursement_date,
-        li.maturity_date,
-        li.current_balance,
-        li.loan_status,
+    # Get comprehensive data using centralized method
+    data = db_manager.get_delinquency_analysis_data()
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(data)
+    
+    if df.empty:
+        print("Error: No data found in database")
+        return pd.DataFrame()
+    
+    print(f"✓ Loaded {len(df):,} records for analysis")
+    print(f"✓ Dataset shape: {df.shape}")
+    print(f"✓ Features available: {df.columns.tolist()}")
+    
+    return df
         li.lender,
         li.program_duration_years,
         li.monthly_payment,
@@ -505,38 +497,45 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='perce
     
     return risk_scores
 
-def update_loan_info_table(df, risk_scores, db_path="student_loan_data.db"):
+def update_loan_info_table(df, risk_scores):
     """
-    Add delinquency_risk column to loan_info table and update with calculated scores.
+    Add delinquency_risk column to loan_info table and update with calculated scores using centralized database methods.
     """
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+    db_manager = DatabaseManager()
     
-    # Add the delinquency_risk column if it doesn't exist (INTEGER for 0, 1, 2)
+    # Create a dictionary mapping payer_id to risk_score
+    risk_score_dict = {}
+    for payer_id, risk_score in zip(df['payer_id'], risk_scores):
+        risk_score_dict[str(payer_id)] = int(risk_score)
+    
+    # Add the delinquency_risk column if it doesn't exist
     try:
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
         cursor.execute("ALTER TABLE loan_info ADD COLUMN delinquency_risk INTEGER")
+        conn.commit()
+        conn.close()
         print("Added delinquency_risk column to loan_info table")
-    except sqlite3.OperationalError as e:
+    except Exception as e:
         if "duplicate column name" in str(e).lower():
             print("delinquency_risk column already exists")
         else:
-            raise e
+            print(f"Error adding column: {e}")
     
-    # Update risk scores for each payer
-    for payer_id, risk_score in zip(df['payer_id'], risk_scores):
-        cursor.execute(
-            "UPDATE loan_info SET delinquency_risk = ? WHERE payer_id = ?", 
-            (int(risk_score), int(payer_id))
-        )
-    
-    conn.commit()
-    conn.close()
-    
-    print(f"Updated {len(risk_scores)} risk scores in loan_info table")
-    print(f"Risk score statistics:")
-    print(f"  Low Risk (0): {np.sum(risk_scores == 0):,} borrowers")
-    print(f"  Medium Risk (1): {np.sum(risk_scores == 1):,} borrowers")
-    print(f"  High Risk (2): {np.sum(risk_scores == 2):,} borrowers")
+    # Update risk scores using centralized batch update method
+    try:
+        rows_updated = db_manager.batch_update_delinquency_risks(risk_score_dict)
+        print(f"Updated {rows_updated} risk scores in loan_info table")
+        
+        # Show statistics
+        print(f"Risk score statistics:")
+        print(f"  Low Risk (0): {np.sum(risk_scores == 0):,} borrowers")
+        print(f"  Medium Risk (1): {np.sum(risk_scores == 1):,} borrowers")
+        print(f"  High Risk (2): {np.sum(risk_scores == 2):,} borrowers")
+        
+    except Exception as e:
+        print(f"Error updating risk scores: {e}")
+        raise
 
 def generate_analysis_report(df, feature_importance_df, model_results, risk_scores):
     """
@@ -611,8 +610,10 @@ Risk Scoring Algorithms:
 
 Examples:
   python delinquency_analysis.py --algorithm percentile
-  python delinquency_analysis.py --algorithm svm --db_path my_data.db
+  python delinquency_analysis.py --algorithm svm
   python delinquency_analysis.py --algorithm knn
+  
+Database connection is handled automatically through the centralized DatabaseManager.
         """
     )
     
@@ -621,12 +622,6 @@ Examples:
         choices=['percentile', 'threshold', 'kmeans', 'svm', 'knn'],
         default='percentile',
         help="Risk scoring algorithm to use (default: percentile)"
-    )
-    
-    parser.add_argument(
-        "--db_path",
-        default="student_loan_data.db",
-        help="Path to SQLite database (default: student_loan_data.db)"
     )
     
     return parser.parse_args()
@@ -639,13 +634,12 @@ def main():
     
     print("Starting Comprehensive Delinquency Risk Analysis...")
     print("=" * 60)
-    print(f"Database: {args.db_path}")
     print(f"Algorithm: {args.algorithm}")
     print(f"Risk Levels: 0 (Low), 1 (Medium), 2 (High)")
     print("=" * 60)
     
-    # Load and prepare data
-    df = load_comprehensive_dataset(args.db_path)
+    # Load and prepare data using centralized database methods
+    df = load_comprehensive_dataset()
     df = engineer_features(df)
     X, y, feature_columns, label_encoders = prepare_ml_features(df)
     
@@ -659,8 +653,8 @@ def main():
     # Calculate risk scores using specified algorithm
     risk_scores = calculate_risk_scores(best_model, X, scaler, best_model_name, args.algorithm)
     
-    # Update database
-    update_loan_info_table(df, risk_scores, args.db_path)
+    # Update database using centralized methods  
+    update_loan_info_table(df, risk_scores)
     
     # Generate report
     generate_analysis_report(df, feature_importance_df, model_results, risk_scores)

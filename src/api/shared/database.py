@@ -9,7 +9,8 @@ from typing import List, Dict, Any
 
 class DatabaseManager:
     def __init__(self):
-        self.db_filename = "student_loan_data.db"
+        # Use the correct path to the database in the shared directory
+        self.db_filename = os.path.join(os.path.dirname(__file__), "student_loan_data.db")
         
     def get_connection(self) -> sqlite3.Connection:
         """Get SQLite connection"""
@@ -24,46 +25,95 @@ class DatabaseManager:
         conn = sqlite3.connect(self.db_filename)
         cursor = conn.cursor()
         
-        # Create tables
+        # Create tables with correct schema matching the actual data
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_profile (
-                id TEXT PRIMARY KEY,
-                first_name TEXT NOT NULL,
-                last_name TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                payer_id INTEGER PRIMARY KEY,
+                first_name TEXT,
+                last_name TEXT,
+                date_of_birth TEXT,
+                age INTEGER,
+                address TEXT,
+                city TEXT,
+                province TEXT,
+                employment_status TEXT,
+                annual_income_cad INTEGER,
+                marital_status TEXT
+            )
+        ''')
+        
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS program_of_study (
+                program_id INTEGER PRIMARY KEY,
+                program_name TEXT,
+                program_type TEXT,
+                field_of_study TEXT,
+                program_difficulty TEXT,
+                duration_years REAL,
+                typical_tuition_cad INTEGER,
+                employment_rate_percent REAL,
+                avg_starting_salary_cad INTEGER,
+                accreditation_body TEXT,
+                institution_type TEXT,
+                university_name TEXT,
+                requires_licensing TEXT,
+                job_market_outlook TEXT
             )
         ''')
         
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS loan_info (
-                id TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                loan_amount REAL NOT NULL,
-                interest_rate REAL NOT NULL,
-                loan_type TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES user_profile (id)
-            )
-        ''')
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS programs_of_study (
-                id TEXT PRIMARY KEY,
-                program_name TEXT NOT NULL,
-                degree_level TEXT NOT NULL,
-                duration_months INTEGER NOT NULL
+                loan_id INTEGER PRIMARY KEY,
+                payer_id INTEGER,
+                program_id INTEGER,
+                loan_amount REAL,
+                interest_rate REAL,
+                loan_term_years INTEGER,
+                loan_term_months INTEGER,
+                loan_type TEXT,
+                institution_name TEXT,
+                institution_city TEXT,
+                institution_province TEXT,
+                education_value REAL,
+                down_payment REAL,
+                ltv_ratio REAL,
+                origination_date TEXT,
+                disbursement_date TEXT,
+                maturity_date TEXT,
+                current_balance REAL,
+                loan_status TEXT,
+                lender TEXT,
+                program_duration_years REAL,
+                monthly_payment REAL,
+                grace_period_months INTEGER,
+                delinquency_risk REAL DEFAULT 0.0,
+                FOREIGN KEY (payer_id) REFERENCES user_profile (payer_id),
+                FOREIGN KEY (program_id) REFERENCES program_of_study (program_id)
             )
         ''')
         
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS loan_payments (
-                id TEXT PRIMARY KEY,
-                loan_id TEXT NOT NULL,
-                payment_amount REAL NOT NULL,
-                payment_date TIMESTAMP NOT NULL,
-                status TEXT NOT NULL,
-                FOREIGN KEY (loan_id) REFERENCES loan_info (id)
+                payment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                payer_id INTEGER,
+                due_date TEXT,
+                paid_date TEXT,
+                payment_due REAL,
+                amount_paid REAL,
+                principal_payment REAL,
+                interest_payment REAL,
+                escrow_payment REAL,
+                late_fee REAL,
+                total_amount_due REAL,
+                remaining_balance REAL,
+                status TEXT,
+                days_late INTEGER,
+                payment_method TEXT,
+                payment_processor TEXT,
+                transaction_id TEXT,
+                confirmation_number TEXT,
+                payment_type TEXT,
+                FOREIGN KEY (payer_id) REFERENCES user_profile (payer_id)
             )
         ''')
         
@@ -101,3 +151,319 @@ class DatabaseManager:
         cursor.executemany(query, data)
         conn.commit()
         conn.close()
+    
+    def execute_update(self, query: str, params: tuple = ()):
+        """Execute an UPDATE query"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute(query, params)
+        conn.commit()
+        conn.close()
+        
+        return cursor.rowcount
+    
+    # ===========================================
+    # DATABASE EXPLORATION QUERIES
+    # ===========================================
+    
+    def get_table_names(self) -> List[str]:
+        """Get all table names in the database"""
+        query = "SELECT name FROM sqlite_master WHERE type='table';"
+        result = self.execute_query(query)
+        return [row['name'] for row in result]
+    
+    def get_sample_user_profiles(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get sample user profiles with different characteristics"""
+        query = """
+        SELECT 
+            payer_id,
+            first_name || ' ' || last_name as full_name,
+            age,
+            city || ', ' || province as location,
+            employment_status,
+            annual_income_cad,
+            marital_status
+        FROM user_profile 
+        ORDER BY payer_id 
+        LIMIT ?
+        """
+        return self.execute_query(query, (limit,))
+    
+    def get_employment_income_analysis(self) -> List[Dict[str, Any]]:
+        """Get employment and income analysis"""
+        query = """
+        SELECT 
+            employment_status,
+            COUNT(*) as count,
+            AVG(annual_income_cad) as avg_income,
+            MIN(annual_income_cad) as min_income,
+            MAX(annual_income_cad) as max_income
+        FROM user_profile 
+        GROUP BY employment_status
+        ORDER BY avg_income DESC
+        """
+        return self.execute_query(query)
+    
+    def get_province_analysis(self) -> List[Dict[str, Any]]:
+        """Get province-wise analysis"""
+        query = """
+        SELECT 
+            province,
+            COUNT(*) as count,
+            AVG(annual_income_cad) as avg_income,
+            AVG(age) as avg_age
+        FROM user_profile 
+        GROUP BY province
+        ORDER BY count DESC
+        """
+        return self.execute_query(query)
+    
+    def get_loan_amount_analysis(self) -> List[Dict[str, Any]]:
+        """Get loan amount analysis"""
+        query = """
+        SELECT 
+            loan_type,
+            COUNT(*) as count,
+            AVG(loan_amount) as avg_loan_amount,
+            MIN(loan_amount) as min_loan_amount,
+            MAX(loan_amount) as max_loan_amount,
+            AVG(interest_rate) as avg_interest_rate
+        FROM loan_info 
+        GROUP BY loan_type
+        ORDER BY avg_loan_amount DESC
+        """
+        return self.execute_query(query)
+    
+    def get_program_analysis(self) -> List[Dict[str, Any]]:
+        """Get program of study analysis"""
+        query = """
+        SELECT 
+            program_type,
+            field_of_study,
+            COUNT(*) as count,
+            AVG(duration_years) as avg_duration
+        FROM program_of_study 
+        GROUP BY program_type, field_of_study
+        ORDER BY count DESC
+        """
+        return self.execute_query(query)
+    
+    def get_payment_status_analysis(self) -> List[Dict[str, Any]]:
+        """Get payment status analysis"""
+        query = """
+        SELECT 
+            status,
+            COUNT(*) as count,
+            AVG(amount_paid) as avg_payment_amount,
+            SUM(amount_paid) as total_payment_amount
+        FROM loan_payments 
+        GROUP BY status
+        ORDER BY count DESC
+        """
+        return self.execute_query(query)
+    
+    def get_payment_trends_analysis(self) -> List[Dict[str, Any]]:
+        """Get payment trends analysis"""
+        query = """
+        SELECT 
+            DATE(paid_date) as payment_date,
+            COUNT(*) as transaction_count,
+            SUM(amount_paid) as total_payments,
+            AVG(amount_paid) as avg_payment
+        FROM loan_payments 
+        GROUP BY DATE(paid_date)
+        ORDER BY payment_date
+        """
+        return self.execute_query(query)
+    
+    # ===========================================
+    # COMPREHENSIVE DATA ANALYSIS QUERIES
+    # ===========================================
+    
+    def get_comprehensive_loan_data(self) -> List[Dict[str, Any]]:
+        """Get comprehensive loan data joining all tables for campaign analysis"""
+        query = """
+        SELECT 
+            -- User Profile Information
+            up.payer_id,
+            up.age,
+            up.annual_income_cad,
+            up.employment_status,
+            up.marital_status,
+            up.city,
+            up.province,
+            
+            -- Loan Information
+            li.loan_amount,
+            li.interest_rate,
+            li.loan_term_years,
+            li.loan_term_months,
+            li.current_balance,
+            li.loan_status,
+            li.monthly_payment,
+            li.origination_date,
+            li.maturity_date,
+            li.delinquency_risk,
+            li.lender,
+            li.institution_name,
+            li.institution_city,
+            li.institution_province,
+            
+            -- Program of Study Information
+            pos.program_name,
+            pos.field_of_study,
+            pos.program_type,
+            pos.program_difficulty,
+            pos.program_duration_years,
+            pos.graduation_rate,
+            pos.employment_rate,
+            pos.average_starting_salary,
+            
+            -- Payment Information (aggregated)
+            COALESCE(payment_stats.total_payments, 0) as total_payments_made,
+            COALESCE(payment_stats.avg_payment_amount, 0) as avg_payment_amount,
+            COALESCE(payment_stats.late_payments, 0) as late_payment_count,
+            COALESCE(payment_stats.missed_payments, 0) as missed_payment_count,
+            COALESCE(payment_stats.last_payment_date, 'Never') as last_payment_date
+            
+        FROM user_profile up
+        LEFT JOIN loan_info li ON up.payer_id = li.payer_id
+        LEFT JOIN programs_of_study pos ON li.program_id = pos.program_id
+        LEFT JOIN (
+            SELECT 
+                lp.loan_id,
+                COUNT(*) as total_payments,
+                AVG(lp.payment_amount) as avg_payment_amount,
+                SUM(CASE WHEN lp.status = 'Late' THEN 1 ELSE 0 END) as late_payments,
+                SUM(CASE WHEN lp.status = 'Missed' THEN 1 ELSE 0 END) as missed_payments,
+                MAX(lp.payment_date) as last_payment_date
+            FROM loan_payments lp
+            GROUP BY lp.loan_id
+        ) payment_stats ON li.loan_id = payment_stats.loan_id
+        
+        WHERE li.loan_id IS NOT NULL
+        ORDER BY up.payer_id
+        """
+        return self.execute_query(query)
+    
+    def get_delinquency_analysis_data(self) -> List[Dict[str, Any]]:
+        """Get comprehensive data for delinquency analysis and ML modeling"""
+        query = """
+        SELECT 
+            -- User Profile Features
+            up.payer_id,
+            up.age,
+            up.annual_income_cad,
+            up.employment_status,
+            up.marital_status,
+            up.city,
+            up.province,
+            
+            -- Loan Info Features  
+            li.loan_amount,
+            li.interest_rate,
+            li.loan_term_years,
+            li.loan_term_months,
+            li.loan_type,
+            li.institution_name,
+            li.institution_city,
+            li.institution_province,
+            li.education_value,
+            li.down_payment,
+            li.ltv_ratio,
+            li.origination_date,
+            li.disbursement_date,
+            li.maturity_date,
+            li.current_balance,
+            li.loan_status,
+            li.lender,
+            li.program_duration_years,
+            li.monthly_payment,
+            li.grace_period_months,
+            
+            -- Program of Study Features
+            pos.program_name,
+            pos.program_type,
+            pos.field_of_study,
+            pos.program_difficulty,
+            pos.program_duration_years as pos_duration,
+            pos.graduation_rate,
+            pos.employment_rate,
+            pos.average_starting_salary,
+            
+            -- Payment Behavior Features (Aggregated)
+            COALESCE(payment_agg.total_payments, 0) as total_payments_made,
+            COALESCE(payment_agg.total_amount_paid, 0) as total_amount_paid,
+            COALESCE(payment_agg.avg_payment_amount, 0) as avg_payment_amount,
+            COALESCE(payment_agg.on_time_payments, 0) as on_time_payments,
+            COALESCE(payment_agg.late_payments, 0) as late_payments,
+            COALESCE(payment_agg.missed_payments, 0) as missed_payments,
+            COALESCE(payment_agg.days_since_last_payment, 9999) as days_since_last_payment,
+            COALESCE(payment_agg.payment_consistency, 0) as payment_consistency,
+            COALESCE(payment_agg.early_payments, 0) as early_payments
+            
+        FROM user_profile up
+        JOIN loan_info li ON up.payer_id = li.payer_id
+        LEFT JOIN programs_of_study pos ON li.program_id = pos.program_id
+        LEFT JOIN (
+            SELECT 
+                loan_id,
+                COUNT(*) as total_payments,
+                SUM(payment_amount) as total_amount_paid,
+                AVG(payment_amount) as avg_payment_amount,
+                SUM(CASE WHEN status = 'Paid' THEN 1 ELSE 0 END) as on_time_payments,
+                SUM(CASE WHEN status = 'Late' THEN 1 ELSE 0 END) as late_payments,
+                SUM(CASE WHEN status = 'Missed' THEN 1 ELSE 0 END) as missed_payments,
+                SUM(CASE WHEN status = 'Early' THEN 1 ELSE 0 END) as early_payments,
+                JULIANDAY('now') - JULIANDAY(MAX(payment_date)) as days_since_last_payment,
+                (CAST(SUM(CASE WHEN status = 'Paid' THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*)) * 100 as payment_consistency
+            FROM loan_payments 
+            GROUP BY loan_id
+        ) payment_agg ON li.loan_id = payment_agg.loan_id
+        
+        WHERE li.loan_id IS NOT NULL
+        ORDER BY up.payer_id
+        """
+        return self.execute_query(query)
+    
+    # ===========================================
+    # DELINQUENCY RISK UPDATE METHODS
+    # ===========================================
+    
+    def update_delinquency_risk(self, payer_id: str, risk_score: float) -> int:
+        """Update delinquency risk for a specific payer"""
+        query = "UPDATE loan_info SET delinquency_risk = ? WHERE payer_id = ?"
+        return self.execute_update(query, (risk_score, payer_id))
+    
+    def batch_update_delinquency_risks(self, risk_scores: Dict[str, float]) -> int:
+        """Batch update delinquency risks for multiple payers"""
+        query = "UPDATE loan_info SET delinquency_risk = ? WHERE payer_id = ?"
+        data = [(score, payer_id) for payer_id, score in risk_scores.items()]
+        
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.executemany(query, data)
+        rowcount = cursor.rowcount
+        conn.commit()
+        conn.close()
+        
+        return rowcount
+    
+    def get_delinquency_risk_count(self) -> int:
+        """Get count of loans with calculated delinquency risk"""
+        query = "SELECT COUNT(*) as count FROM loan_info WHERE delinquency_risk IS NOT NULL"
+        result = self.execute_query(query)
+        return result[0]['count'] if result else 0
+    
+    def get_delinquency_risk_distribution(self) -> List[Dict[str, Any]]:
+        """Get distribution of delinquency risk scores"""
+        query = """
+        SELECT 
+            delinquency_risk, 
+            COUNT(*) as count 
+        FROM loan_info 
+        GROUP BY delinquency_risk 
+        ORDER BY delinquency_risk
+        """
+        return self.execute_query(query)

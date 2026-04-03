@@ -1,0 +1,157 @@
+<div class="container-fluid p-4">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mb-3">
+        <i class="bi bi-bar-chart-line"></i> Data Summary
+      </h1>
+      
+      <!-- Status indicators -->
+      <div class="mb-4">
+        <div class="alert alert-info">
+          <h5>Status:</h5>
+          <ul class="mb-0">
+            <li>Loading: {{ isLoading ? 'Yes' : 'No' }}</li>
+            <li>Error: {{ error || 'None' }}</li>
+            <li>Data Loaded: {{ dataSummary ? 'Yes' : 'No' }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading database summary...</p>
+      </div>
+
+      <!-- Error display -->
+      <div *ngIf="error" class="alert alert-danger">
+        <h5>Error occurred:</h5>
+        <p>{{ error }}</p>
+        <button class="btn btn-outline-danger" (click)="refreshData()">Try Again</button>
+      </div>
+
+      <!-- Success - Data loaded -->
+      <div *ngIf="dataSummary && !error && !isLoading">
+        <div class="alert alert-success">
+          <h5>✅ Data loaded successfully!</h5>
+          <p>Found {{ dataSummary.summary?.total_tables || 0 }} tables in the database.</p>
+        </div>
+
+        <!-- Database Overview -->
+        <div class="row mb-4">
+          <div class="col-md-3">
+            <div class="card bg-primary text-white">
+              <div class="card-body text-center">
+                <h2>{{ dataSummary.summary?.total_tables || 0 }}</h2>
+                <p>Total Tables</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-success text-white">
+              <div class="card-body text-center">
+                <h2>{{ (dataSummary.sample_user_profiles || []).length }}</h2>
+                <p>Sample Profiles</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-info text-white">
+              <div class="card-body text-center">
+                <h2>{{ (dataSummary.employment_income_analysis || []).length }}</h2>
+                <p>Employment Records</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-warning text-white">
+              <div class="card-body text-center">
+                <h2>{{ (dataSummary.loan_amount_analysis || []).length }}</h2>
+                <p>Loan Types</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sample User Profiles -->
+        <div *ngIf="dataSummary.sample_user_profiles && dataSummary.sample_user_profiles.length > 0" class="mb-4">
+          <h3>Sample User Profiles</h3>
+          <div class="row">
+            <div class="col-md-6" *ngFor="let profile of dataSummary.sample_user_profiles.slice(0, 4)">
+              <div class="card mb-2">
+                <div class="card-body">
+                  <h6>{{ profile.first_name }} {{ profile.last_name }}</h6>
+                  <small class="text-muted">{{ profile.email }}</small><br>
+                  <small>{{ profile.employment_status }} • {{ profile.province }}</small><br>
+                  <small><strong>{{ formatCurrency(profile.annual_income) }}</strong>/year</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Employment Analysis -->
+        <div *ngIf="dataSummary.employment_income_analysis && dataSummary.employment_income_analysis.length > 0" class="mb-4">
+          <h3>Employment Analysis</h3>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Employment Status</th>
+                  <th>Count</th>
+                  <th>Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of dataSummary.employment_income_analysis">
+                  <td>{{ item.employment_status }}</td>
+                  <td>{{ formatNumber(item.count) }}</td>
+                  <td>{{ formatPercentage(item.percentage) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Loan Analysis -->
+        <div *ngIf="dataSummary.loan_amount_analysis && dataSummary.loan_amount_analysis.length > 0" class="mb-4">
+          <h3>Loan Analysis</h3>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Loan Type</th>
+                  <th>Count</th>
+                  <th>Total Amount</th>
+                  <th>Average Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of dataSummary.loan_amount_analysis">
+                  <td>{{ item.loan_type }}</td>
+                  <td>{{ formatNumber(item.count) }}</td>
+                  <td>{{ formatCurrency(item.total_amount) }}</td>
+                  <td>{{ formatCurrency(item.avg_amount) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="mt-4">
+        <button class="btn btn-primary me-2" (click)="refreshData()" [disabled]="isLoading">
+          <i class="bi bi-arrow-clockwise"></i>
+          {{ isLoading ? 'Loading...' : 'Refresh Data' }}
+        </button>
+        <button class="btn btn-outline-secondary" (click)="testConnection()" [disabled]="isLoading">
+          <i class="bi bi-wifi"></i>
+          Test Connection
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

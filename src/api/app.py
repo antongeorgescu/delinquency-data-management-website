@@ -3,84 +3,87 @@ Flask API server for delinquency data management
 """
 import sys
 import os
+import json
+import math
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-# Add the shared directory to the path
+# Add the shared and services directories to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'shared'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'services'))
 
 from database import DatabaseManager
-from mock_data import MockDataGenerator
+from run_data_generation import generate_complete_dataset
+from explore_database import explore_database
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
 
+def sanitize_json_data(obj):
+    """
+    Recursively sanitize data to ensure JSON compatibility
+    Converts None, NaN, inf, -inf to null or appropriate values
+    """
+    if obj is None:
+        return None
+    elif isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None  # Convert NaN and infinite values to null
+        return obj
+    elif isinstance(obj, dict):
+        return {key: sanitize_json_data(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [sanitize_json_data(item) for item in obj]
+    else:
+        return obj
+
 @app.route('/api/generate-data', methods=['POST'])
 def generate_data():
     """
-    Generate synthetic data for all entities
+    Generate synthetic data for all entities using the data generation service
     """
     try:
-        # Initialize database manager
-        db_manager = DatabaseManager()
+        # Get parameters from POST request body
+        data = request.get_json() or {}
         
-        # Clear existing data
-        conn = db_manager.get_connection()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM loan_payments")
-        cursor.execute("DELETE FROM loan_info")
-        cursor.execute("DELETE FROM user_profile")
-        cursor.execute("DELETE FROM programs_of_study")
-        conn.commit()
-        conn.close()
+        # Extract parameters with defaults
+        num_payers = data.get('num_payers', 50)
+        start_date = data.get('start_date', '2023-01-01')
+        end_date = data.get('end_date', '2024-12-31')
+        validate = data.get('validate', False)
         
-        # Generate user profiles
-        user_profiles = MockDataGenerator.generate_user_profiles(50)
-        user_query = """
-            INSERT INTO user_profile (id, first_name, last_name, email, created_at)
-            VALUES (?, ?, ?, ?, ?)
-        """
-        db_manager.execute_many(user_query, user_profiles)
+        # Database path for the current database
+        db_path = os.path.join(os.path.dirname(__file__), 'shared', 'student_loan_data.db')
         
-        # Get user IDs for foreign key relationships
-        user_ids = [profile[0] for profile in user_profiles]
+        # Ensure the shared directory exists
+        shared_dir = os.path.join(os.path.dirname(__file__), 'shared')
+        os.makedirs(shared_dir, exist_ok=True)
         
-        # Generate loan information
-        loan_info = MockDataGenerator.generate_loan_info(user_ids, 2)
-        loan_query = """
-            INSERT INTO loan_info (id, user_id, loan_amount, interest_rate, loan_type, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """
-        db_manager.execute_many(loan_query, loan_info)
-        
-        # Get loan IDs for payment history
-        loan_ids = [loan[0] for loan in loan_info]
-        
-        # Generate programs of study
-        programs = MockDataGenerator.generate_programs_of_study(20)
-        program_query = """
-            INSERT INTO programs_of_study (id, program_name, degree_level, duration_months)
-            VALUES (?, ?, ?, ?)
-        """
-        db_manager.execute_many(program_query, programs)
-        
-        # Generate loan payments
-        loan_payments = MockDataGenerator.generate_loan_payments(loan_ids, 12)
-        payment_query = """
-            INSERT INTO loan_payments (id, loan_id, payment_amount, payment_date, status)
-            VALUES (?, ?, ?, ?, ?)
-        """
-        db_manager.execute_many(payment_query, loan_payments)
+        # Call the data generation service
+        print(f"Generating data for {num_payers} payers from {start_date} to {end_date}")
+        df_profiles, df_programs, df_loans, df_payments = generate_complete_dataset(
+            num_payers=num_payers,
+            start_date_str=start_date,
+            end_date_str=end_date,
+            db_path=db_path,
+            validate=validate
+        )
         
         # Return success response with generation statistics
         response_data = {
             "success": True,
-            "message": "Synthetic data generated successfully",
+            "message": "Synthetic data generated successfully using data generation service",
+            "parameters": {
+                "num_payers": num_payers,
+                "start_date": start_date,
+                "end_date": end_date,
+                "validate": validate
+            },
             "statistics": {
-                "user_profile": len(user_profiles),
-                "loan_info": len(loan_info),
-                "programs_of_study": len(programs),
-                "loan_payments": len(loan_payments)
+                "user_profiles": len(df_profiles),
+                "loan_info": len(df_loans),
+                "programs_of_study": len(df_programs),
+                "loan_payments": len(df_payments)
             }
         }
         
@@ -248,6 +251,60 @@ def get_loan_payments():
         }
         
         return jsonify(error_response), 500
+
+@app.route('/api/explore-database', methods=['GET'])
+def explore_database_api():
+    """
+    Explore database structure and return comprehensive analysis in JSON format
+    """
+    try:
+        # Get the database analysis result
+        analysis_result = explore_database()
+        
+        # Sanitize the data to ensure proper JSON serialization
+        analysis_result = sanitize_json_data(analysis_result)
+        
+        # Return success response with database analysis
+        if "error" in analysis_result:
+            error_response = {
+                "success": False,
+                "error": analysis_result["error"],
+                "message": "Failed to explore database"
+            }
+            return jsonify(error_response), 500
+        
+        response_data = {
+            "success": True,
+            "message": "Database exploration completed successfully",
+            "data": analysis_result
+        }
+        
+        # Sanitize the entire response
+        response_data = sanitize_json_data(response_data)
+        
+        return jsonify(response_data), 200
+        
+    except Exception as e:
+        error_response = {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to explore database"
+        }
+        
+        return jsonify(error_response), 500
+
+@app.route('/api/test', methods=['GET'])
+def test():
+    """Simple test endpoint to verify Angular-Flask communication"""
+    return jsonify({
+        "success": True,
+        "message": "Flask API is working correctly",
+        "timestamp": "2026-04-03",
+        "data": {
+            "test_array": [1, 2, 3, 4, 5],
+            "test_object": {"name": "test", "value": "success"}
+        }
+    }), 200
 
 @app.route('/api/health', methods=['GET'])
 def health():

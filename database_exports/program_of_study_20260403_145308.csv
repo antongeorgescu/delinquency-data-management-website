@@ -1,0 +1,39 @@
+program_id,program_name,program_type,field_of_study,program_difficulty,duration_years,typical_tuition_cad,employment_rate_percent,avg_starting_salary_cad,accreditation_body,institution_type,university_name,requires_licensing,job_market_outlook
+1,Business Administration,Bachelor's,Business,1,4,36867.69,88.3,54013.37,Canadian Medical Association,University,University of Alberta,False,Fair
+2,Marketing,Bachelor's,Business,1,4,31828.01,87.3,47587.14,Canadian Association of University Teachers,University,McMaster University,False,Fair
+3,Human Resources,Bachelor's,Business,1,4,29636.18,78.6,53700.23,Association of Universities and Colleges of Canada,College,Western College,False,Challenging
+4,Communications,Bachelor's,Liberal Arts,1,4,28143.47,77.0,41567.59,Canadian Association of University Teachers,University,University of British Columbia (UBC),False,Challenging
+5,General Studies,Bachelor's,Liberal Arts,1,4,25284.95,70.6,36912.18,Canadian Council of Professional Engineers,University,University of Alberta,False,Excellent
+6,Early Childhood Education,Bachelor's,Education,1,4,28540.95,79.3,45901.29,Canadian Council of Professional Engineers,University,University of British Columbia (UBC),False,Challenging
+7,Hospitality Management,Bachelor's,Business,1,4,29965.88,74.1,44450.26,Canadian Association of University Teachers,College,Southern College,False,Good
+8,Sports Management,Bachelor's,Business,1,4,33379.88,69.6,38973.98,Law Society of Ontario,University,University of Toronto,False,Excellent
+9,Computer Science,Bachelor's,Technology,2,4,44807.66,90.9,77266.23,Canadian Council of Professional Engineers,College,Northern College,False,Fair
+10,Nursing,Bachelor's,Healthcare,2,4,39956.04,98.1,67701.42,Association of Universities and Colleges of Canada,University,University of Toronto,True,Challenging
+11,Accounting,Bachelor's,Business,2,4,34001.78,84.8,60205.25,Canadian Council on Learning,College,Western College,False,Challenging
+12,Psychology,Bachelor's,Social Sciences,2,4,31405.19,78.7,47008.73,Canadian Medical Association,University,University of Waterloo,False,Good
+13,Information Technology,Bachelor's,Technology,2,4,42563.53,90.3,67325.82,Canadian Nursing Association,University,McGill University,False,Good
+14,Criminal Justice,Bachelor's,Social Sciences,2,4,31258.85,80.1,49823.2,Canadian Council on Learning,College,Eastern College,False,Excellent
+15,Social Work,Bachelor's,Social Sciences,2,4,29507.98,80.7,45896.97,Canadian Nursing Association,College,Western College,False,Good
+16,Elementary Education,Bachelor's,Education,2,4,26394.84,81.7,48506.4,Canadian Council of Professional Engineers,College,Western College,False,Challenging
+17,Biomedical Engineering,Bachelor's,Engineering,3,4,49808.04,86.8,69809.93,Canadian Council on Learning,University,University of Toronto,True,Excellent
+18,Aerospace Engineering,Bachelor's,Engineering,3,4,57062.97,79.1,74057.06,Professional Engineers Ontario,College,Metropolitan College,True,Excellent
+19,Chemical Engineering,Bachelor's,Engineering,3,4,54169.69,82.1,73334.16,Law Society of Ontario,College,Southern College,True,Excellent
+20,Electrical Engineering,Bachelor's,Engineering,3,4,46368.55,91.2,76448.05,Professional Engineers Ontario,College,Metropolitan College,True,Challenging
+21,Mechanical Engineering,Bachelor's,Engineering,3,4,46856.22,83.3,71951.74,Association of Universities and Colleges of Canada,College,Metropolitan College,True,Good
+22,Physics,Bachelor's,Science,3,4,43039.74,69.7,53364.33,Canadian Council on Learning,University,University of Toronto,False,Fair
+23,Mathematics,Bachelor's,Science,3,4,43294.0,71.9,57483.9,Association of Universities and Colleges of Canada,College,Central College,False,Excellent
+24,Chemistry,Bachelor's,Science,3,4,39370.74,77.3,57532.92,Professional Engineers Ontario,University,University of British Columbia (UBC),False,Good
+25,Architecture,Bachelor's,Design,3,5,48830.71,71.8,64613.13,Canadian Council on Learning,University,University of British Columbia (UBC),False,Good
+26,Pre-Medicine,Bachelor's,Science,3,4,48885.04,65.2,44583.57,Canadian Association of University Teachers,University,McGill University,False,Good
+27,Master of Business Administration,Master's,Business,2,2,60558.95,94.0,97711.79,Canadian Medical Association,Professional School,Northern Professional School,False,Fair
+28,Master of Science in Engineering,Master's,Engineering,3,2,49713.58,86.7,83216.21,Professional Engineers Ontario,University,University of British Columbia (UBC),True,Good
+29,Master of Education,Master's,Education,2,2,32079.08,90.5,64016.75,Association of Universities and Colleges of Canada,Professional School,Central Professional School,False,Fair
+30,Master of Social Work,Master's,Social Sciences,2,2,40572.88,86.0,60627.05,Law Society of Ontario,Professional School,Central Professional School,False,Excellent
+31,Juris Doctor (Law),Professional,Law,3,3,79782.45,76.7,81149.13,Canadian Association of University Teachers,University,McGill University,True,Challenging
+32,Doctor of Medicine,Professional,Medicine,3,4,79303.46,99.1,122150.63,Professional Engineers Ontario,Professional School,Western Professional School,True,Challenging
+33,Doctor of Pharmacy,Professional,Healthcare,3,4,72544.88,96.1,92894.85,Canadian Association of University Teachers,Professional School,Western Professional School,True,Challenging
+34,Automotive Technology,Certificate,Technical,1,2,16808.83,84.2,46677.06,Law Society of Ontario,Community College,Western Community College,False,Fair
+35,HVAC Technology,Certificate,Technical,1,2,16693.21,90.8,48439.85,Association of Universities and Colleges of Canada,Community College,Western Community College,False,Fair
+36,Network Administration,Certificate,Technology,2,2,23602.0,83.0,54548.01,Canadian Nursing Association,Community College,Eastern Community College,False,Good
+37,Dental Hygiene,Associate,Healthcare,2,2,33859.79,88.7,59443.98,Canadian Association of University Teachers,Community College,Southern Community College,True,Challenging
+38,Medical Assistant,Certificate,Healthcare,1,1,16380.43,82.1,38854.09,Canadian Association of University Teachers,Community College,Eastern Community College,True,Fair
