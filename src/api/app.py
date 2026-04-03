@@ -149,36 +149,49 @@ def get_user_profiles():
         
         return jsonify(error_response), 500
 
-@app.route('/api/get-loan-info', methods=['GET'])
-def get_loan_info():
+@app.route('/api/get-loans', methods=['GET'])
+def get_loans():
     """
-    Get all loan information with user details
+    Get paginated loan information with borrower details
     """
     try:
         db_manager = DatabaseManager()
         
+        # Get pagination parameters
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 30))
+        offset = (page - 1) * per_page
+        
+        # Get total count
+        count_query = "SELECT COUNT(*) as total FROM loan_info"
+        count_result = db_manager.execute_query(count_query)
+        total_count = count_result[0]['total'] if count_result else 0
+        
+        # Get paginated loan data with all fields including borrower names
         query = """
-            SELECT 
-                l.id, 
-                l.user_id,
-                l.loan_amount,
-                l.interest_rate,
-                l.loan_type,
-                l.created_at,
-                u.first_name,
-                u.last_name,
-                u.email
+            SELECT l.loan_id, l.payer_id, l.program_id, l.loan_amount, l.interest_rate,
+                   l.loan_term_years, l.loan_term_months, l.loan_type, l.institution_name,
+                   l.institution_city, l.institution_province, l.education_value,
+                   l.down_payment, l.ltv_ratio, l.origination_date, l.disbursement_date,
+                   l.maturity_date, l.current_balance, l.loan_status, l.lender,
+                   l.program_duration_years, l.monthly_payment, l.grace_period_months,
+                   l.delinquency_risk, u.first_name, u.last_name
             FROM loan_info l
-            JOIN user_profile u ON l.user_id = u.id
-            ORDER BY l.created_at DESC
+            LEFT JOIN user_profile u ON l.payer_id = u.payer_id
+            ORDER BY l.loan_id ASC
+            LIMIT ? OFFSET ?
         """
         
-        loan_info = db_manager.execute_query(query)
+        loans = db_manager.execute_query(query, (per_page, offset))
         
         response_data = {
             "success": True,
-            "data": loan_info,
-            "count": len(loan_info)
+            "data": loans,
+            "count": len(loans),
+            "total": total_count,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": (total_count + per_page - 1) // per_page
         }
         
         return jsonify(response_data), 200

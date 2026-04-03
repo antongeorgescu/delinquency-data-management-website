@@ -47,9 +47,9 @@ export class DataService {
     return this.http.get<PaginatedApiResponse<UserProfile>>(`${this.baseUrl}/get-user-profiles?page=${page}&per_page=${perPage}`);
   }
 
-  // Get loan information
-  getLoanInfo(): Observable<ApiResponse<LoanInfo>> {
-    return this.http.get<ApiResponse<LoanInfo>>(`${this.baseUrl}/get-loan-info`);
+  // Get loan information with pagination
+  getLoans(page: number = 1, perPage: number = 30): Observable<PaginatedApiResponse<LoanInfo>> {
+    return this.http.get<PaginatedApiResponse<LoanInfo>>(`${this.baseUrl}/get-loans?page=${page}&per_page=${perPage}`);
   }
 
   // Get programs of study

@@ -13,15 +13,32 @@ export interface UserProfile {
 }
 
 export interface LoanInfo {
-  id: string;
-  user_id: string;
+  loan_id: number;
+  payer_id: number;
+  program_id: number;
   loan_amount: number;
   interest_rate: number;
+  loan_term_years: number;
+  loan_term_months: number;
   loan_type: string;
-  created_at: string;
+  institution_name: string;
+  institution_city: string;
+  institution_province: string;
+  education_value: number;
+  down_payment: number;
+  ltv_ratio: number;
+  origination_date: string;
+  disbursement_date: string;
+  maturity_date: string;
+  current_balance: number;
+  loan_status: string;
+  lender: string;
+  program_duration_years: number;
+  monthly_payment: number;
+  grace_period_months: number;
+  delinquency_risk: number;
   first_name?: string;
   last_name?: string;
-  email?: string;
 }
 
 export interface ProgramOfStudy {

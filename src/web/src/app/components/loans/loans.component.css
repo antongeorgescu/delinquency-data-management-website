@@ -1,0 +1,74 @@
+/* Loans component specific styles */
+
+.loans-container {
+  padding: 1rem;
+}
+
+.table-responsive {
+  border-radius: 0.375rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.badge {
+  font-size: 0.75rem;
+}
+
+.pagination {
+  margin-bottom: 0;
+}
+
+.page-link {
+  color: #6c757d;
+}
+
+.page-link:hover {
+  color: #0056b3;
+  background-color: #f8f9fa;
+}
+
+.page-item.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+/* Responsive table improvements */
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+/* Risk level colors */
+.risk-low {
+  background-color: #28a745 !important;
+}
+
+.risk-medium {
+  background-color: #ffc107 !important;
+  color: #212529 !important;
+}
+
+.risk-high {
+  background-color: #dc3545 !important;
+}
+
+.risk-critical {
+  background-color: #343a40 !important;
+}
