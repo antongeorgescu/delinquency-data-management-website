@@ -9,7 +9,7 @@ from typing import List, Dict, Any
 
 class DatabaseManager:
     def __init__(self):
-        self.db_filename = "delinquency_data.db"
+        self.db_filename = "student_loan_data.db"
         
     def get_connection(self) -> sqlite3.Connection:
         """Get SQLite connection"""
