@@ -8,6 +8,8 @@ import { DataService } from '../../services/data.service';
 })
 export class HomeComponent {
   isGenerating = false;
+  isRunningRiskAnalysis = false;
+  isRunningEDA = false;
   generationComplete = false;
   generationStats: any = null;
   error: string | null = null;
@@ -41,6 +43,42 @@ export class HomeComponent {
         this.isGenerating = false;
         this.error = 'Failed to generate data. Please try again.';
         console.error('Error generating data:', error);
+      }
+    });
+  }
+
+  runRiskAnalysis(): void {
+    this.isRunningRiskAnalysis = true;
+    this.error = null;
+
+    this.dataService.runRiskAnalysis().subscribe({
+      next: (response) => {
+        this.isRunningRiskAnalysis = false;
+        console.log('Risk analysis completed:', response);
+        // You might want to show a success message or update UI based on response
+      },
+      error: (error) => {
+        this.isRunningRiskAnalysis = false;
+        this.error = 'Failed to run risk analysis. Please ensure data is generated first.';
+        console.error('Error running risk analysis:', error);
+      }
+    });
+  }
+
+  runEDA(): void {
+    this.isRunningEDA = true;
+    this.error = null;
+
+    this.dataService.runEDA().subscribe({
+      next: (response) => {
+        this.isRunningEDA = false;
+        console.log('EDA completed:', response);
+        // You might want to show a success message or update UI based on response
+      },
+      error: (error) => {
+        this.isRunningEDA = false;
+        this.error = 'Failed to run EDA. Please ensure data is generated first.';
+        console.error('Error running EDA:', error);
       }
     });
   }

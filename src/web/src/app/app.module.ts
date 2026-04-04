@@ -9,6 +9,7 @@ import { HomeComponent } from './components/home/home.component';
 import { UserProfilesComponent } from './components/user-profiles/user-profiles.component';
 import { LoansComponent } from './components/loans/loans.component';
 import { ProgramsComponent } from './components/programs/programs.component';
+import { PaymentsComponent } from './components/payments/payments.component';
 import { LoanPaymentsComponent } from './components/loan-payments/loan-payments.component';
 import { DataSummaryComponent } from './components/data-summary/data-summary.component';
 import { DataService } from './services/data.service';
@@ -20,6 +21,7 @@ import { DataService } from './services/data.service';
     UserProfilesComponent,
     LoansComponent,
     ProgramsComponent,
+    PaymentsComponent,
     LoanPaymentsComponent,
     DataSummaryComponent
   ],
@@ -32,7 +34,8 @@ import { DataService } from './services/data.service';
       { path: 'users', component: UserProfilesComponent },
       { path: 'loans', component: LoansComponent },
       { path: 'programs', component: ProgramsComponent },
-      { path: 'payments', component: LoanPaymentsComponent },
+      { path: 'payments', component: PaymentsComponent },
+      { path: 'loan-payments', component: LoanPaymentsComponent },
       { path: 'summary', component: DataSummaryComponent },
       { path: '**', redirectTo: '' }
     ])

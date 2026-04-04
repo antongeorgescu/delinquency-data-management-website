@@ -42,10 +42,43 @@ export interface LoanInfo {
 }
 
 export interface ProgramOfStudy {
-  id: string;
+  program_id: number;
   program_name: string;
-  degree_level: string;
-  duration_months: number;
+  program_type: string;
+  field_of_study: string;
+  program_difficulty: string;
+  duration_years: number;
+  typical_tuition_cad: number;
+  employment_rate_percent: number;
+  avg_starting_salary_cad: number;
+  accreditation_body: string;
+  institution_type: string;
+  university_name: string;
+  requires_licensing: string;
+  job_market_outlook: string;
+}
+
+export interface Payment {
+  payment_id: number;
+  first_name: string;
+  last_name: string;
+  due_date: string;
+  paid_date: string;
+  payment_due: number;
+  amount_paid: number;
+  principal_payment: number;
+  interest_payment: number;
+  escrow_payment: number;
+  late_fee: number;
+  total_amount_due: number;
+  remaining_balance: number;
+  status: string;
+  days_late: number;
+  payment_method: string;
+  payment_processor: string;
+  transaction_id: string;
+  confirmation_number: string;
+  payment_type: string;
 }
 
 export interface LoanPayment {

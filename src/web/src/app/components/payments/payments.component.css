@@ -1,0 +1,27 @@
+.table {
+  font-size: 0.75rem;
+}
+
+th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+td {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.badge {
+  font-size: 0.7rem;
+}
+
+.pagination .page-link.active {
+  background-color: #198754;
+  border-color: #198754;
+  color: white;
+}
+
+small.text-muted {
+  font-size: 0.6rem;
+}

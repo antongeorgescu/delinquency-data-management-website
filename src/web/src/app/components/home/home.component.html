@@ -5,7 +5,7 @@
       <h4>
         <i class="bi bi-graph-up-arrow me-3"></i>Delinquency Data Management System
       </h4>
-      <p class="lead mb-0">Generate synthetic student loan data and analyze delinquency patterns with advanced machine learning algorithms.</p>
+      <p class="mb-0" style="font-size: 1.1rem;">Generate synthetic student loan data and analyze delinquency patterns with advanced machine learning algorithms.</p>
     </div>
   </div>
 </div>
@@ -15,9 +15,9 @@
   <div class="col-md-4">
     <div class="card h-100 border-primary">
       <div class="card-header bg-info bg-opacity-10">
-        <h5 class="card-title mb-0 text-dark">
+        <h6 class="card-title mb-0 text-dark">
           <i class="bi bi-people-fill me-2"></i>Number of Borrowers
-        </h5>
+        </h6>
       </div>
       <div class="card-body">
         <p class="card-text small text-muted mb-3">
@@ -40,9 +40,9 @@
   <div class="col-md-4">
     <div class="card h-100 border-primary">
       <div class="card-header bg-success bg-opacity-10">
-        <h5 class="card-title mb-0 text-dark">
+        <h6 class="card-title mb-0 text-dark">
           <i class="bi bi-calendar-event me-2"></i>Start Date
-        </h5>
+        </h6>
       </div>
       <div class="card-body">
         <p class="card-text small text-muted mb-3">
@@ -67,9 +67,9 @@
   <div class="col-md-4">
     <div class="card h-100 border-primary">
       <div class="card-header bg-warning bg-opacity-10">
-        <h5 class="card-title mb-0 text-dark">
+        <h6 class="card-title mb-0 text-dark">
           <i class="bi bi-calendar-check me-2"></i>End Date
-        </h5>
+        </h6>
       </div>
       <div class="card-body">
         <p class="card-text small text-muted mb-3">
@@ -106,7 +106,7 @@
         </p>
         <div class="d-flex flex-column flex-md-row gap-3 align-items-center justify-content-center">
           <button 
-            class="btn btn-primary btn-lg px-4 py-2 text-nowrap"
+            class="btn btn-primary px-4 py-2 text-nowrap"
             [disabled]="isGenerating"
             (click)="generateData()">
             <span *ngIf="isGenerating" class="spinner-border spinner-border-sm me-2" role="status"></span>
@@ -153,6 +153,75 @@
           <a routerLink="/payments" class="btn btn-outline-primary btn-sm text-start">
             <i class="bi bi-credit-card me-2"></i>Payments
           </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Exploratory Data Analysis -->
+<div class="row mb-3">
+  <div class="col-md-12">
+    <div class="card border-primary">
+      <div class="card-body text-center p-4">
+        <h5 class="card-title text-dark mb-3">
+          <i class="bi bi-graph-up-arrow me-2"></i>Delinquency Risk Estimation and Data Insights
+        </h5>
+        <p class="card-text mb-4">
+          Perform advanced analytical operations on your generated student loan dataset. Choose from delinquency risk assessment or comprehensive exploratory data analysis with machine learning insights.
+        </p>
+        <div class="row">
+          <!-- Risk Analysis Button -->
+          <div class="col-md-6 mb-3">
+            <div class="card h-100 border-secondary">
+              <div class="card-body p-3">
+                <h6 class="card-title text-dark mb-3">
+                  <i class="bi bi-exclamation-triangle me-2"></i>Delinquency Risk Analysis
+                </h6>
+                <p class="card-text small mb-3">
+                  Run comprehensive delinquency analysis and update the database with ML algorithm calculated risk scores.
+                </p>
+                <button 
+                  class="btn btn-primary px-4 py-2 text-nowrap w-100"
+                  [disabled]="isRunningRiskAnalysis"
+                  (click)="runRiskAnalysis()">
+                  <span *ngIf="isRunningRiskAnalysis" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  <i *ngIf="!isRunningRiskAnalysis" class="bi bi-shield-exclamation me-2"></i>
+                  {{ isRunningRiskAnalysis ? 'Running Risk Analysis...' : 'Run Delinquency Risk Analysis' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- EDA Button -->
+          <div class="col-md-6 mb-3">
+            <div class="card h-100 border-secondary">
+              <div class="card-body p-3">
+                <h6 class="card-title text-dark mb-3">
+                  <i class="bi bi-bar-chart-line me-2"></i>Exploratory Data Analysis (EDA)
+                </h6>
+                <div class="text-start mb-3">
+                  <p class="card-text small mb-2">Run comprehensive exploratory data analysis with PCA:</p>
+                  <ul class="list-unstyled small text-muted">
+                    <li><i class="bi bi-check2 me-1"></i>Principal Component Analysis (PCA) dimensionality reduction</li>
+                    <li><i class="bi bi-check2 me-1"></i>Interactive visualizations and charts</li>
+                    <li><i class="bi bi-check2 me-1"></i>Feature correlation analysis</li>
+                    <li><i class="bi bi-check2 me-1"></i>Risk distribution analysis</li>
+                    <li><i class="bi bi-check2 me-1"></i>K-means clustering on PCA components</li>
+                    <li><i class="bi bi-check2 me-1"></i>Comprehensive reporting</li>
+                  </ul>
+                </div>
+                <button 
+                  class="btn btn-primary px-4 py-2 text-nowrap w-100"
+                  [disabled]="isRunningEDA"
+                  (click)="runEDA()">
+                  <span *ngIf="isRunningEDA" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  <i *ngIf="!isRunningEDA" class="bi bi-graph-up me-2"></i>
+                  {{ isRunningEDA ? 'Running EDA...' : 'Exploratory Data Analysis (EDA)' }}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

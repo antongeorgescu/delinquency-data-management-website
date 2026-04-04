@@ -6,6 +6,7 @@ import {
   UserProfile, 
   LoanInfo, 
   ProgramOfStudy, 
+  Payment,
   LoanPayment, 
   ApiResponse,
   PaginatedApiResponse,
@@ -52,9 +53,14 @@ export class DataService {
     return this.http.get<PaginatedApiResponse<LoanInfo>>(`${this.baseUrl}/get-loans?page=${page}&per_page=${perPage}`);
   }
 
-  // Get programs of study
-  getPrograms(): Observable<ApiResponse<ProgramOfStudy>> {
-    return this.http.get<ApiResponse<ProgramOfStudy>>(`${this.baseUrl}/get-programs`);
+  // Get programs of study with pagination
+  getPrograms(page: number = 1, perPage: number = 30): Observable<PaginatedApiResponse<ProgramOfStudy>> {
+    return this.http.get<PaginatedApiResponse<ProgramOfStudy>>(`${this.baseUrl}/get-programs?page=${page}&per_page=${perPage}`);
+  }
+
+  // Get payments with pagination 
+  getPayments(page: number = 1, perPage: number = 30): Observable<PaginatedApiResponse<Payment>> {
+    return this.http.get<PaginatedApiResponse<Payment>>(`${this.baseUrl}/get-payments?page=${page}&per_page=${perPage}`);
   }
 
   // Get loan payments
@@ -96,5 +102,21 @@ export class DataService {
   // Test endpoint to verify communication
   testConnection(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/test`);
+  }
+
+  // Run delinquency risk analysis
+  runRiskAnalysis(): Observable<{ success: boolean; message: string; results?: any }> {
+    return this.http.post<{ success: boolean; message: string; results?: any }>(
+      `${this.baseUrl}/run-risk-analysis`, 
+      {}
+    );
+  }
+
+  // Run exploratory data analysis (EDA)
+  runEDA(): Observable<{ success: boolean; message: string; results?: any }> {
+    return this.http.post<{ success: boolean; message: string; results?: any }>(
+      `${this.baseUrl}/run-eda`, 
+      {}
+    );
   }
 }

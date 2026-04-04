@@ -329,7 +329,7 @@ class DatabaseManager:
             
         FROM user_profile up
         LEFT JOIN loan_info li ON up.payer_id = li.payer_id
-        LEFT JOIN programs_of_study pos ON li.program_id = pos.program_id
+        LEFT JOIN program_of_study pos ON li.program_id = pos.program_id
         LEFT JOIN (
             SELECT 
                 lp.loan_id,
@@ -405,7 +405,7 @@ class DatabaseManager:
             
         FROM user_profile up
         JOIN loan_info li ON up.payer_id = li.payer_id
-        LEFT JOIN programs_of_study pos ON li.program_id = pos.program_id
+        LEFT JOIN program_of_study pos ON li.program_id = pos.program_id
         LEFT JOIN (
             SELECT 
                 loan_id,
