@@ -112,12 +112,18 @@ export class LoansComponent implements OnInit {
   }
 
   formatRiskLevel(risk: number): { text: string; class: string } {
-    if (risk === null || risk === undefined) return { text: 'Unknown', class: 'bg-secondary' };
+    if (risk === null || risk === undefined) return { text: 'Unknown', class: 'bg-secondary text-white' };
     
-    if (risk < 0.3) return { text: 'Low', class: 'bg-success' };
-    if (risk < 0.6) return { text: 'Medium', class: 'bg-warning' };
-    if (risk < 0.8) return { text: 'High', class: 'bg-danger' };
-    return { text: 'Critical', class: 'bg-dark' };
+    switch (risk) {
+      case 0:
+        return { text: 'Low', class: 'bg-success text-white' };
+      case 1:
+        return { text: 'Medium', class: 'bg-warning text-dark' };
+      case 2:
+        return { text: 'Critical', class: 'bg-danger text-white' };
+      default:
+        return { text: 'Unknown', class: 'bg-secondary text-white' };
+    }
   }
 
   getBorrowerName(loan: LoanInfo): string {
