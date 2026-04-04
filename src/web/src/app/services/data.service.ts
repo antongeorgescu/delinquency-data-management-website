@@ -11,7 +11,8 @@ import {
   ApiResponse,
   PaginatedApiResponse,
   GenerationStats,
-  DatabaseSummaryResponse 
+  DatabaseSummaryResponse,
+  RiskModel 
 } from '../interfaces/data.interface';
 
 @Injectable({
@@ -41,6 +42,11 @@ export class DataService {
       `${this.baseUrl}/generate-data`, 
       requestBody
     );
+  }
+
+  // Get risk models/algorithms
+  getRiskModels(): Observable<{ models: RiskModel[] }> {
+    return this.http.get<{ models: RiskModel[] }>(`${this.baseUrl}/risk-models`);
   }
 
   // Get user profiles with pagination
@@ -104,7 +110,23 @@ export class DataService {
     return this.http.get<any>(`${this.baseUrl}/test`);
   }
 
-  // Run delinquency risk analysis
+  // Run delinquency risk estimation with new endpoint
+  runRiskEstimation(algorithm: string = 'percentile'): Observable<any> {
+    return this.http.post<any>(
+      `${this.baseUrl}/risk-estimator`, 
+      { algorithm: algorithm }
+    );
+  }
+
+  // Generate campaign files
+  generateCampaignFiles(): Observable<any> {
+    return this.http.post<any>(
+      `${this.baseUrl}/generate-campaign-files`, 
+      {}
+    );
+  }
+
+  // Run delinquency risk analysis (legacy method)
   runRiskAnalysis(algorithm: string = 'percentile'): Observable<{ success: boolean; message: string; results?: any }> {
     return this.http.post<{ success: boolean; message: string; results?: any }>(
       `${this.baseUrl}/run-risk-analysis`, 

@@ -5,7 +5,8 @@ import sys
 import os
 import json
 import math
-from flask import Flask, jsonify, request
+from datetime import datetime
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 
 # Add the shared and services directories to the path
@@ -254,6 +255,188 @@ def get_programs():
             "success": False,
             "error": str(e),
             "message": "Failed to retrieve programs of study"
+        }
+        
+        return jsonify(error_response), 500
+
+@app.route('/api/risk-models', methods=['GET'])
+def get_risk_models():
+    """
+    Get available risk analysis models/algorithms
+    """
+    try:
+        algorithms = [
+            {
+                'id': 'percentile',
+                'name': 'Percentile Based',
+                'short_name': 'Percentile',
+                'description': 'Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)'
+            },
+            {
+                'id': 'threshold',
+                'name': 'Fixed Threshold',
+                'short_name': 'Threshold',
+                'description': 'Fixed probability thresholds: <0.3=Low, 0.3-0.6=Medium, >0.6=High'
+            },
+            {
+                'id': 'kmeans',
+                'name': 'K-Means Clustering',
+                'short_name': 'K-Means',
+                'description': 'K-means clustering of probabilities into 3 risk groups'
+            },
+            {
+                'id': 'svm',
+                'name': 'Support Vector Machine',
+                'short_name': 'SVM',
+                'description': 'Support Vector Machine classifier trained on probability-based risk labels'
+            },
+            {
+                'id': 'knn',
+                'name': 'K-Nearest Neighbors',
+                'short_name': 'KNN',
+                'description': 'K-Nearest Neighbors classifier with optimal k and distance weighting'
+            }
+        ]
+        
+        response_data = {
+            'models': algorithms
+        }
+        
+        return jsonify(response_data), 200
+        
+    except Exception as e:
+        error_response = {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve risk models"
+        }
+        
+        return jsonify(error_response), 500
+
+@app.route('/api/risk-estimator', methods=['POST'])
+def run_risk_estimator():
+    """
+    Run delinquency risk estimation analysis with specified algorithm
+    """
+    try:
+        # Get parameters from POST request body
+        data = request.get_json() or {}
+        
+        # Extract algorithm parameter with default
+        algorithm = data.get('algorithm', 'percentile')
+        
+        # Validate algorithm
+        valid_algorithms = ['percentile', 'threshold', 'kmeans', 'svm', 'knn']
+        if algorithm not in valid_algorithms:
+            return jsonify({
+                "success": False,
+                "error": f"Invalid algorithm '{algorithm}'. Must be one of: {', '.join(valid_algorithms)}",
+                "message": "Invalid algorithm specified"
+            }), 400
+        
+        # Import and run the JSON-compatible risk estimation
+        from services.run_risk_estimation import run_risk_estimation_json
+        
+        # Run the analysis and get JSON results
+        results = run_risk_estimation_json(algorithm=algorithm)
+        
+        # Return results
+        if results["success"]:
+            return jsonify(results), 200
+        else:
+            return jsonify(results), 500
+        
+    except Exception as e:
+        import traceback
+        error_response = {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to run risk estimation analysis",
+            "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "traceback": traceback.format_exc()
+        }
+        
+        # Log the error for debugging
+        print(f"Risk estimation error: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+        
+        return jsonify(error_response), 500
+
+@app.route('/api/generate-campaign-files', methods=['POST'])
+def generate_campaign_files_endpoint():
+    """
+    Generate targeted marketing campaign files based on delinquency risk levels
+    """
+    try:
+        # Import and run the JSON-compatible campaign file generation
+        from services.generate_campaign_files import generate_campaign_files_json
+        
+        # Run the campaign file generation and get JSON results
+        results = generate_campaign_files_json()
+        
+        # Return results
+        if results["success"]:
+            return jsonify(results), 200
+        else:
+            return jsonify(results), 500
+        
+    except Exception as e:
+        import traceback
+        error_response = {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to generate campaign files",
+            "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "traceback": traceback.format_exc()
+        }
+        
+        # Log the error for debugging
+        print(f"Campaign generation error: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+        
+        return jsonify(error_response), 500
+
+@app.route('/api/download-campaign-file/<filename>', methods=['GET'])
+def download_campaign_file(filename):
+    """
+    Download generated campaign files
+    """
+    try:
+        # Define the campaigns directory path
+        campaigns_dir = os.path.join(os.path.dirname(__file__), 'services', 'campaigns')
+        
+        # Validate filename for security
+        allowed_files = ['medium_risk_users.csv', 'high_risk_users.csv']
+        if filename not in allowed_files:
+            return jsonify({
+                "success": False,
+                "error": "Invalid filename",
+                "message": "File not found or access denied"
+            }), 404
+        
+        file_path = os.path.join(campaigns_dir, filename)
+        
+        # Check if file exists
+        if not os.path.exists(file_path):
+            return jsonify({
+                "success": False,
+                "error": "File not found",
+                "message": f"Campaign file '{filename}' does not exist. Please generate campaign files first."
+            }), 404
+        
+        # Return the file
+        return send_file(
+            file_path,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='text/csv'
+        )
+        
+    except Exception as e:
+        error_response = {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to download campaign file"
         }
         
         return jsonify(error_response), 500

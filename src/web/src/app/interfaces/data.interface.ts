@@ -94,6 +94,13 @@ export interface LoanPayment {
   email?: string;
 }
 
+export interface RiskModel {
+  id: string;
+  name: string;
+  short_name: string;
+  description: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T[];

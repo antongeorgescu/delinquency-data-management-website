@@ -40,55 +40,6 @@ def load_comprehensive_dataset():
     print(f"✓ Features available: {df.columns.tolist()}")
     
     return df
-        li.lender,
-        li.program_duration_years,
-        li.monthly_payment,
-        li.grace_period_months,
-        
-        -- Program of Study Features
-        pos.program_name,
-        pos.program_type,
-        pos.field_of_study,
-        pos.program_difficulty,
-        pos.duration_years,
-        pos.typical_tuition_cad,
-        pos.employment_rate_percent,
-        pos.avg_starting_salary_cad,
-        pos.accreditation_body,
-        pos.institution_type,
-        pos.university_name,
-        pos.requires_licensing,
-        pos.job_market_outlook,
-        
-        -- Payment Behavior Features (Aggregated)
-        COUNT(lp.payer_id) as total_payments_made,
-        SUM(CASE WHEN lp.status = 'Missed' THEN 1 ELSE 0 END) as missed_payments,
-        SUM(CASE WHEN lp.status = 'Paid' THEN 1 ELSE 0 END) as successful_payments,
-        AVG(lp.days_late) as avg_days_late,
-        SUM(lp.late_fee) as total_late_fees,
-        AVG(lp.amount_paid) as avg_payment_amount,
-        MAX(lp.days_late) as max_days_late,
-        
-        -- Delinquency Target Variable
-        CASE 
-            WHEN SUM(CASE WHEN lp.status = 'Missed' THEN 1 ELSE 0 END) > 0 THEN 1 
-            ELSE 0 
-        END as is_delinquent
-        
-    FROM user_profile up
-    JOIN loan_info li ON up.payer_id = li.payer_id
-    JOIN program_of_study pos ON li.program_id = pos.program_id
-    LEFT JOIN loan_payments lp ON up.payer_id = lp.payer_id
-    GROUP BY up.payer_id
-    """
-    
-    df = pd.read_sql_query(query, conn)
-    conn.close()
-    
-    print(f"Loaded dataset with {len(df)} records and {len(df.columns)} features")
-    print(f"Delinquency rate: {df['is_delinquent'].mean():.2%}")
-    
-    return df
 
 def engineer_features(df):
     """
@@ -110,13 +61,14 @@ def engineer_features(df):
     # Financial ratios
     df['debt_to_income_ratio'] = df['loan_amount'] / np.maximum(df['annual_income_cad'], 1)
     df['payment_to_income_ratio'] = (df['monthly_payment'] * 12) / np.maximum(df['annual_income_cad'], 1)
-    df['education_roi'] = df['avg_starting_salary_cad'] / np.maximum(df['typical_tuition_cad'], 1)
+    df['education_roi'] = df['average_starting_salary'] / np.maximum(df['typical_tuition_cad'], 1)
     df['loan_to_education_value_ratio'] = df['loan_amount'] / df['education_value']
     
     # Payment behavior features
     df['delinquency_rate'] = df['missed_payments'] / np.maximum(df['total_payments_made'], 1)
-    df['payment_consistency'] = df['successful_payments'] / np.maximum(df['total_payments_made'], 1)
-    df['avg_late_fee_per_payment'] = df['total_late_fees'] / np.maximum(df['total_payments_made'], 1)
+    df['payment_consistency'] = df['on_time_payments'] / np.maximum(df['total_payments_made'], 1)
+    # Note: total_late_fees not available, using missed_payments as proxy for late fees
+    df['avg_late_fee_per_payment'] = df['missed_payments'] / np.maximum(df['total_payments_made'], 1)
     
     # Risk category features
     df['high_ltv_risk'] = (df['ltv_ratio'] > 80).astype(int)
@@ -126,7 +78,7 @@ def engineer_features(df):
     df['high_difficulty_program'] = (df['program_difficulty'] == 3).astype(int)
     
     # Employment market features
-    df['low_employment_rate'] = (df['employment_rate_percent'] < 80).astype(int)
+    df['low_employment_rate'] = (df['employment_rate'] < 80).astype(int)
     df['poor_job_outlook'] = (df['job_market_outlook'] == 'Challenging').astype(int)
     
     print(f"Feature engineering complete. Dataset now has {len(df.columns)} features")

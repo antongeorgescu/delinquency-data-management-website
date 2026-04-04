@@ -213,7 +213,7 @@ flowchart TD
 ### 1. `delinquency_analysis.py`
 Main analysis script with 8 core functions implementing the complete ML pipeline from data loading through risk score calculation and database updates.
 
-### 2. `run_delinquency_analysis.py`
+### 2. `run_risk_estimation.py`
 Simple runner script with error checking and user-friendly interface.
 
 ### 3. Updated Database Schema
@@ -225,13 +225,13 @@ The `loan_info` table now includes:
 ### Basic Usage
 ```bash
 # Run analysis with default settings
-python run_delinquency_analysis.py
+python run_risk_estimation.py
 
 # Use specific algorithm
-python run_delinquency_analysis.py --algorithm svm
+python run_risk_estimation.py --algorithm svm
 
 # Custom database path
-python run_delinquency_analysis.py --db_path my_database.db --algorithm kmeans
+python run_risk_estimation.py --db_path my_database.db --algorithm kmeans
 ```
 
 ### Available Risk Algorithms

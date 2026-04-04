@@ -315,10 +315,10 @@ class DatabaseManager:
             pos.field_of_study,
             pos.program_type,
             pos.program_difficulty,
-            pos.program_duration_years,
-            pos.graduation_rate,
-            pos.employment_rate,
-            pos.average_starting_salary,
+            pos.duration_years as program_duration_years,
+            pos.employment_rate_percent as graduation_rate,
+            pos.employment_rate_percent,
+            pos.avg_starting_salary_cad as average_starting_salary,
             
             -- Payment Information (aggregated)
             COALESCE(payment_stats.total_payments, 0) as total_payments_made,
@@ -332,15 +332,15 @@ class DatabaseManager:
         LEFT JOIN program_of_study pos ON li.program_id = pos.program_id
         LEFT JOIN (
             SELECT 
-                lp.loan_id,
+                lp.payer_id,
                 COUNT(*) as total_payments,
-                AVG(lp.payment_amount) as avg_payment_amount,
+                AVG(lp.amount_paid) as avg_payment_amount,
                 SUM(CASE WHEN lp.status = 'Late' THEN 1 ELSE 0 END) as late_payments,
                 SUM(CASE WHEN lp.status = 'Missed' THEN 1 ELSE 0 END) as missed_payments,
-                MAX(lp.payment_date) as last_payment_date
+                MAX(lp.paid_date) as last_payment_date
             FROM loan_payments lp
-            GROUP BY lp.loan_id
-        ) payment_stats ON li.loan_id = payment_stats.loan_id
+            GROUP BY lp.payer_id
+        ) payment_stats ON li.payer_id = payment_stats.payer_id
         
         WHERE li.loan_id IS NOT NULL
         ORDER BY up.payer_id
@@ -387,10 +387,11 @@ class DatabaseManager:
             pos.program_type,
             pos.field_of_study,
             pos.program_difficulty,
-            pos.program_duration_years as pos_duration,
-            pos.graduation_rate,
-            pos.employment_rate,
-            pos.average_starting_salary,
+            pos.duration_years as pos_duration,
+            pos.employment_rate_percent as employment_rate,
+            pos.avg_starting_salary_cad as average_starting_salary,
+            pos.typical_tuition_cad,
+            pos.job_market_outlook,
             
             -- Payment Behavior Features (Aggregated)
             COALESCE(payment_agg.total_payments, 0) as total_payments_made,
@@ -401,26 +402,32 @@ class DatabaseManager:
             COALESCE(payment_agg.missed_payments, 0) as missed_payments,
             COALESCE(payment_agg.days_since_last_payment, 9999) as days_since_last_payment,
             COALESCE(payment_agg.payment_consistency, 0) as payment_consistency,
-            COALESCE(payment_agg.early_payments, 0) as early_payments
+            COALESCE(payment_agg.early_payments, 0) as early_payments,
+            
+            -- Delinquency Target Variable (1 if any missed payments, 0 otherwise)
+            CASE 
+                WHEN COALESCE(payment_agg.missed_payments, 0) > 0 THEN 1 
+                ELSE 0 
+            END as is_delinquent
             
         FROM user_profile up
         JOIN loan_info li ON up.payer_id = li.payer_id
         LEFT JOIN program_of_study pos ON li.program_id = pos.program_id
         LEFT JOIN (
             SELECT 
-                loan_id,
+                payer_id,
                 COUNT(*) as total_payments,
-                SUM(payment_amount) as total_amount_paid,
-                AVG(payment_amount) as avg_payment_amount,
+                SUM(amount_paid) as total_amount_paid,
+                AVG(amount_paid) as avg_payment_amount,
                 SUM(CASE WHEN status = 'Paid' THEN 1 ELSE 0 END) as on_time_payments,
                 SUM(CASE WHEN status = 'Late' THEN 1 ELSE 0 END) as late_payments,
                 SUM(CASE WHEN status = 'Missed' THEN 1 ELSE 0 END) as missed_payments,
                 SUM(CASE WHEN status = 'Early' THEN 1 ELSE 0 END) as early_payments,
-                JULIANDAY('now') - JULIANDAY(MAX(payment_date)) as days_since_last_payment,
+                JULIANDAY('now') - JULIANDAY(MAX(paid_date)) as days_since_last_payment,
                 (CAST(SUM(CASE WHEN status = 'Paid' THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*)) * 100 as payment_consistency
             FROM loan_payments 
-            GROUP BY loan_id
-        ) payment_agg ON li.loan_id = payment_agg.loan_id
+            GROUP BY payer_id
+        ) payment_agg ON up.payer_id = payment_agg.payer_id
         
         WHERE li.loan_id IS NOT NULL
         ORDER BY up.payer_id
