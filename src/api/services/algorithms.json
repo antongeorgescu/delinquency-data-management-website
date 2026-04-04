@@ -1,0 +1,86 @@
+{
+  "risk_scoring_algorithms": [
+    {
+      "id": "percentile",
+      "name": "Percentile Based",
+      "short_name": "Percentile",
+      "description": "Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)",
+      "category": "statistical",
+      "complexity": "low",
+      "recommended_for": "general_purpose",
+      "risk_levels": {
+        "0": "Low (Bottom 60%)",
+        "1": "Medium (Next 30%)", 
+        "2": "High (Top 10%)"
+      }
+    },
+    {
+      "id": "threshold",
+      "name": "Fixed Threshold",
+      "short_name": "Threshold",
+      "description": "Fixed probability thresholds: <0.3=Low, 0.3-0.6=Medium, >0.6=High",
+      "category": "rule_based",
+      "complexity": "low",
+      "recommended_for": "interpretable_results",
+      "risk_levels": {
+        "0": "Low (< 0.3 probability)",
+        "1": "Medium (0.3-0.6 probability)",
+        "2": "High (> 0.6 probability)"
+      }
+    },
+    {
+      "id": "kmeans",
+      "name": "K-Means Clustering",
+      "short_name": "K-Means",
+      "description": "K-means clustering of probabilities into 3 risk groups",
+      "category": "unsupervised_ml",
+      "complexity": "medium",
+      "recommended_for": "pattern_discovery",
+      "risk_levels": {
+        "0": "Low Risk Cluster",
+        "1": "Medium Risk Cluster",
+        "2": "High Risk Cluster"
+      }
+    },
+    {
+      "id": "svm",
+      "name": "Support Vector Machine",
+      "short_name": "SVM",
+      "description": "Support Vector Machine classifier trained on probability-based risk labels",
+      "category": "supervised_ml",
+      "complexity": "high",
+      "recommended_for": "complex_patterns",
+      "risk_levels": {
+        "0": "Low Risk (SVM Classified)",
+        "1": "Medium Risk (SVM Classified)",
+        "2": "High Risk (SVM Classified)"
+      }
+    },
+    {
+      "id": "knn",
+      "name": "K-Nearest Neighbors",
+      "short_name": "KNN",
+      "description": "K-Nearest Neighbors classifier with optimal k and distance weighting",
+      "category": "supervised_ml",
+      "complexity": "medium",
+      "recommended_for": "similarity_based",
+      "risk_levels": {
+        "0": "Low Risk (KNN Classified)",
+        "1": "Medium Risk (KNN Classified)",
+        "2": "High Risk (KNN Classified)"
+      }
+    }
+  ],
+  "default_algorithm": "percentile",
+  "algorithm_categories": {
+    "statistical": "Statistical Methods",
+    "rule_based": "Rule-Based Methods",
+    "unsupervised_ml": "Unsupervised Machine Learning",
+    "supervised_ml": "Supervised Machine Learning"
+  },
+  "complexity_levels": {
+    "low": "Simple and fast",
+    "medium": "Moderate complexity",
+    "high": "Complex but powerful"
+  }
+}

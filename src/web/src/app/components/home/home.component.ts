@@ -18,6 +18,41 @@ export class HomeComponent {
   selectedNumPayers: string = '1000';
   selectedStartDate: string = '2020-01-01';
   selectedEndDate: string = '2023-12-31';
+  
+  // Algorithm selection properties
+  selectedAlgorithm: string = 'percentile';
+  algorithms = [
+    {
+      id: 'percentile',
+      name: 'Percentile Based',
+      short_name: 'Percentile',
+      description: 'Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)'
+    },
+    {
+      id: 'threshold', 
+      name: 'Fixed Threshold',
+      short_name: 'Threshold',
+      description: 'Fixed probability thresholds: <0.3=Low, 0.3-0.6=Medium, >0.6=High'
+    },
+    {
+      id: 'kmeans',
+      name: 'K-Means Clustering', 
+      short_name: 'K-Means',
+      description: 'K-means clustering of probabilities into 3 risk groups'
+    },
+    {
+      id: 'svm',
+      name: 'Support Vector Machine',
+      short_name: 'SVM', 
+      description: 'Support Vector Machine classifier trained on probability-based risk labels'
+    },
+    {
+      id: 'knn',
+      name: 'K-Nearest Neighbors',
+      short_name: 'KNN',
+      description: 'K-Nearest Neighbors classifier with optimal k and distance weighting'
+    }
+  ];
 
   constructor(private dataService: DataService) {}
 
@@ -47,11 +82,15 @@ export class HomeComponent {
     });
   }
 
+  selectAlgorithm(algorithmId: string): void {
+    this.selectedAlgorithm = algorithmId;
+  }
+
   runRiskAnalysis(): void {
     this.isRunningRiskAnalysis = true;
     this.error = null;
 
-    this.dataService.runRiskAnalysis().subscribe({
+    this.dataService.runRiskAnalysis(this.selectedAlgorithm).subscribe({
       next: (response) => {
         this.isRunningRiskAnalysis = false;
         console.log('Risk analysis completed:', response);

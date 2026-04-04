@@ -105,10 +105,10 @@ export class DataService {
   }
 
   // Run delinquency risk analysis
-  runRiskAnalysis(): Observable<{ success: boolean; message: string; results?: any }> {
+  runRiskAnalysis(algorithm: string = 'percentile'): Observable<{ success: boolean; message: string; results?: any }> {
     return this.http.post<{ success: boolean; message: string; results?: any }>(
       `${this.baseUrl}/run-risk-analysis`, 
-      {}
+      { algorithm: algorithm }
     );
   }
 
