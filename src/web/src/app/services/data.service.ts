@@ -141,4 +141,15 @@ export class DataService {
       {}
     );
   }
+
+  // Run EDA with custom parameters
+  runEDAReports(nClusters: number, nComponents: number): Observable<{ success: boolean; message: string; results?: any }> {
+    return this.http.post<{ success: boolean; message: string; results?: any }>(
+      `${this.baseUrl}/eda-reports`,
+      {
+        n_clusters: nClusters,
+        n_components: nComponents
+      }
+    );
+  }
 }

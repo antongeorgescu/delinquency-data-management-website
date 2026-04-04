@@ -621,5 +621,250 @@ def health():
         "message": "Delinquency API is running"
     }), 200
 
+@app.route('/api/eda-reports', methods=['POST'])
+def run_eda_reports():
+    """
+    Run comprehensive exploratory data analysis with specified parameters and generate files
+    """
+    try:
+        # Get parameters from POST request body
+        data = request.get_json() or {}
+        
+        # Extract parameters with defaults
+        n_clusters = data.get('n_clusters', 5)
+        n_components = data.get('n_components', 10)
+        
+        # Validate parameters
+        try:
+            n_clusters = int(n_clusters)
+            n_components = int(n_components)
+        except ValueError:
+            return jsonify({
+                "success": False,
+                "error": "Invalid parameter values. Both n_clusters and n_components must be integers.",
+                "message": "Invalid parameters"
+            }), 400
+        
+        if n_clusters < 1 or n_clusters > 20:
+            return jsonify({
+                "success": False,
+                "error": "n_clusters must be between 1 and 20",
+                "message": "Invalid n_clusters value"
+            }), 400
+        
+        if n_components < 2 or n_components > 50:
+            return jsonify({
+                "success": False,
+                "error": "n_components must be between 2 and 50",
+                "message": "Invalid n_components value"
+            }), 400
+        
+        # Database path for the current database
+        db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'shared', 'student_loan_data.db'))
+        
+        # Check if database exists
+        if not os.path.exists(db_path):
+            return jsonify({
+                "success": False,
+                "error": "Database not found. Please generate data first.",
+                "message": "Database not found"
+            }), 404
+        
+        # Set up output directory for EDA files
+        output_dir = os.path.join(os.path.dirname(__file__), 'static', 'eda_outputs')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Run full EDA analysis with file generation
+        import subprocess
+        import sys
+        
+        # Run the full EDA script
+        script_path = os.path.join(os.path.dirname(__file__), 'services', 'run_eda_analysis.py')
+        cmd = [
+            sys.executable, script_path,
+            '--db_path', db_path,
+            '--output_dir', output_dir,
+            '--n_clusters', str(n_clusters),
+            '--n_components', str(n_components)
+        ]
+        
+        # Execute EDA script
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.path.dirname(__file__))
+        
+        if result.returncode != 0:
+            return jsonify({
+                "success": False,
+                "error": f"EDA script failed: {result.stderr}",
+                "stdout": result.stdout,
+                "message": "EDA script execution failed"
+            }), 500
+        
+        # Get analysis summary using JSON function
+        from services.run_eda_analysis_json import run_eda_analysis_json
+        json_results = run_eda_analysis_json(n_clusters=n_clusters, n_components=n_components)
+        
+        # Define the generated files with descriptions
+        files_info = [
+            {
+                "filename": "pca_scree_plot.html",
+                "description": "Variance explained by each principal component",
+                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/pca_scree_plot.html"
+            },
+            {
+                "filename": "pca_scatter_plot.html", 
+                "description": "PC1 vs PC2 scatter plot colored by delinquency risk",
+                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/pca_scatter_plot.html"
+            },
+            {
+                "filename": f"pca_biplot_pc1_vs_pc2.html",
+                "description": "Biplot showing feature contribution vectors",
+                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/pca_biplot_pc1_vs_pc2.html"
+            },
+            {
+                "filename": "pca_feature_contributions.html",
+                "description": "Feature contributions to each principal component",
+                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/pca_feature_contributions.html"
+            },
+            {
+                "filename": "feature_correlation_heatmap.html",
+                "description": "Correlation matrix heatmap of original features",
+                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/feature_correlation_heatmap.html"
+            },
+            {
+                "filename": f"pca_clustering_k{n_clusters}.html",
+                "description": f"K-means clustering results (k={n_clusters}) on PCA components",
+                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/pca_clustering_k{n_clusters}.html"
+            },
+            {
+                "filename": "cluster_analysis_summary.csv",
+                "description": "Statistical summary of cluster analysis",
+                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/cluster_analysis_summary.csv"
+            },
+            {
+                "filename": "eda_comprehensive_report.md",
+                "description": "Comprehensive analysis report with insights",
+                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/eda_comprehensive_report.md"
+            }
+        ]
+        
+        # Verify files exist and add file size info
+        existing_files = []
+        for file_info in files_info:
+            file_path = os.path.join(output_dir, file_info["filename"])
+            if os.path.exists(file_path):
+                file_stats = os.stat(file_path)
+                file_size = file_stats.st_size
+                file_mtime = file_stats.st_mtime
+                
+                # Convert file size to human-readable format
+                if file_size < 1024:
+                    size_str = f"{file_size} B"
+                elif file_size < 1024 * 1024:
+                    size_str = f"{file_size / 1024:.1f} KB"
+                elif file_size < 1024 * 1024 * 1024:
+                    size_str = f"{file_size / (1024 * 1024):.1f} MB"
+                else:
+                    size_str = f"{file_size / (1024 * 1024 * 1024):.1f} GB"
+                
+                # Format creation date
+                from datetime import datetime
+                creation_date = datetime.fromtimestamp(file_mtime).strftime('%Y-%m-%d %H:%M:%S')
+                
+                file_info["size"] = file_size
+                file_info["size_formatted"] = size_str
+                file_info["creation_date"] = creation_date
+                file_info["exists"] = True
+                existing_files.append(file_info)
+            else:
+                file_info["exists"] = False
+        
+        # Prepare response with analysis summary and file information
+        response = {
+            "success": True,
+            "parameters": {
+                "n_clusters": n_clusters,
+                "n_components": n_components
+            },
+            "files": existing_files,
+            "files_count": len(existing_files),
+            "analysis_summary": json_results.get("analysis_summary", {}),
+            "data_overview": json_results.get("data_overview", {}),
+            "feature_summary": json_results.get("feature_summary", {}),
+            "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "message": f"EDA analysis completed successfully. Generated {len(existing_files)} files."
+        }
+        
+        return jsonify(response), 200
+        
+    except Exception as e:
+        import traceback
+        error_response = {
+            "success": False,  
+            "error": str(e),
+            "message": "Failed to run EDA analysis",
+            "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "traceback": traceback.format_exc()
+        }
+        
+        # Log the error for debugging
+        print(f"EDA analysis error: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+        
+        return jsonify(error_response), 500
+
+@app.route('/api/static/eda_outputs/<path:filename>')
+def serve_eda_files(filename):
+    """
+    Serve static EDA output files (HTML, CSV, MD)
+    """
+    try:
+        # Define the static directory for EDA outputs
+        eda_outputs_dir = os.path.join(os.path.dirname(__file__), 'static', 'eda_outputs')
+        
+        # Security check: ensure filename doesn't contain path traversal
+        if '..' in filename or filename.startswith('/'):
+            return jsonify({"error": "Invalid filename"}), 400
+            
+        # Check if file exists
+        file_path = os.path.join(eda_outputs_dir, filename)
+        if not os.path.exists(file_path):
+            return jsonify({"error": "File not found"}), 404
+        
+        # Determine content type based on file extension
+        if filename.endswith('.html'):
+            mimetype = 'text/html'
+        elif filename.endswith('.csv'):
+            mimetype = 'text/csv'
+        elif filename.endswith('.md'):
+            mimetype = 'text/markdown'
+        else:
+            mimetype = 'application/octet-stream'
+        
+        # Send the file with CORS headers
+        from flask import send_file, make_response
+        response = make_response(send_file(file_path, mimetype=mimetype))
+        
+        # Add CORS headers for frontend access
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        
+        return response
+        
+    except Exception as e:
+        return jsonify({"error": f"Failed to serve file: {str(e)}"}), 500
+
+@app.route('/api/static/eda_outputs/<path:filename>', methods=['OPTIONS'])
+def serve_eda_files_options(filename):
+    """
+    Handle CORS preflight requests for EDA static files
+    """
+    from flask import make_response
+    response = make_response()
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

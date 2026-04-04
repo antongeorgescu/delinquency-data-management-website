@@ -26,7 +26,7 @@ def main():
     """Main entry point for EDA analysis."""
     
     parser = argparse.ArgumentParser(
-        description='🔍 Student Loan Exploratory Data Analysis with PCA',
+        description='Student Loan Exploratory Data Analysis with PCA',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -67,24 +67,29 @@ Examples:
     # Parse arguments
     args = parser.parse_args()
     
+    # Fix database path - ensure it's absolute and points to the shared directory
+    if not os.path.isabs(args.db_path):
+        # If relative path, make it relative to the shared directory
+        args.db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'shared', args.db_path))
+    
     # Validate database file exists
     if not os.path.exists(args.db_path):
-        print(f"❌ Error: Database file '{args.db_path}' not found!")
-        print("💡 Tip: Run 'python run_data_generation.py' first to create the database.")
+        print(f"ERROR: Database file '{args.db_path}' not found!")
+        print("TIP: Run 'python run_data_generation.py' first to create the database.")
         return 1
     
     try:
         # Import the EDA module
         from delinquency_analysis.exploratory_data_analysis import ExploratoryDataAnalysis
         
-        print("🚀 Starting Exploratory Data Analysis with PCA...")
-        print(f"📂 Database: {args.db_path}")
-        print(f"📊 Output directory: {args.output_dir}")
-        print(f"🎯 K-means clusters: {args.n_clusters}")
+        print("Starting Exploratory Data Analysis with PCA...")
+        print(f"Database: {args.db_path}")
+        print(f"Output directory: {args.output_dir}")
+        print(f"K-means clusters: {args.n_clusters}")
         if args.n_components:
-            print(f"🧮 PCA components: {args.n_components}")
+            print(f"PCA components: {args.n_components}")
         else:
-            print(f"🧮 PCA components: Auto-determined")
+            print(f"PCA components: Auto-determined")
         
         # Initialize EDA
         eda = ExploratoryDataAnalysis(args.db_path, args.output_dir)
@@ -106,19 +111,19 @@ Examples:
         print("STEP 3: CREATING VISUALIZATIONS")
         print("="*60)
         
-        print("📊 Creating scree plot...")
+        print("Creating scree plot...")
         eda.create_scree_plot()
         
-        print("📊 Creating PCA scatter plot...")
+        print("Creating PCA scatter plot...")
         eda.create_pca_scatter_plot()
         
-        print("📊 Creating PCA biplot...")
+        print("Creating PCA biplot...")
         eda.create_biplot()
         
-        print("📊 Analyzing feature contributions...")
+        print("Analyzing feature contributions...")
         eda.analyze_feature_contributions()
         
-        print("📊 Creating correlation heatmap...")
+        print("Creating correlation heatmap...")
         eda.create_correlation_heatmap()
         
         # Step 4: Clustering analysis
@@ -134,32 +139,32 @@ Examples:
         eda.generate_comprehensive_report()
         
         print("\\n" + "="*60)
-        print("✅ ANALYSIS COMPLETE!")
+        print("ANALYSIS COMPLETE!")
         print("="*60)
-        print(f"📊 All visualizations and reports saved to: {args.output_dir}/")
-        print("🔍 Open the HTML files in your browser to explore the interactive charts:")
+        print(f"All visualizations and reports saved to: {args.output_dir}/")
+        print("Open the HTML files in your browser to explore the interactive charts:")
         print(f"   • {args.output_dir}/pca_scatter_plot.html")
         print(f"   • {args.output_dir}/pca_biplot_pc1_vs_pc2.html")  
         print(f"   • {args.output_dir}/pca_feature_contributions.html")
         print(f"   • {args.output_dir}/feature_correlation_heatmap.html")
-        print(f"📋 Read the comprehensive report: {args.output_dir}/eda_comprehensive_report.md")
+        print(f"Read the comprehensive report: {args.output_dir}/eda_comprehensive_report.md")
         
         return 0
         
     except ImportError as e:
-        print(f"❌ Import Error: {e}")
-        print("💡 Tip: Make sure you have installed all required packages:")
+        print(f"IMPORT ERROR: {e}")
+        print("TIP: Make sure you have installed all required packages:")
         print("   pip install -r requirements.txt")
         return 1
         
     except FileNotFoundError as e:
-        print(f"❌ File Error: {e}")
-        print("💡 Tip: Make sure the database file exists and is accessible.")
+        print(f"FILE ERROR: {e}")
+        print("TIP: Make sure the database file exists and is accessible.")
         return 1
         
     except Exception as e:
-        print(f"❌ Unexpected Error: {e}")
-        print("💡 Tip: Check the error details above and ensure data integrity.")
+        print(f"UNEXPECTED ERROR: {e}")
+        print("TIP: Check the error details above and ensure data integrity.")
         return 1
 
 if __name__ == "__main__":

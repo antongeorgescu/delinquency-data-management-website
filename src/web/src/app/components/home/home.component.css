@@ -16,3 +16,37 @@
 .btn i {
   margin-right: 0.25rem;
 }
+
+/* EDA Results Table Styling */
+.table-responsive .table code {
+  background-color: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* File type icons */
+.bi-file-earmark-code {
+  color: #d63384;
+}
+
+.bi-file-earmark-spreadsheet {
+  color: #198754;
+}
+
+.bi-file-earmark-text {
+  color: #fd7e14;
+}
+
+/* EDA panel specific styling */
+.card.border-info .card-header {
+  border-bottom: 1px solid #b8daff;
+}
+
+.bg-info.bg-opacity-10 {
+  background-color: rgba(13, 202, 240, 0.1) !important;
+}

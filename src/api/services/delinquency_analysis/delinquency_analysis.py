@@ -18,12 +18,16 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
 
 from database import DatabaseManager
 
-def load_comprehensive_dataset():
+def load_comprehensive_dataset(db_path=None):
     """
     Load and merge all tables for comprehensive delinquency analysis using centralized database methods.
+    
+    Args:
+        db_path: Optional path to the database file. If None, uses default location.
+        
     Returns a DataFrame with all relevant features and target variable.
     """
-    db_manager = DatabaseManager()
+    db_manager = DatabaseManager(db_path) if db_path else DatabaseManager()
     
     # Get comprehensive data using centralized method
     data = db_manager.get_delinquency_analysis_data()
@@ -35,9 +39,9 @@ def load_comprehensive_dataset():
         print("Error: No data found in database")
         return pd.DataFrame()
     
-    print(f"✓ Loaded {len(df):,} records for analysis")
-    print(f"✓ Dataset shape: {df.shape}")
-    print(f"✓ Features available: {df.columns.tolist()}")
+    print(f"Loaded {len(df):,} records for analysis")
+    print(f"Dataset shape: {df.shape}")
+    print(f"Features available: {df.columns.tolist()}")
     
     return df
 

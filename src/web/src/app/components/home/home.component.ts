@@ -26,10 +26,18 @@ export class HomeComponent implements OnInit {
   selectedAlgorithm: string = 'percentile';
   algorithms: RiskModel[] = [];
   
+  // EDA parameters
+  selectedNClusters: string = '5';
+  selectedNComponents: string = '10';
+  
   // Risk estimation results
   riskEstimationResults: any = null;
   showRiskResults = false;
   showCampaignDialog = false;
+  
+  // EDA results
+  edaResults: any = null;
+  showEdaResults = false;
   
   // Campaign generation results
   campaignResults: any = null;
@@ -105,11 +113,17 @@ export class HomeComponent implements OnInit {
   loadPersistedPanels(): void {
     try {
       const savedRiskResults = localStorage.getItem('riskEstimationResults');
+      const savedEdaResults = localStorage.getItem('edaResults');
       const savedCampaignResults = localStorage.getItem('campaignResults');
       
       if (savedRiskResults) {
         this.riskEstimationResults = JSON.parse(savedRiskResults);
         this.showRiskResults = true;
+      }
+      
+      if (savedEdaResults) {
+        this.edaResults = JSON.parse(savedEdaResults);
+        this.showEdaResults = true;
       }
       
       if (savedCampaignResults) {
@@ -137,11 +151,23 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  saveEdaResults(): void {
+    if (this.edaResults) {
+      localStorage.setItem('edaResults', JSON.stringify(this.edaResults));
+    }
+  }
+  
   // Close panel methods
   closeRiskResults(): void {
     this.showRiskResults = false;
     localStorage.removeItem('riskEstimationResults');
     this.riskEstimationResults = null;
+  }
+
+  closeEdaResults(): void {
+    this.showEdaResults = false;
+    localStorage.removeItem('edaResults');
+    this.edaResults = null;
   }
 
   closeCampaignResults(): void {
@@ -242,11 +268,17 @@ export class HomeComponent implements OnInit {
     this.isRunningEDA = true;
     this.error = null;
 
-    this.dataService.runEDA().subscribe({
+    // Parse the selected parameters
+    const nClusters = parseInt(this.selectedNClusters, 10);
+    const nComponents = parseInt(this.selectedNComponents, 10);
+
+    this.dataService.runEDAReports(nClusters, nComponents).subscribe({
       next: (response) => {
         this.isRunningEDA = false;
+        this.edaResults = response;
+        this.showEdaResults = true;
+        this.saveEdaResults();
         console.log('EDA completed:', response);
-        // You might want to show a success message or update UI based on response
       },
       error: (error) => {
         this.isRunningEDA = false;

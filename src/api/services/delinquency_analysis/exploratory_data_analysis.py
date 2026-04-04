@@ -58,38 +58,38 @@ class ExploratoryDataAnalysis:
         self.pca_components = None
         self.explained_variance = None
         
-        print(f"🔍 Exploratory Data Analysis initialized")
-        print(f"📊 Output directory: {self.output_dir}")
+        print(f"Exploratory Data Analysis initialized")
+        print(f"Output directory: {self.output_dir}")
     
     def create_output_directory(self):
         """Create output directory for charts and analysis results."""
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
-            print(f"📁 Created output directory: {self.output_dir}")
+            print(f"Created output directory: {self.output_dir}")
     
     def load_and_process_data(self):
         """
         Load data from database and apply feature engineering.
         """
-        print("📥 Loading comprehensive dataset...")
+        print("Loading comprehensive dataset...")
         self.raw_df = load_comprehensive_dataset(self.db_path)
         
-        print("🔧 Engineering features...")
+        print("Engineering features...")
         self.processed_df = engineer_features(self.raw_df)
         
-        print("🎯 Preparing ML features...")
+        print("Preparing ML features...")
         X, self.y, self.feature_columns, self.label_encoders = prepare_ml_features(self.processed_df)
         
         # Standardize features for PCA
-        print("📏 Standardizing features...")
+        print("Standardizing features...")
         scaler = StandardScaler()
         self.X_scaled = scaler.fit_transform(X)
         self.scaler = scaler
         
-        print(f"✅ Data processing complete:")
-        print(f"   • Sample size: {len(self.processed_df):,} borrowers")
-        print(f"   • Features: {len(self.feature_columns)} engineered features")
-        print(f"   • Delinquency rate: {self.y.mean():.2%}")
+        print(f"Data processing complete:")
+        print(f"   - Sample size: {len(self.processed_df):,} borrowers")
+        print(f"   - Features: {len(self.feature_columns)} engineered features")
+        print(f"   - Delinquency rate: {self.y.mean():.2%}")
         
         return self.processed_df
     
@@ -103,7 +103,7 @@ class ExploratoryDataAnalysis:
         if self.X_scaled is None:
             raise ValueError("Data must be loaded and processed first!")
         
-        print("🧮 Performing Principal Component Analysis...")
+        print("Performing Principal Component Analysis...")
         
         # Determine optimal number of components if not specified
         if n_components is None:
@@ -117,13 +117,13 @@ class ExploratoryDataAnalysis:
         self.explained_variance = self.pca.explained_variance_ratio_
         cumulative_variance = np.cumsum(self.explained_variance)
         
-        print(f"🎯 PCA Analysis Results:")
-        print(f"   • Components extracted: {len(self.explained_variance)}")
-        print(f"   • Variance explained by PC1: {self.explained_variance[0]:.2%}")
-        print(f"   • Variance explained by PC2: {self.explained_variance[1]:.2%}")
-        print(f"   • Cumulative variance (first 5 PCs): {cumulative_variance[4]:.2%}")
-        print(f"   • Components for 80% variance: {np.argmax(cumulative_variance >= 0.8) + 1}")
-        print(f"   • Components for 95% variance: {np.argmax(cumulative_variance >= 0.95) + 1}")
+        print(f"PCA Analysis Results:")
+        print(f"   - Components extracted: {len(self.explained_variance)}")
+        print(f"   - Variance explained by PC1: {self.explained_variance[0]:.2%}")
+        print(f"   - Variance explained by PC2: {self.explained_variance[1]:.2%}")
+        print(f"   - Cumulative variance (first 5 PCs): {cumulative_variance[4]:.2%}")
+        print(f"   - Components for 80% variance: {np.argmax(cumulative_variance >= 0.8) + 1}")
+        print(f"   - Components for 95% variance: {np.argmax(cumulative_variance >= 0.95) + 1}")
         
         return self.pca_components
     
@@ -177,7 +177,7 @@ class ExploratoryDataAnalysis:
         fig.update_yaxes(title_text="Cumulative Variance (%)", row=1, col=2)
         
         fig.update_layout(
-            title="📊 PCA Scree Plot: Explained Variance Analysis",
+            title="PCA Scree Plot: Explained Variance Analysis",
             height=500,
             showlegend=False
         )
@@ -185,7 +185,7 @@ class ExploratoryDataAnalysis:
         # Save plot
         output_path = os.path.join(self.output_dir, "pca_scree_plot.html")
         fig.write_html(output_path)
-        print(f"📊 Scree plot saved: {output_path}")
+        print(f"Scree plot saved: {output_path}")
         
         return fig
     
@@ -215,7 +215,7 @@ class ExploratoryDataAnalysis:
             color='Risk_Level',
             size='Loan_Amount',
             hover_data=['Annual_Income', 'Age', 'Delinquency_Rate'],
-            title=f"🎯 PCA Analysis: Principal Components 1 vs 2<br>PC1 explains {self.explained_variance[0]:.1%}, PC2 explains {self.explained_variance[1]:.1%}",
+            title=f"PCA Analysis: Principal Components 1 vs 2<br>PC1 explains {self.explained_variance[0]:.1%}, PC2 explains {self.explained_variance[1]:.1%}",
             labels={
                 'PC1': f'First Principal Component ({self.explained_variance[0]:.1%} variance)',
                 'PC2': f'Second Principal Component ({self.explained_variance[1]:.1%} variance)'
@@ -231,7 +231,7 @@ class ExploratoryDataAnalysis:
         # Save plot
         output_path = os.path.join(self.output_dir, "pca_scatter_plot.html")
         fig.write_html(output_path)
-        print(f"📊 PCA scatter plot saved: {output_path}")
+        print(f"PCA scatter plot saved: {output_path}")
         
         return fig
     
@@ -300,7 +300,7 @@ class ExploratoryDataAnalysis:
             ))
         
         fig.update_layout(
-            title=f"🎯 PCA Biplot: Components {pc1+1} vs {pc2+1}<br>Top {top_features} Contributing Features",
+            title=f"PCA Biplot: Components {pc1+1} vs {pc2+1}<br>Top {top_features} Contributing Features",
             xaxis_title=f'PC{pc1+1} ({self.explained_variance[pc1]:.1%} variance)',
             yaxis_title=f'PC{pc2+1} ({self.explained_variance[pc2]:.1%} variance)',
             height=700,
@@ -311,7 +311,7 @@ class ExploratoryDataAnalysis:
         # Save plot
         output_path = os.path.join(self.output_dir, f"pca_biplot_pc{pc1+1}_vs_pc{pc2+1}.html")
         fig.write_html(output_path)
-        print(f"📊 PCA biplot saved: {output_path}")
+        print(f"PCA biplot saved: {output_path}")
         
         return fig
     
@@ -364,7 +364,7 @@ class ExploratoryDataAnalysis:
             )
         
         fig.update_layout(
-            title="🔍 Feature Contributions to Principal Components",
+            title="Feature Contributions to Principal Components",
             height=300 * n_components_to_analyze,
             showlegend=False
         )
@@ -376,7 +376,7 @@ class ExploratoryDataAnalysis:
         # Save plot
         output_path = os.path.join(self.output_dir, "pca_feature_contributions.html")
         fig.write_html(output_path)
-        print(f"📊 Feature contributions analysis saved: {output_path}")
+        print(f"Feature contributions analysis saved: {output_path}")
         
         return fig
     
@@ -401,7 +401,7 @@ class ExploratoryDataAnalysis:
         # Create interactive heatmap
         fig = px.imshow(
             correlation_matrix,
-            title="🌡️ Feature Correlation Heatmap",
+            title="Feature Correlation Heatmap",
             color_continuous_scale='RdBu',
             aspect='auto'
         )
@@ -414,7 +414,7 @@ class ExploratoryDataAnalysis:
         # Save plot
         output_path = os.path.join(self.output_dir, "feature_correlation_heatmap.html")
         fig.write_html(output_path)
-        print(f"📊 Correlation heatmap saved: {output_path}")
+        print(f"Correlation heatmap saved: {output_path}")
         
         return fig
     
@@ -428,7 +428,7 @@ class ExploratoryDataAnalysis:
         if self.pca_components is None:
             raise ValueError("PCA must be performed first!")
         
-        print(f"🎯 Performing K-means clustering with {n_clusters} clusters...")
+        print(f"Performing K-means clustering with {n_clusters} clusters...")
         
         # Use first few principal components for clustering
         pca_for_clustering = self.pca_components[:, :5]  # First 5 components
@@ -456,7 +456,7 @@ class ExploratoryDataAnalysis:
             symbol='Risk_Level',
             size='Loan_Amount',
             hover_data=['Annual_Income'],
-            title=f"🎯 K-means Clustering Analysis on PCA Components<br>({n_clusters} clusters identified)",
+            title=f"K-means Clustering Analysis on PCA Components<br>({n_clusters} clusters identified)",
             labels={
                 'PC1': f'PC1 ({self.explained_variance[0]:.1%} variance)',
                 'PC2': f'PC2 ({self.explained_variance[1]:.1%} variance)'
@@ -468,7 +468,7 @@ class ExploratoryDataAnalysis:
         # Save plot
         output_path = os.path.join(self.output_dir, f"pca_clustering_k{n_clusters}.html")
         fig.write_html(output_path)
-        print(f"📊 Clustering analysis saved: {output_path}")
+        print(f"Clustering analysis saved: {output_path}")
         
         # Analyze cluster characteristics
         cluster_analysis = self.analyze_cluster_characteristics(cluster_labels)
@@ -505,13 +505,13 @@ class ExploratoryDataAnalysis:
         
         cluster_analysis_df = pd.DataFrame(cluster_stats)
         
-        print("\\n🎯 Cluster Analysis Summary:")
+        print("\nCluster Analysis Summary:")
         print(cluster_analysis_df.round(2))
         
         # Save cluster analysis
         output_path = os.path.join(self.output_dir, "cluster_analysis_summary.csv")
         cluster_analysis_df.to_csv(output_path, index=False)
-        print(f"📊 Cluster analysis saved: {output_path}")
+        print(f"Cluster analysis saved: {output_path}")
         
         return cluster_analysis_df
     
@@ -519,23 +519,23 @@ class ExploratoryDataAnalysis:
         """
         Generate a comprehensive EDA report with all analyses and insights.
         """
-        print("📋 Generating comprehensive EDA report...")
+        print("Generating comprehensive EDA report...")
         
         report = f"""
-# 🔍 Exploratory Data Analysis Report
+# Exploratory Data Analysis Report
 ## Student Loan Delinquency Risk Assessment
 
 **Generated on:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Database:** {self.db_path}
 
-## 📊 Dataset Overview
+## Dataset Overview
 
 - **Total Borrowers:** {len(self.processed_df):,}
 - **Total Features:** {len(self.feature_columns)} (engineered)
 - **Delinquency Rate:** {self.y.mean():.2%}
 - **Data Quality:** Complete records after feature engineering
 
-## 🧮 Principal Component Analysis Results
+## Principal Component Analysis Results
 
 ### Variance Explanation
 - **PC1:** {self.explained_variance[0]:.2%} of total variance
@@ -556,7 +556,7 @@ class ExploratoryDataAnalysis:
 3. **Risk Patterns:** The principal components help identify natural groupings of borrowers
    based on their risk profiles.
 
-## 📈 Generated Visualizations
+## Generated Visualizations
 
 All interactive charts have been saved to the `{self.output_dir}` directory:
 
@@ -567,7 +567,7 @@ All interactive charts have been saved to the `{self.output_dir}` directory:
 5. **feature_correlation_heatmap.html** - Correlation matrix of original features
 6. **pca_clustering_k3.html** - K-means clustering on PCA components
 
-## 🎯 Business Implications
+## Business Implications
 
 ### Risk Segmentation
 The PCA analysis reveals natural risk segments that can be used for:
@@ -594,7 +594,7 @@ Understanding the principal components helps in:
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(report)
         
-        print(f"📋 Comprehensive report saved: {output_path}")
+        print(f"Comprehensive report saved: {output_path}")
         return report
 
 def main():
@@ -613,9 +613,9 @@ def main():
     
     args = parser.parse_args()
     
-    print("🚀 Starting Exploratory Data Analysis with PCA...")
-    print(f"📂 Database: {args.db_path}")
-    print(f"📊 Output directory: {args.output_dir}")
+    print("Starting Exploratory Data Analysis with PCA...")
+    print(f"Database: {args.db_path}")
+    print(f"Output directory: {args.output_dir}")
     
     # Initialize EDA
     eda = ExploratoryDataAnalysis(args.db_path, args.output_dir)
@@ -639,23 +639,23 @@ def main():
         print("="*60)
         
         # Scree plot
-        print("📊 Creating scree plot...")
+        print("Creating scree plot...")
         eda.create_scree_plot()
         
         # PCA scatter plot
-        print("📊 Creating PCA scatter plot...")
+        print("Creating PCA scatter plot...")
         eda.create_pca_scatter_plot()
         
         # Biplot
-        print("📊 Creating PCA biplot...")
+        print("Creating PCA biplot...")
         eda.create_biplot()
         
         # Feature contributions
-        print("📊 Analyzing feature contributions...")
+        print("Analyzing feature contributions...")
         eda.analyze_feature_contributions()
         
         # Correlation heatmap
-        print("📊 Creating correlation heatmap...")
+        print("Creating correlation heatmap...")
         eda.create_correlation_heatmap()
         
         # Step 4: Clustering analysis
@@ -671,13 +671,13 @@ def main():
         eda.generate_comprehensive_report()
         
         print("\\n" + "="*60)
-        print("✅ ANALYSIS COMPLETE!")
+        print("ANALYSIS COMPLETE!")
         print("="*60)
-        print(f"📊 All visualizations and reports saved to: {args.output_dir}")
-        print("🔍 Open the HTML files in your browser to explore the interactive charts.")
+        print(f"All visualizations and reports saved to: {args.output_dir}")
+        print("Open the HTML files in your browser to explore the interactive charts.")
         
     except Exception as e:
-        print(f"❌ Error during analysis: {str(e)}")
+        print(f"Error during analysis: {str(e)}")
         raise
 
 if __name__ == "__main__":

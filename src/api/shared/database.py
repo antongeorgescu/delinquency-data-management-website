@@ -8,9 +8,12 @@ from typing import List, Dict, Any
 
 
 class DatabaseManager:
-    def __init__(self):
-        # Use the correct path to the database in the shared directory
-        self.db_filename = os.path.join(os.path.dirname(__file__), "student_loan_data.db")
+    def __init__(self, db_path=None):
+        # Use custom path if provided, otherwise default to shared directory
+        if db_path:
+            self.db_filename = db_path
+        else:
+            self.db_filename = os.path.join(os.path.dirname(__file__), "student_loan_data.db")
         
     def get_connection(self) -> sqlite3.Connection:
         """Get SQLite connection"""
