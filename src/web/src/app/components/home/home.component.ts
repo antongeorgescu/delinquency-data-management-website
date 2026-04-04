@@ -28,16 +28,19 @@ export class HomeComponent implements OnInit {
   
   // Risk estimation results
   riskEstimationResults: any = null;
+  showRiskResults = false;
   showCampaignDialog = false;
   
   // Campaign generation results
   campaignResults: any = null;
+  showCampaignResults = false;
   downloadLinks: any[] = [];
 
   constructor(private dataService: DataService) {}
 
   ngOnInit(): void {
     this.loadRiskModels();
+    this.loadPersistedPanels();
   }
 
   loadRiskModels(): void {
@@ -98,6 +101,56 @@ export class HomeComponent implements OnInit {
     this.selectedAlgorithm = algorithmId;
   }
 
+  // Load persisted panel states from localStorage
+  loadPersistedPanels(): void {
+    try {
+      const savedRiskResults = localStorage.getItem('riskEstimationResults');
+      const savedCampaignResults = localStorage.getItem('campaignResults');
+      
+      if (savedRiskResults) {
+        this.riskEstimationResults = JSON.parse(savedRiskResults);
+        this.showRiskResults = true;
+      }
+      
+      if (savedCampaignResults) {
+        this.campaignResults = JSON.parse(savedCampaignResults);
+        this.showCampaignResults = true;
+        if (this.campaignResults.files_generated) {
+          this.downloadLinks = this.campaignResults.files_generated;
+        }
+      }
+    } catch (error) {
+      console.warn('Error loading persisted panels:', error);
+    }
+  }
+
+  // Save panel state to localStorage
+  saveRiskResults(): void {
+    if (this.riskEstimationResults) {
+      localStorage.setItem('riskEstimationResults', JSON.stringify(this.riskEstimationResults));
+    }
+  }
+
+  saveCampaignResults(): void {
+    if (this.campaignResults) {
+      localStorage.setItem('campaignResults', JSON.stringify(this.campaignResults));
+    }
+  }
+
+  // Close panel methods
+  closeRiskResults(): void {
+    this.showRiskResults = false;
+    localStorage.removeItem('riskEstimationResults');
+    this.riskEstimationResults = null;
+  }
+
+  closeCampaignResults(): void {
+    this.showCampaignResults = false;
+    localStorage.removeItem('campaignResults');
+    this.campaignResults = null;
+    this.downloadLinks = [];
+  }
+
   runRiskAnalysis(): void {
     if (!this.selectedAlgorithm) {
       this.error = 'Please select an algorithm first.';
@@ -106,12 +159,22 @@ export class HomeComponent implements OnInit {
     
     this.isRunningRiskAnalysis = true;
     this.error = null;
+    
+    // Clear both panels when starting new risk analysis
     this.riskEstimationResults = null;
+    this.showRiskResults = false;
+    this.campaignResults = null;
+    this.showCampaignResults = false;
+    this.downloadLinks = [];
+    localStorage.removeItem('riskEstimationResults');
+    localStorage.removeItem('campaignResults');
 
     this.dataService.runRiskEstimation(this.selectedAlgorithm).subscribe({
       next: (response) => {
         this.isRunningRiskAnalysis = false;
         this.riskEstimationResults = response;
+        this.showRiskResults = true;
+        this.saveRiskResults();
         
         if (response.success) {
           // Show dialog asking about campaign files generation
@@ -135,6 +198,8 @@ export class HomeComponent implements OnInit {
       next: (response) => {
         this.isGeneratingCampaignFiles = false;
         this.campaignResults = response;
+        this.showCampaignResults = true;
+        this.saveCampaignResults();
         
         if (response.success && response.files_generated) {
           this.downloadLinks = response.files_generated;
