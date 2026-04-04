@@ -627,7 +627,7 @@
     <div class="alert alert-success border-success" role="alert">
       <div class="d-flex align-items-start">
         <i class="bi bi-check-circle-fill fs-4 text-success me-3 mt-1"></i>
-        <div>
+        <div class="flex-grow-1">
           <h4 class="alert-heading mb-2">Data Generation Completed Successfully!</h4>
           <p class="mb-2">Your synthetic student loan dataset has been generated and is ready for analysis.</p>
           <div *ngIf="generationStats" class="small">
@@ -641,6 +641,7 @@
             </ul>
           </div>
         </div>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeGenerationSuccess()"></button>
       </div>
     </div>
   </div>

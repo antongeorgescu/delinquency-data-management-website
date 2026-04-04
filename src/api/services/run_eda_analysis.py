@@ -38,11 +38,12 @@ Examples:
         """
     )
     
-    parser.add_argument(
-        '--db_path', 
-        default='student_loan_data.db',
-        help='Path to SQLite database file (default: student_loan_data.db)'
-    )
+    # Database path is fixed - always in the shared directory
+    # parser.add_argument(
+    #     '--db_path', 
+    #     default='student_loan_data.db',
+    #     help='Path to SQLite database file (default: student_loan_data.db)'
+    # )
     
     parser.add_argument(
         '--output_dir', 
@@ -67,14 +68,12 @@ Examples:
     # Parse arguments
     args = parser.parse_args()
     
-    # Fix database path - ensure it's absolute and points to the shared directory
-    if not os.path.isabs(args.db_path):
-        # If relative path, make it relative to the shared directory
-        args.db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'shared', args.db_path))
+    # Database path is automatically determined - always in the shared directory
+    db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'shared', 'student_loan_data.db'))
     
     # Validate database file exists
-    if not os.path.exists(args.db_path):
-        print(f"ERROR: Database file '{args.db_path}' not found!")
+    if not os.path.exists(db_path):
+        print(f"ERROR: Database file '{db_path}' not found!")
         print("TIP: Run 'python run_data_generation.py' first to create the database.")
         return 1
     
@@ -83,7 +82,7 @@ Examples:
         from delinquency_analysis.exploratory_data_analysis import ExploratoryDataAnalysis
         
         print("Starting Exploratory Data Analysis with PCA...")
-        print(f"Database: {args.db_path}")
+        print(f"Database: {db_path}")
         print(f"Output directory: {args.output_dir}")
         print(f"K-means clusters: {args.n_clusters}")
         if args.n_components:
@@ -92,7 +91,7 @@ Examples:
             print(f"PCA components: Auto-determined")
         
         # Initialize EDA
-        eda = ExploratoryDataAnalysis(args.db_path, args.output_dir)
+        eda = ExploratoryDataAnalysis(db_path, args.output_dir)
         
         # Step 1: Load and process data
         print("\\n" + "="*60)
@@ -134,20 +133,22 @@ Examples:
         
         # Step 5: Generate comprehensive report
         print("\\n" + "="*60)
-        print("STEP 5: GENERATING REPORT")
+        print("STEP 5: GENERATING REPORTS")
         print("="*60)
-        eda.generate_comprehensive_report()
+        markdown_report = eda.generate_comprehensive_report()
+        
+        # Convert to HTML
+        eda.convert_markdown_to_html(markdown_report)
         
         print("\\n" + "="*60)
         print("ANALYSIS COMPLETE!")
         print("="*60)
         print(f"All visualizations and reports saved to: {args.output_dir}/")
-        print("Open the HTML files in your browser to explore the interactive charts:")
-        print(f"   • {args.output_dir}/pca_scatter_plot.html")
-        print(f"   • {args.output_dir}/pca_biplot_pc1_vs_pc2.html")  
-        print(f"   • {args.output_dir}/pca_feature_contributions.html")
-        print(f"   • {args.output_dir}/feature_correlation_heatmap.html")
-        print(f"Read the comprehensive report: {args.output_dir}/eda_comprehensive_report.md")
+        print("\nGenerated Files:")
+        print("  - 6 Interactive HTML charts")
+        print("  - 1 Comprehensive markdown report (eda_comprehensive_report.md)")
+        print("  - 1 Styled HTML report (eda_comprehensive_report.html)")
+        print("\nTIP: Open the HTML files in your browser to explore the interactive charts and reports.")
         
         return 0
         

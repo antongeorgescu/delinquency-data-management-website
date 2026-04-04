@@ -158,6 +158,11 @@ export class HomeComponent implements OnInit {
   }
   
   // Close panel methods
+  closeGenerationSuccess(): void {
+    this.generationComplete = false;
+    this.generationStats = null;
+  }
+
   closeRiskResults(): void {
     this.showRiskResults = false;
     localStorage.removeItem('riskEstimationResults');

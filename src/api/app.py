@@ -682,7 +682,6 @@ def run_eda_reports():
         script_path = os.path.join(os.path.dirname(__file__), 'services', 'run_eda_analysis.py')
         cmd = [
             sys.executable, script_path,
-            '--db_path', db_path,
             '--output_dir', output_dir,
             '--n_clusters', str(n_clusters),
             '--n_components', str(n_components)
@@ -744,6 +743,11 @@ def run_eda_reports():
                 "filename": "eda_comprehensive_report.md",
                 "description": "Comprehensive analysis report with insights",
                 "url": f"http://127.0.0.1:5000/api/static/eda_outputs/eda_comprehensive_report.md"
+            },
+            {
+                "filename": "eda_comprehensive_report.html",
+                "description": "Comprehensive analysis report (HTML format)",
+                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/eda_comprehensive_report.html"
             }
         ]
         
