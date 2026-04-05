@@ -132,6 +132,7 @@
                 <tr style="border-bottom: 2px solid #007bff;">
                   <th style="width: 20px; padding: 8px 4px; border: 1px solid #007bff;"></th>
                   <th style="font-size: 0.75rem; font-weight: bold; padding: 8px; border: 1px solid #007bff;">Model</th>
+                  <th style="font-size: 0.75rem; font-weight: bold; padding: 8px; border: 1px solid #007bff;">Type</th>
                   <th style="font-size: 0.75rem; font-weight: bold; padding: 8px; border: 1px solid #007bff;">Description</th>
                 </tr>
               </thead>
@@ -146,10 +147,19 @@
                            name="algorithm">
                   </td>
                   <td class="fw-bold" style="font-size: 0.75rem; border: 1px solid #007bff; padding: 6px;">{{ algorithm.short_name }}</td>
+                  <td class="text-muted" style="font-size: 0.7rem; border: 1px solid #007bff; padding: 6px;">{{ algorithm.type }}</td>
                   <td style="font-size: 0.7rem; color: #666; border: 1px solid #007bff; padding: 6px;">{{ algorithm.description }}</td>
                 </tr>
               </tbody>
             </table>
+            
+            <!-- K-Means Note -->
+            <div class="mt-2">
+              <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                <strong>Note:</strong> All models use K-Means = 3 to categorize borrowers into 3 risk groups: Low, Medium, and High risk levels.
+              </small>
+            </div>
           </div>
           
           <!-- No algorithms message -->
@@ -439,6 +449,115 @@
                 <div class="p-2 border rounded text-center">
                   <div class="fw-bold text-danger">{{ riskEstimationResults.risk_distribution.high_risk?.count || 0 | number }}</div>
                   <small class="text-muted">High Risk ({{ riskEstimationResults.risk_distribution.high_risk?.percentage || 0 }}%)</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Algorithm Performance Details (Classification Algorithms Only) -->
+        <div *ngIf="riskEstimationResults.model_performance?.algorithm_category === 'Classification Algorithm'" class="row mb-3">
+          <div class="col-md-12">
+            <div class="card" style="border: 1px solid #000;">
+              <div class="card-header" style="background-color: #f8f9fa; color: #212529;">
+                <h6 class="mb-0">
+                  <i class="bi bi-cpu me-2"></i>
+                  {{ riskEstimationResults.model_performance?.algorithm_details?.name || 'Classification Algorithm' }} Performance
+                </h6>
+              </div>
+              <div class="card-body">
+                <!-- Performance Metrics -->
+                <div class="row mb-3" *ngIf="riskEstimationResults.model_performance?.performance_summary">
+                  <div class="col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                      <div class="fw-bold fs-5" 
+                           [class.text-success]="riskEstimationResults.model_performance.performance_summary.auc_score >= 0.8"
+                           [class.text-warning]="riskEstimationResults.model_performance.performance_summary.auc_score >= 0.7 && riskEstimationResults.model_performance.performance_summary.auc_score < 0.8"
+                           [class.text-danger]="riskEstimationResults.model_performance.performance_summary.auc_score < 0.7">
+                        {{ (riskEstimationResults.model_performance.performance_summary.auc_score * 100) | number:'1.1-1' }}%
+                      </div>
+                      <small class="text-muted d-flex align-items-center justify-content-center">
+                        AUC Score
+                        <i class="bi bi-info-circle ms-1" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top"
+                           title="AUC Score (Area Under the Curve): Measures how well the model distinguishes between high-risk and low-risk borrowers. Values range from 0-100%. • 90-100%: Excellent discrimination • 80-89%: Good discrimination • 70-79%: Fair discrimination • Below 70%: Poor discrimination. Higher values indicate better predictive performance."
+                           style="cursor: pointer; color: #6c757d;"></i>
+                      </small>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                      <div class="fw-bold fs-6"
+                           [class.text-success]="riskEstimationResults.model_performance.performance_summary.performance_rating === 'Excellent'"
+                           [class.text-info]="riskEstimationResults.model_performance.performance_summary.performance_rating === 'Good'"
+                           [class.text-warning]="riskEstimationResults.model_performance.performance_summary.performance_rating === 'Fair'"
+                           [class.text-danger]="riskEstimationResults.model_performance.performance_summary.performance_rating === 'Poor'">
+                        {{ riskEstimationResults.model_performance.performance_summary.performance_rating }}
+                      </div>
+                      <small class="text-muted d-flex align-items-center justify-content-center">
+                        Performance Rating
+                        <i class="bi bi-info-circle ms-1" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top"
+                           title="Performance Rating: Overall assessment of model quality based on AUC score and other metrics. • Excellent (90%+): Outstanding predictive accuracy • Good (80-89%): Reliable performance for production use • Fair (70-79%): Acceptable but may need improvement • Poor (<70%): Requires model refinement before deployment."
+                           style="cursor: pointer; color: #6c757d;"></i>
+                      </small>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                      <div class="fw-bold fs-6">{{ (riskEstimationResults.model_performance.performance_summary.cross_validation_mean * 100) | number:'1.1-1' }}%</div>
+                      <small class="text-muted d-flex align-items-center justify-content-center">
+                        CV Mean
+                        <i class="bi bi-info-circle ms-1" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top"
+                           title="CV Mean (Cross-Validation Mean): Average performance across multiple training/testing splits of the data. This metric shows how consistently the model performs on different data subsets, indicating model stability and generalizability. Values close to the main AUC score suggest reliable performance across various data conditions."
+                           style="cursor: pointer; color: #6c757d;"></i>
+                      </small>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                      <div class="fw-bold fs-6">{{ riskEstimationResults.model_performance?.algorithm_details?.type }}</div>
+                      <small class="text-muted">Algorithm Type</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Algorithm Details -->
+                <div class="row" *ngIf="riskEstimationResults.model_performance?.algorithm_details">
+                  <div class="col-md-6">
+                    <h6 class="text-primary">Algorithm Description:</h6>
+                    <p class="small">{{ riskEstimationResults.model_performance.algorithm_details.description }}</p>
+                    
+                    <h6 class="text-primary">Best Use Case:</h6>
+                    <p class="small">{{ riskEstimationResults.model_performance.algorithm_details.best_for }}</p>
+                  </div>
+                  <div class="col-md-6">
+                    <h6 class="text-primary">Key Strengths:</h6>
+                    <ul class="small">
+                      <li *ngFor="let strength of riskEstimationResults.model_performance.algorithm_details.strengths">
+                        {{ strength }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Parameters -->
+                <div class="mt-2" *ngIf="riskEstimationResults.model_performance?.algorithm_details?.parameters">
+                  <h6 class="text-primary">Model Parameters:</h6>
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="d-flex flex-wrap gap-2">
+                        <span *ngFor="let param of getParameterEntries(riskEstimationResults.model_performance.algorithm_details.parameters)" 
+                              class="badge bg-secondary">
+                          {{ param.key }}: {{ param.value }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -270,31 +270,57 @@ def get_risk_models():
                 'id': 'percentile',
                 'name': 'Percentile Based',
                 'short_name': 'Percentile',
-                'description': 'Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)'
+                'description': 'Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)',
+                'type': 'Statistical Distribution'
             },
             {
                 'id': 'threshold',
                 'name': 'Fixed Threshold',
                 'short_name': 'Threshold',
-                'description': 'Fixed probability thresholds: <0.3=Low, 0.3-0.6=Medium, >0.6=High'
+                'description': 'Fixed probability thresholds: <0.6=Low, 0.6-0.9=Medium, >0.9=High',
+                'type': 'Statistical Distribution'
             },
             {
-                'id': 'kmeans',
-                'name': 'K-Means Clustering',
-                'short_name': 'K-Means',
-                'description': 'K-means clustering of probabilities into 3 risk groups'
+                'id': 'random_forest',
+                'name': 'Random Forest Classifier',
+                'short_name': 'Random Forest',
+                'description': 'Ensemble classifier with balanced classes and feature importance analysis',
+                'type': 'Classification Algorithm'
+            },
+            {
+                'id': 'gradient_boosting',
+                'name': 'Gradient Boosting Classifier',
+                'short_name': 'Gradient Boosting',
+                'description': 'Gradient Boosting classifier for complex patterns and high accuracy',
+                'type': 'Classification Algorithm'
+            },
+            {
+                'id': 'logistic_regression',
+                'name': 'Logistic Regression Classifier',
+                'short_name': 'Logistic Regression',
+                'description': 'Linear classifier with L2 regularization and balanced class handling',
+                'type': 'Classification Algorithm'
+            },
+            {
+                'id': 'neural_network',
+                'name': 'Neural Network (MLP)',
+                'short_name': 'Neural Network',
+                'description': 'Multi-layer Perceptron with adaptive learning for complex pattern detection',
+                'type': 'Classification Algorithm'
             },
             {
                 'id': 'svm',
                 'name': 'Support Vector Machine',
                 'short_name': 'SVM',
-                'description': 'Support Vector Machine classifier trained on probability-based risk labels'
+                'description': 'Support Vector Machine classifier trained on probability-based risk labels',
+                'type': 'Classification Algorithm'
             },
             {
                 'id': 'knn',
                 'name': 'K-Nearest Neighbors',
                 'short_name': 'KNN',
-                'description': 'K-Nearest Neighbors classifier with optimal k and distance weighting'
+                'description': 'K-Nearest Neighbors classifier with optimal k and distance weighting',
+                'type': 'Classification Algorithm'
             }
         ]
         
@@ -323,10 +349,10 @@ def run_risk_estimator():
         data = request.get_json() or {}
         
         # Extract algorithm parameter with default
-        algorithm = data.get('algorithm', 'percentile')
+        algorithm = data.get('algorithm', 'random_forest')
         
-        # Validate algorithm
-        valid_algorithms = ['percentile', 'threshold', 'kmeans', 'svm', 'knn']
+        # Validate algorithm - include all supported algorithms
+        valid_algorithms = ['percentile', 'threshold', 'random_forest', 'gradient_boosting', 'logistic_regression', 'neural_network', 'svm', 'knn', 'kmeans']
         if algorithm not in valid_algorithms:
             return jsonify({
                 "success": False,

@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { RiskModel } from '../../interfaces/data.interface';
+
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit {
   isGenerating = false;
   isRunningRiskAnalysis = false;
   isRunningEDA = false;
@@ -75,7 +77,8 @@ export class HomeComponent implements OnInit {
             id: 'percentile',
             name: 'Percentile Based',
             short_name: 'Percentile',
-            description: 'Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)'
+            description: 'Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)',
+            type: 'Statistical Distribution'
           }
         ];
       }
@@ -135,6 +138,11 @@ export class HomeComponent implements OnInit {
         if (this.campaignResults.files_generated) {
           this.downloadLinks = this.campaignResults.files_generated;
         }
+      }
+      
+      // Refresh tooltips for persisted performance metrics
+      if (this.riskEstimationResults) {
+        setTimeout(() => this.refreshTooltips(), 300);
       }
     } catch (error) {
       console.warn('Error loading persisted panels:', error);
@@ -213,6 +221,9 @@ export class HomeComponent implements OnInit {
         this.riskEstimationResults = response;
         this.showRiskResults = true;
         this.saveRiskResults();
+        
+        // Refresh tooltips for the performance metrics
+        setTimeout(() => this.refreshTooltips(), 200);
         
         if (response.success) {
           // Show dialog asking about campaign files generation
@@ -298,5 +309,50 @@ export class HomeComponent implements OnInit {
         console.error('Error running EDA:', error);
       }
     });
+  }
+
+  // Helper method to convert object to array of key-value pairs for template display
+  getParameterEntries(parameters: any): {key: string, value: any}[] {
+    if (!parameters) return [];
+    return Object.entries(parameters).map(([key, value]) => ({key, value}));
+  }
+
+  ngAfterViewInit(): void {
+    // Initialize Bootstrap tooltips after view is rendered
+    this.initializeTooltips();
+  }
+
+  // Initialize Bootstrap tooltips
+  initializeTooltips(): void {
+    // Small delay to ensure DOM is fully rendered
+    setTimeout(() => {
+      try {
+        const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+          new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      } catch (error) {
+        console.warn('Bootstrap tooltips could not be initialized:', error);
+      }
+    }, 100);
+  }
+
+  // Re-initialize tooltips when risk results are updated (called after API responses)
+  refreshTooltips(): void {
+    // Dispose existing tooltips first
+    try {
+      const existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      existingTooltips.forEach(el => {
+        const tooltip = bootstrap.Tooltip.getInstance(el);
+        if (tooltip) {
+          tooltip.dispose();
+        }
+      });
+    } catch (error) {
+      console.warn('Error disposing tooltips:', error);
+    }
+    
+    // Re-initialize tooltips
+    this.initializeTooltips();
   }
 }

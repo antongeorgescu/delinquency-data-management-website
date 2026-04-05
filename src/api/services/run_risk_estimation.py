@@ -28,30 +28,32 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Risk Scoring Algorithms:
-  percentile  - Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)
-  threshold   - Fixed probability thresholds: <0.3=Low, 0.3-0.6=Medium, >0.6=High
-  kmeans      - K-means clustering of probabilities into 3 risk groups
-  svm         - Support Vector Machine classifier trained on probability-based risk labels
-  knn         - K-Nearest Neighbors classifier with optimal k and distance weighting
+  random_forest      - Random Forest classifier with balanced classes (default)
+  gradient_boosting  - Gradient Boosting classifier for complex patterns
+  logistic_regression - Linear classifier with L2 regularization
+  neural_network     - Multi-layer Perceptron with adaptive learning
+  svm                - Support Vector Machine with RBF kernel
+  knn                - K-Nearest Neighbors with distance weighting
+  kmeans             - K-means clustering for unsupervised segmentation
 
 Examples:
   python run_risk_estimation.py
-  python run_risk_estimation.py --algorithm svm
-  python run_risk_estimation.py --algorithm knn --db_path my_database.db
+  python run_risk_estimation.py --algorithm gradient_boosting
+  python run_risk_estimation.py --algorithm svm --db_path my_database.db
         """
     )
     
     parser.add_argument(
         "--algorithm",
-        choices=['percentile', 'threshold', 'kmeans', 'svm', 'knn'],
-        default='percentile',
-        help="Risk scoring algorithm to use (default: percentile)"
+        choices=['random_forest', 'gradient_boosting', 'logistic_regression', 'neural_network', 'svm', 'knn', 'kmeans'],
+        default='random_forest',
+        help="Risk scoring algorithm to use (default: random_forest)"
     )
     
     parser.add_argument(
         "--db_path", 
-        default="student_loan_data.db",
-        help="Path to the SQLite database file (default: student_loan_data.db)"
+        default=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'shared', 'student_loan_data.db')),
+        help="Path to the SQLite database file (default: auto-detected absolute path)"
     )
     
     args = parser.parse_args()
@@ -59,6 +61,7 @@ Examples:
     # Check if database exists
     if not os.path.exists(args.db_path):
         print(f"Error: Database file '{args.db_path}' not found.")
+        print(f"Expected location: {os.path.abspath(args.db_path)}")
         print(f"Please run 'python run_data_generation.py' first to create the database.")
         sys.exit(1)
     
@@ -84,7 +87,7 @@ Examples:
     try:
         # Import and run the analysis
         # Set up arguments for the main analysis script
-        sys.argv = ['delinquency_analysis.py', '--algorithm', args.algorithm, '--db_path', args.db_path]
+        sys.argv = ['delinquency_analysis.py', '--algorithm', args.algorithm]
         
         from delinquency_analysis import main as run_analysis
         
@@ -94,7 +97,7 @@ Examples:
         print("=" * 60)
         print("✅ Risk estimation analysis completed successfully!")
         print(f"📊 The database '{args.db_path}' has been updated with ML-based risk scores.")
-        print(f"🤖 Algorithm used: {args.algorithm}")
+        print(f"🤖 Algorithm used: {args.algorithm} (Classification-based)")
         print(f"📈 Risk levels: 0 (Low), 1 (Medium), 2 (High)")
         print("📈 You can now explore the enhanced data using:")
         print(f"   python explore_database.py --db_path {args.db_path}")
@@ -105,11 +108,11 @@ Examples:
         print("1. Ensure the database has been populated with data")
         print("2. Check that all required tables exist (user_profile, loan_info, program_of_study, loan_payments)")
         print("3. Verify you have sufficient data for machine learning (recommended: 100+ borrowers)")
-        print("4. For SVM/KNN algorithms, ensure you have enough diverse data for training")
-        print(f"5. Try a different algorithm if '{args.algorithm}' fails (e.g., --algorithm percentile)")
+        print("4. For advanced algorithms (SVM/Neural Network), ensure you have sufficient data for training")
+        print(f"5. Try a different algorithm if '{args.algorithm}' fails (e.g., --algorithm random_forest)")
         sys.exit(1)
 
-def run_risk_estimation_json(algorithm='percentile'):
+def run_risk_estimation_json(algorithm='random_forest'):
     """
     Run risk estimation analysis and return results as JSON-compatible dictionary.
     
@@ -170,7 +173,7 @@ def run_risk_estimation_json(algorithm='percentile'):
         original_argv = sys.argv.copy()
         
         # Set up arguments for the analysis script
-        sys.argv = ['delinquency_analysis.py', '--algorithm', algorithm, '--db_path', db_path]
+        sys.argv = ['delinquency_analysis.py', '--algorithm', algorithm]
         
         # Add the delinquency_analysis directory to the Python path
         analysis_dir = os.path.join(os.path.dirname(__file__), 'delinquency_analysis')
@@ -181,7 +184,7 @@ def run_risk_estimation_json(algorithm='percentile'):
         try:
             from delinquency_analysis import (
                 load_comprehensive_dataset, engineer_features, prepare_ml_features,
-                train_delinquency_models, analyze_feature_importance, calculate_risk_scores,
+                train_delinquency_models, train_single_algorithm, analyze_feature_importance, calculate_risk_scores,
                 update_loan_info_table
             )
         except ImportError as import_error:
@@ -199,14 +202,18 @@ def run_risk_estimation_json(algorithm='percentile'):
         df = engineer_features(df)
         X, y, feature_columns, label_encoders = prepare_ml_features(df)
         
-        # Train models and get results
-        best_model, model_results, scaler = train_delinquency_models(X, y)
-        best_model_name = max(model_results.keys(), key=lambda x: model_results[x]['auc_score'])
+        # Train models based on selected algorithm
+        if algorithm in ['percentile', 'threshold', 'kmeans']:
+            # For statistical algorithms, train all models and use best for probability generation
+            best_model, model_results, scaler = train_delinquency_models(X, y)
+            best_model_name = max(model_results.keys(), key=lambda x: model_results[x]['auc_score'])
+            feature_importance_df = analyze_feature_importance(best_model, feature_columns, best_model_name)
+        else:
+            # For specific ML algorithms, train only the selected algorithm
+            best_model, model_results, scaler, best_model_name = train_single_algorithm(X, y, algorithm)
+            feature_importance_df = analyze_feature_importance(best_model, feature_columns, best_model_name)
         
-        # Get feature importance
-        feature_importance_df = analyze_feature_importance(best_model, feature_columns, best_model_name)
-        
-        # Calculate risk scores
+        # Calculate risk scores using the selected algorithm
         risk_scores = calculate_risk_scores(best_model, X, scaler, best_model_name, algorithm)
         
         # Update database
@@ -225,11 +232,27 @@ def run_risk_estimation_json(algorithm='percentile'):
             "records_updated": len(risk_scores)
         }
         
-        # Model performance
+        # Model performance with enhanced details for Classification Algorithms
+        classification_algorithms = ['random_forest', 'gradient_boosting', 'logistic_regression', 'neural_network', 'svm', 'knn']
+        
         results["model_performance"] = {
             "best_model": best_model_name,
+            "algorithm_category": "Classification Algorithm" if algorithm in classification_algorithms else "Statistical Distribution",
+            "algorithm_used": algorithm,
             "models": {}
         }
+        
+        # Add detailed metrics for Classification Algorithms
+        if algorithm in classification_algorithms:
+            results["model_performance"]["algorithm_details"] = get_algorithm_details(algorithm)
+            results["model_performance"]["performance_summary"] = {
+                "auc_score": float(model_results[best_model_name]['auc_score']),
+                "cross_validation_mean": float(model_results[best_model_name]['cv_mean']),
+                "cross_validation_std": float(model_results[best_model_name]['cv_std']),
+                "performance_rating": get_performance_rating(model_results[best_model_name]['auc_score'])
+            }
+        else:
+            results["model_performance"]["algorithm_details"] = get_statistical_algorithm_description(algorithm)
         
         for name, model_data in model_results.items():
             results["model_performance"]["models"][name] = {
@@ -318,6 +341,105 @@ def run_risk_estimation_json(algorithm='percentile'):
         print(f"Full traceback: {error_traceback}")
         
         return results
+
+def get_algorithm_details(algorithm):
+    """
+    Get detailed information about classification algorithms.
+    """
+    algorithm_details = {
+        'random_forest': {
+            'name': 'Random Forest Classifier',
+            'type': 'Ensemble Learning',
+            'description': 'Combines multiple decision trees using bootstrap aggregating (bagging)',
+            'strengths': ['Reduces overfitting', 'Handles missing values', 'Provides feature importance', 'Works well with categorical and numerical features'],
+            'parameters': {'n_estimators': 100, 'max_depth': 10, 'class_weight': 'balanced'},
+            'best_for': 'Complex datasets with mixed feature types and potential overfitting concerns'
+        },
+        'gradient_boosting': {
+            'name': 'Gradient Boosting Classifier', 
+            'type': 'Sequential Ensemble Learning',
+            'description': 'Builds models sequentially, each correcting errors of the previous',
+            'strengths': ['High predictive accuracy', 'Handles complex patterns', 'Feature importance', 'Robust to outliers'],
+            'parameters': {'n_estimators': 100, 'max_depth': 6, 'learning_rate': 0.1},
+            'best_for': 'High-accuracy requirements with structured/tabular data'
+        },
+        'logistic_regression': {
+            'name': 'Logistic Regression',
+            'type': 'Linear Classification',
+            'description': 'Uses logistic function to model probability of binary outcomes',
+            'strengths': ['Interpretable coefficients', 'Fast training', 'No hyperparameter tuning needed', 'Probabilistic output'],
+            'parameters': {'C': 1.0, 'max_iter': 1000, 'class_weight': 'balanced'},
+            'best_for': 'Linear relationships and when model interpretability is important'
+        },
+        'neural_network': {
+            'name': 'Multi-layer Perceptron (MLP)',
+            'type': 'Deep Learning',
+            'description': 'Neural network with hidden layers for complex pattern recognition',
+            'strengths': ['Captures non-linear patterns', 'Universal approximator', 'Adaptive learning', 'Flexible architecture'],
+            'parameters': {'hidden_layers': '100, 50', 'activation': 'relu', 'max_iter': 500},
+            'best_for': 'Complex non-linear relationships and large datasets'
+        },
+        'svm': {
+            'name': 'Support Vector Machine',
+            'type': 'Kernel-based Classification',
+            'description': 'Finds optimal hyperplane using support vectors and kernel tricks',
+            'strengths': ['Effective in high dimensions', 'Memory efficient', 'Versatile kernels', 'Works with small datasets'],
+            'parameters': {'kernel': 'rbf', 'C': 10.0, 'class_weight': 'balanced'},
+            'best_for': 'High-dimensional data and when clear margin separation exists'
+        },
+        'knn': {
+            'name': 'K-Nearest Neighbors',
+            'type': 'Instance-based Learning',
+            'description': 'Classifies based on similarity to k nearest training samples',
+            'strengths': ['Simple to understand', 'No assumptions about data', 'Naturally handles multi-class', 'Local decision boundaries'],
+            'parameters': {'n_neighbors': 5, 'weights': 'distance', 'algorithm': 'auto'},
+            'best_for': 'Datasets with clear local patterns and sufficient training data'
+        }
+    }
+    
+    return algorithm_details.get(algorithm, {'name': 'Unknown Algorithm', 'description': 'Algorithm details not available'})
+
+def get_statistical_algorithm_description(algorithm):
+    """
+    Get description for statistical algorithms.
+    """
+    descriptions = {
+        'percentile': {
+            'name': 'Percentile-based Classification',
+            'type': 'Statistical Distribution',
+            'description': 'Divides borrowers based on probability percentiles: Bottom 60% = Low, Next 30% = Medium, Top 10% = High',
+            'thresholds': 'Dynamic based on 60th and 90th percentiles of risk probabilities'
+        },
+        'threshold': {
+            'name': 'Fixed Threshold Classification',
+            'type': 'Statistical Distribution', 
+            'description': 'Uses fixed probability thresholds for risk classification',
+            'thresholds': 'Low < 0.6, Medium = 0.6-0.9, High > 0.9'
+        },
+        'kmeans': {
+            'name': 'K-Means Clustering',
+            'type': 'Unsupervised Learning',
+            'description': 'Groups borrowers into 3 clusters based on feature similarity, then maps to risk levels',
+            'clusters': 3
+        }
+    }
+    
+    return descriptions.get(algorithm, {'name': 'Unknown Algorithm', 'description': 'Algorithm details not available'})
+
+def get_performance_rating(auc_score):
+    """
+    Get performance rating based on AUC score.
+    """
+    if auc_score >= 0.9:
+        return "Excellent"
+    elif auc_score >= 0.8:
+        return "Good"
+    elif auc_score >= 0.7:
+        return "Fair" 
+    elif auc_score >= 0.6:
+        return "Poor"
+    else:
+        return "Very Poor"
 
 if __name__ == "__main__":
     main()

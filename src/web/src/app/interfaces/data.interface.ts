@@ -99,6 +99,7 @@ export interface RiskModel {
   name: string;
   short_name: string;
   description: string;
+  type: string;
 }
 
 export interface ApiResponse<T> {

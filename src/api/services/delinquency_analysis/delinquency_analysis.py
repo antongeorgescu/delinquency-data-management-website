@@ -8,6 +8,8 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 import warnings
@@ -149,7 +151,9 @@ def train_delinquency_models(X, y):
     models = {
         'Random Forest': RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42),
         'Gradient Boosting': GradientBoostingClassifier(n_estimators=100, max_depth=6, random_state=42),
-        'Logistic Regression': LogisticRegression(random_state=42, max_iter=1000)
+        'Logistic Regression': LogisticRegression(random_state=42, max_iter=1000),
+        'SVC': SVC(kernel='rbf', probability=True, random_state=42),
+        'KNN': KNeighborsClassifier(n_neighbors=5)
     }
     
     # Train and evaluate models
@@ -192,7 +196,72 @@ def train_delinquency_models(X, y):
     print(f"\nBest performing model: {best_model_name}")
     
     return best_model, model_results, scaler
-
+def train_single_algorithm(X, y, algorithm):
+    """
+    Train only the specified ML algorithm instead of all models.
+    
+    Args:
+        X: Feature matrix
+        y: Target labels
+        algorithm: The specific algorithm to train
+    
+    Returns:
+        Tuple of (model, model_results, scaler, model_name)
+    """
+    # Split the data
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    
+    # Scale features
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    
+    # Algorithm mapping
+    algorithm_map = {
+        'random_forest': ('Random Forest', RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42)),
+        'gradient_boosting': ('Gradient Boosting', GradientBoostingClassifier(n_estimators=100, max_depth=6, random_state=42)),
+        'logistic_regression': ('Logistic Regression', LogisticRegression(random_state=42, max_iter=1000)),
+        'neural_network': ('Neural Network', MLPClassifier(hidden_layer_sizes=(100, 50), random_state=42, max_iter=500)),
+        'svm': ('SVM', SVC(kernel='rbf', probability=True, random_state=42)),
+        'knn': ('KNN', KNeighborsClassifier(n_neighbors=5))
+    }
+    
+    if algorithm not in algorithm_map:
+        raise ValueError(f"Unknown algorithm: {algorithm}")
+    
+    model_name, model = algorithm_map[algorithm]
+    
+    print(f"\nTraining {model_name}...")
+    
+    # Train the specific model
+    if algorithm == 'logistic_regression':
+        model.fit(X_train_scaled, y_train)
+        y_pred = model.predict(X_test_scaled)
+        y_pred_proba = model.predict_proba(X_test_scaled)[:, 1]
+    else:
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        y_pred_proba = model.predict_proba(X_test)[:, 1]
+    
+    # Calculate metrics
+    auc_score = roc_auc_score(y_test, y_pred_proba) if len(set(y_test)) > 1 else 0.0
+    cv_scores = cross_val_score(model, X_train_scaled if algorithm == 'logistic_regression' else X_train, y_train, cv=5, scoring='roc_auc')
+    
+    print(f"AUC Score: {auc_score:.4f}")
+    print(f"Cross-validation AUC: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
+    print(f"\nClassification Report:")
+    print(classification_report(y_test, y_pred))
+    
+    # Store results in same format as train_delinquency_models
+    model_results = {
+        model_name: {
+            'auc_score': auc_score,
+            'cv_mean': cv_scores.mean(),
+            'cv_std': cv_scores.std()
+        }
+    }
+    
+    return model, model_results, scaler, model_name
 def analyze_feature_importance(model, feature_columns, model_name):
     """
     Analyze and display feature importance from the trained model.
@@ -241,16 +310,16 @@ def analyze_feature_importance(model, feature_columns, model_name):
     
     return feature_importance_df
 
-def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='percentile'):
+def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='random_forest'):
     """
-    Calculate delinquency risk scores using discrete levels: 0 (low), 1 (medium), 2 (high).
+    Calculate delinquency risk scores using ML classification algorithms: 0 (low), 1 (medium), 2 (high).
     
     Args:
         model: Trained ML model
         X: Feature matrix
-        scaler: Feature scaler (for Logistic Regression)
+        scaler: Feature scaler (for algorithms requiring scaling)
         model_name: Name of the model
-        algorithm: Risk scoring algorithm ('percentile', 'threshold', 'kmeans', 'svm', 'knn')
+        algorithm: Risk scoring algorithm ('random_forest', 'gradient_boosting', 'logistic_regression', 'svm', 'knn', 'neural_network')
     
     Returns:
         Array of risk scores (0, 1, or 2)
@@ -261,164 +330,320 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='perce
     else:
         risk_probabilities = model.predict_proba(X)[:, 1]
     
-    print(f"\nUsing '{algorithm}' algorithm for risk scoring...")
+    print(f"\nUsing '{algorithm}' classification algorithm for risk scoring...")
     
-    if algorithm == 'percentile':
-        # Percentile-based approach: bottom 60% = 0, next 30% = 1, top 10% = 2
-        percentiles = np.percentile(risk_probabilities, [60, 90])
-        risk_scores = np.zeros(len(risk_probabilities))
-        risk_scores[risk_probabilities > percentiles[0]] = 1
-        risk_scores[risk_probabilities > percentiles[1]] = 2
+    # Create training labels from probability distribution for classification algorithms
+    prob_percentiles = np.percentile(risk_probabilities, [40, 80])  # 40-40-20 split
+    training_labels = np.zeros(len(risk_probabilities))
+    training_labels[risk_probabilities > prob_percentiles[0]] = 1
+    training_labels[risk_probabilities > prob_percentiles[1]] = 2
+    
+    # Prepare data for classification
+    X_for_classification = X if scaler is None else scaler.transform(X)
+    
+    if algorithm == 'random_forest':
+        # Random Forest classification approach
+        print("Training Random Forest classifier for risk level prediction...")
+        from sklearn.ensemble import RandomForestClassifier
         
-    elif algorithm == 'threshold':
-        # Fixed threshold approach based on probability values
-        risk_scores = np.zeros(len(risk_probabilities))
-        risk_scores[risk_probabilities > 0.3] = 1  # Medium risk threshold
-        risk_scores[risk_probabilities > 0.6] = 2  # High risk threshold
+        rf_model = RandomForestClassifier(
+            n_estimators=100, 
+            max_depth=10, 
+            random_state=42,
+            class_weight='balanced',
+            min_samples_split=5,
+            min_samples_leaf=2
+        )
+        
+        # Train-test split with stratification
+        try:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X_for_classification, training_labels, test_size=0.3, random_state=42, 
+                stratify=training_labels
+            )
+        except ValueError:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X_for_classification, training_labels, test_size=0.3, random_state=42
+            )
+        
+        rf_model.fit(X_train, y_train)
+        risk_scores = rf_model.predict(X_for_classification)
+        
+        print(f"Random Forest Training Accuracy: {rf_model.score(X_train, y_train):.3f}")
+        print(f"Random Forest Test Accuracy: {rf_model.score(X_test, y_test):.3f}")
+        
+    elif algorithm == 'gradient_boosting':
+        # Gradient Boosting classification approach
+        print("Training Gradient Boosting classifier for risk level prediction...")
+        from sklearn.ensemble import GradientBoostingClassifier
+        
+        gb_model = GradientBoostingClassifier(
+            n_estimators=100,
+            learning_rate=0.1,
+            max_depth=6,
+            random_state=42,
+            min_samples_split=5,
+            min_samples_leaf=2
+        )
+        
+        try:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X_for_classification, training_labels, test_size=0.3, random_state=42, 
+                stratify=training_labels
+            )
+        except ValueError:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X_for_classification, training_labels, test_size=0.3, random_state=42
+            )
+        
+        gb_model.fit(X_train, y_train)
+        risk_scores = gb_model.predict(X_for_classification)
+        
+        print(f"Gradient Boosting Training Accuracy: {gb_model.score(X_train, y_train):.3f}")
+        print(f"Gradient Boosting Test Accuracy: {gb_model.score(X_test, y_test):.3f}")
+        
+    elif algorithm == 'logistic_regression':
+        # Logistic Regression classification approach
+        print("Training Logistic Regression classifier for risk level prediction...")
+        from sklearn.linear_model import LogisticRegression
+        
+        lr_model = LogisticRegression(
+            random_state=42,
+            class_weight='balanced',
+            max_iter=1000,
+            C=1.0
+        )
+        
+        try:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X_for_classification, training_labels, test_size=0.3, random_state=42, 
+                stratify=training_labels
+            )
+        except ValueError:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X_for_classification, training_labels, test_size=0.3, random_state=42
+            )
+        
+        lr_model.fit(X_train, y_train)
+        risk_scores = lr_model.predict(X_for_classification)
+        
+        print(f"Logistic Regression Training Accuracy: {lr_model.score(X_train, y_train):.3f}")
+        print(f"Logistic Regression Test Accuracy: {lr_model.score(X_test, y_test):.3f}")
+        
+    elif algorithm == 'neural_network':
+        # Multi-layer Perceptron classification approach
+        print("Training Neural Network classifier for risk level prediction...")
+        from sklearn.neural_network import MLPClassifier
+        
+        nn_model = MLPClassifier(
+            hidden_layer_sizes=(100, 50),
+            activation='relu',
+            solver='adam',
+            alpha=0.001,
+            learning_rate='adaptive',
+            max_iter=500,
+            random_state=42
+        )
+        
+        try:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X_for_classification, training_labels, test_size=0.3, random_state=42, 
+                stratify=training_labels
+            )
+        except ValueError:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X_for_classification, training_labels, test_size=0.3, random_state=42
+            )
+        
+        nn_model.fit(X_train, y_train)
+        risk_scores = nn_model.predict(X_for_classification)
+        
+        print(f"Neural Network Training Accuracy: {nn_model.score(X_train, y_train):.3f}")
+        print(f"Neural Network Test Accuracy: {nn_model.score(X_test, y_test):.3f}")
         
     elif algorithm == 'kmeans':
-        # K-means clustering approach
+        # K-means clustering approach (unsupervised learning fallback)
+        print("Using K-means clustering for risk level prediction...")
         from sklearn.cluster import KMeans
-        kmeans = KMeans(n_clusters=3, random_state=42)
-        clusters = kmeans.fit_predict(risk_probabilities.reshape(-1, 1))
+        kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+        clusters = kmeans.fit_predict(X_for_classification)
         
-        # Map clusters to risk levels based on cluster centers
-        cluster_centers = kmeans.cluster_centers_.flatten()
-        center_order = np.argsort(cluster_centers)
+        # Map clusters to risk levels based on average probability in each cluster
+        cluster_probs = []
+        for i in range(3):
+            cluster_mask = clusters == i
+            if np.sum(cluster_mask) > 0:
+                avg_prob = np.mean(risk_probabilities[cluster_mask])
+                cluster_probs.append((i, avg_prob))
+        
+        # Sort clusters by average probability
+        cluster_probs.sort(key=lambda x: x[1])
         
         risk_scores = np.zeros(len(risk_probabilities))
-        for i, cluster_idx in enumerate(center_order):
-            risk_scores[clusters == cluster_idx] = i
+        for rank, (cluster_idx, _) in enumerate(cluster_probs):
+            risk_scores[clusters == cluster_idx] = rank
+            
+        print(f"K-means cluster mapping: {[(f'Cluster {cp[0]}', f'Risk {rank}', f'Avg Prob {cp[1]:.3f}') for rank, cp in enumerate(cluster_probs)]}")
     
     elif algorithm == 'svm':
-        # SVM-based risk classification using probability bins
-        print("Training SVM classifier for risk level prediction...")
-        
-        # Create more balanced risk labels using percentiles rather than terciles
-        prob_percentiles = np.percentile(risk_probabilities, [40, 80])  # 40-40-20 split instead of 33-33-33
-        training_labels = np.zeros(len(risk_probabilities))
-        training_labels[risk_probabilities > prob_percentiles[0]] = 1
-        training_labels[risk_probabilities > prob_percentiles[1]] = 2
+        # Enhanced SVM-based risk classification
+        print("Training Support Vector Machine classifier for risk level prediction...")
         
         # Verify we have all three classes in training data
         unique_labels, label_counts = np.unique(training_labels, return_counts=True)
         print(f"Training label distribution: {dict(zip(unique_labels.astype(int), label_counts))}")
         
-        # Use a more balanced SVM with class weighting
+        # Enhanced SVM with optimized hyperparameters
         svm_model = SVC(
             kernel='rbf', 
             probability=True, 
             random_state=42,
-            class_weight='balanced',  # Handle class imbalance
-            C=1.0,  # Regularization parameter
-            gamma='scale'  # Kernel coefficient
+            class_weight='balanced',
+            C=10.0,  # Higher regularization for better generalization
+            gamma='auto',
+            decision_function_shape='ovr'
         )
-        X_for_svm = X if scaler is None else scaler.transform(X)
         
-        # Ensure we have sufficient samples for each class
-        min_samples_per_class = 10
+        # Ensure sufficient samples for each class
+        min_samples_per_class = 5
         for label in [0, 1, 2]:
             count = np.sum(training_labels == label)
             if count < min_samples_per_class:
-                print(f"Warning: Only {count} samples for class {label}. Adjusting percentiles...")
-                # Fall back to a more conservative split
-                prob_percentiles = np.percentile(risk_probabilities, [50, 85])  # 50-35-15 split
+                print(f"Warning: Only {count} samples for class {label}. Adjusting distribution...")
+                prob_percentiles = np.percentile(risk_probabilities, [50, 85])
                 training_labels = np.zeros(len(risk_probabilities))
                 training_labels[risk_probabilities > prob_percentiles[0]] = 1
                 training_labels[risk_probabilities > prob_percentiles[1]] = 2
                 break
         
-        # Use stratified split with minimum class representation
         try:
             X_train_svm, X_test_svm, y_train_svm, y_test_svm = train_test_split(
-                X_for_svm, training_labels, test_size=0.3, random_state=42, 
+                X_for_classification, training_labels, test_size=0.3, random_state=42, 
                 stratify=training_labels
             )
         except ValueError:
-            # If stratification fails, use regular split
             X_train_svm, X_test_svm, y_train_svm, y_test_svm = train_test_split(
-                X_for_svm, training_labels, test_size=0.3, random_state=42
+                X_for_classification, training_labels, test_size=0.3, random_state=42
             )
         
         svm_model.fit(X_train_svm, y_train_svm)
-        risk_scores = svm_model.predict(X_for_svm)
-        
-        # Verify the output distribution
-        unique_output, output_counts = np.unique(risk_scores, return_counts=True)
-        print(f"SVM Output distribution: {dict(zip(unique_output.astype(int), output_counts))}")
+        risk_scores = svm_model.predict(X_for_classification)
         
         print(f"SVM Training Accuracy: {svm_model.score(X_train_svm, y_train_svm):.3f}")
         print(f"SVM Test Accuracy: {svm_model.score(X_test_svm, y_test_svm):.3f}")
         
-        # If SVM still doesn't produce medium risk, force a more balanced distribution
-        if 1 not in risk_scores:
-            print("SVM didn't produce medium risk. Applying post-processing...")
-            # Convert some low-prob high-risk to medium risk
-            high_risk_indices = np.where(risk_scores == 2)[0]
-            if len(high_risk_indices) > 0:
-                # Convert bottom 30% of high-risk to medium risk
-                high_risk_probs = risk_probabilities[high_risk_indices]
-                medium_threshold = np.percentile(high_risk_probs, 30)
-                medium_candidates = high_risk_indices[high_risk_probs <= medium_threshold]
-                risk_scores[medium_candidates] = 1
+        # Enhanced post-processing for balanced distribution
+        unique_output, output_counts = np.unique(risk_scores, return_counts=True)
+        print(f"SVM Output distribution: {dict(zip(unique_output.astype(int), output_counts))}")
+        
+        if len(unique_output) < 3:
+            print("SVM produced incomplete risk distribution. Applying intelligent post-processing...")
+            # Get prediction probabilities for more nuanced classification
+            svm_probs = svm_model.predict_proba(X_for_classification)
+            
+            # Use probability-based adjustment for missing classes
+            prob_based_scores = np.argmax(svm_probs, axis=1)
+            
+            # Blend original predictions with probability-based ones
+            final_scores = np.copy(risk_scores)
+            
+            # Fill missing medium risk category if needed
+            if 1 not in risk_scores and len(np.where(prob_based_scores == 1)[0]) > 0:
+                final_scores[prob_based_scores == 1] = 1
+            
+            risk_scores = final_scores
     
     elif algorithm == 'knn':
-        # KNN-based risk classification
-        print("Training KNN classifier for risk level prediction...")
-        
-        # Create risk labels based on probability terciles for training
-        prob_terciles = np.percentile(risk_probabilities, [40, 80])  # Match SVM approach
-        training_labels = np.zeros(len(risk_probabilities))
-        training_labels[risk_probabilities > prob_terciles[0]] = 1
-        training_labels[risk_probabilities > prob_terciles[1]] = 2
+        # Enhanced KNN-based risk classification
+        print("Training K-Nearest Neighbors classifier for risk level prediction...")
         
         # Verify we have all three classes
         unique_labels, label_counts = np.unique(training_labels, return_counts=True)
         print(f"Training label distribution: {dict(zip(unique_labels.astype(int), label_counts))}")
         
-        # Train KNN classifier with optimal k
-        optimal_k = min(15, max(3, int(np.sqrt(len(risk_probabilities)))))  # Ensure k >= 3
-        knn_model = KNeighborsClassifier(n_neighbors=optimal_k, weights='distance')
+        # Optimize k value based on dataset size
+        dataset_size = len(risk_probabilities)
+        if dataset_size < 100:
+            optimal_k = 3
+        elif dataset_size < 500:
+            optimal_k = 5
+        elif dataset_size < 1000:
+            optimal_k = 7
+        else:
+            optimal_k = min(15, max(5, int(np.sqrt(dataset_size) * 0.5)))
         
-        X_for_knn = X if scaler is None else scaler.transform(X)
+        # Enhanced KNN with better parameters
+        knn_model = KNeighborsClassifier(
+            n_neighbors=optimal_k, 
+            weights='distance',
+            algorithm='auto',
+            metric='euclidean',
+            p=2
+        )
         
-        # Use stratified split with error handling
         try:
             X_train_knn, X_test_knn, y_train_knn, y_test_knn = train_test_split(
-                X_for_knn, training_labels, test_size=0.3, random_state=42, 
+                X_for_classification, training_labels, test_size=0.3, random_state=42, 
                 stratify=training_labels
             )
         except ValueError:
-            # If stratification fails, use regular split
             X_train_knn, X_test_knn, y_train_knn, y_test_knn = train_test_split(
-                X_for_knn, training_labels, test_size=0.3, random_state=42
+                X_for_classification, training_labels, test_size=0.3, random_state=42
             )
         
         knn_model.fit(X_train_knn, y_train_knn)
-        risk_scores = knn_model.predict(X_for_knn)
-        
-        # Verify the output distribution
-        unique_output, output_counts = np.unique(risk_scores, return_counts=True)
-        print(f"KNN Output distribution: {dict(zip(unique_output.astype(int), output_counts))}")
+        risk_scores = knn_model.predict(X_for_classification)
         
         print(f"KNN Training Accuracy (k={optimal_k}): {knn_model.score(X_train_knn, y_train_knn):.3f}")
         print(f"KNN Test Accuracy: {knn_model.score(X_test_knn, y_test_knn):.3f}")
         
-        # If KNN still doesn't produce medium risk, force a more balanced distribution
-        if 1 not in risk_scores:
-            print("KNN didn't produce medium risk. Applying post-processing...")
-            # Use probability-based adjustment
-            medium_threshold_low = np.percentile(risk_probabilities, 40)
-            medium_threshold_high = np.percentile(risk_probabilities, 80)
-            medium_candidates = np.where(
-                (risk_probabilities >= medium_threshold_low) & 
-                (risk_probabilities <= medium_threshold_high)
-            )[0]
-            if len(medium_candidates) > 0:
-                risk_scores[medium_candidates] = 1
+        # Enhanced distribution checking and correction
+        unique_output, output_counts = np.unique(risk_scores, return_counts=True)
+        print(f"KNN Output distribution: {dict(zip(unique_output.astype(int), output_counts))}")
+        
+        if len(unique_output) < 3:
+            print("KNN produced incomplete risk distribution. Applying probability-based correction...")
+            # Get prediction probabilities for more intelligent adjustment
+            knn_probs = knn_model.predict_proba(X_for_classification)
+            
+            # Find samples with high uncertainty (close probabilities)
+            max_probs = np.max(knn_probs, axis=1)
+            uncertain_mask = max_probs < 0.6  # Low confidence predictions
+            
+            if np.sum(uncertain_mask) > 0:
+                # Reassign uncertain predictions based on probability distribution
+                uncertain_indices = np.where(uncertain_mask)[0]
+                for idx in uncertain_indices:
+                    target_prob = risk_probabilities[idx]
+                    if 0.6 <= target_prob <= 0.9:  # Medium risk probability range
+                        risk_scores[idx] = 1
+            
+    elif algorithm == 'percentile':
+        # Percentile-based risk classification
+        print("Using Percentile-based risk classification...")
+        # Bottom 60% = Low (0), Next 30% = Medium (1), Top 10% = High (2)
+        percentile_60 = np.percentile(risk_probabilities, 60)
+        percentile_90 = np.percentile(risk_probabilities, 90)
+        
+        risk_scores = np.zeros(len(risk_probabilities))
+        risk_scores[risk_probabilities > percentile_60] = 1  # Medium risk
+        risk_scores[risk_probabilities > percentile_90] = 2  # High risk
+        
+        print(f"Percentile thresholds: P60={percentile_60:.4f}, P90={percentile_90:.4f}")
+            
+    elif algorithm == 'threshold':
+        # Fixed probability threshold-based risk classification  
+        print("Using Fixed Threshold-based risk classification...")
+        # Updated thresholds: <0.6=Low, 0.6-0.9=Medium, >0.9=High
+        
+        risk_scores = np.zeros(len(risk_probabilities))
+        risk_scores[risk_probabilities >= 0.6] = 1  # Medium risk
+        risk_scores[risk_probabilities > 0.9] = 2   # High risk
+        
+        print(f"Fixed thresholds: Low<0.6, Medium=0.6-0.9, High>0.9")
             
     else:
-        raise ValueError(f"Unknown algorithm: {algorithm}. Choose from 'percentile', 'threshold', 'kmeans', 'svm', 'knn'")
+        raise ValueError(f"Unknown algorithm: {algorithm}. Choose from 'random_forest', 'gradient_boosting', 'logistic_regression', 'neural_network', 'svm', 'knn', 'kmeans', 'percentile', 'threshold'")
     
     # Convert to integers
     risk_scores = risk_scores.astype(int)
@@ -436,8 +661,8 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='perce
     
     if algorithm == 'threshold':
         print(f"\nProbability Thresholds Used:")
-        print(f"  Low -> Medium: 0.3")
-        print(f"  Medium -> High: 0.6")
+        print(f"  Low -> Medium: 0.6")
+        print(f"  Medium -> High: 0.9")
     elif algorithm == 'percentile':
         print(f"\nPercentile Thresholds Used:")
         print(f"  Low -> Medium: {np.percentile(risk_probabilities, 60):.4f}")
@@ -559,7 +784,7 @@ def parse_arguments():
         epilog="""
 Risk Scoring Algorithms:
   percentile  - Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)
-  threshold   - Fixed probability thresholds: <0.3=Low, 0.3-0.6=Medium, >0.6=High
+  threshold   - Fixed probability thresholds: <0.6=Low, 0.6-0.9=Medium, >0.9=High
   kmeans      - K-means clustering of probabilities into 3 risk groups
   svm         - Support Vector Machine classifier trained on probability-based risk labels
   knn         - K-Nearest Neighbors classifier with optimal k and distance weighting
@@ -575,9 +800,9 @@ Database connection is handled automatically through the centralized DatabaseMan
     
     parser.add_argument(
         "--algorithm",
-        choices=['percentile', 'threshold', 'kmeans', 'svm', 'knn'],
-        default='percentile',
-        help="Risk scoring algorithm to use (default: percentile)"
+        choices=['random_forest', 'gradient_boosting', 'logistic_regression', 'neural_network', 'svm', 'knn', 'kmeans'],
+        default='random_forest',
+        help="Risk scoring algorithm to use (default: random_forest)"
     )
     
     return parser.parse_args()
