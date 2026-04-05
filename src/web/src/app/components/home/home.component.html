@@ -16,8 +16,17 @@
   <div class="col-md-4">
     <div class="card border-primary h-100">
       <div class="card-header bg-primary bg-opacity-10">
-        <h6 class="card-title text-dark mb-0">
-          <i class="bi bi-play-circle me-2"></i>Run Data Generation
+        <h6 class="card-title text-dark mb-0 d-flex align-items-center justify-content-between">
+          <span>
+            <i class="bi bi-play-circle me-2"></i>Run Data Generation
+          </span>
+          <button type="button" 
+                  class="btn btn-link p-0 text-dark" 
+                  (click)="toggleDataGenerationExplanation()"
+                  [attr.aria-expanded]="showDataGenerationExplanation"
+                  title="Show data generation logic explanation">
+            <i class="bi bi-info-circle-fill"></i>
+          </button>
         </h6>
       </div>
       <div class="card-body p-3">
@@ -240,6 +249,110 @@
           <i *ngIf="!isRunningEDA" class="bi bi-graph-up me-2"></i>
           {{ isRunningEDA ? 'Analyzing...' : 'Run EDA' }}
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Data Generation Logic Explanation Panel -->
+<div *ngIf="showDataGenerationExplanation" class="row mb-3">
+  <div class="col-12">
+    <div class="card border-info">
+      <div class="card-header bg-info bg-opacity-10 d-flex justify-content-between align-items-center">
+        <h6 class="card-title text-dark mb-0">
+          <i class="bi bi-info-circle-fill me-2"></i>Synthetic Data Generation Logic
+        </h6>
+        <button type="button" 
+                class="btn btn-sm btn-outline-info" 
+                (click)="toggleDataGenerationExplanation()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="card-body p-4">
+        <h6 class="text-primary mb-3">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Delinquency Risk Factor Synthetic Correlations
+        </h6>
+        
+        <div class="row">
+          <div class="col-lg-8">
+            <h6 class="text-dark mb-2">Primary Risk Drivers</h6>
+            
+            <div class="mb-3">
+              <span class="badge bg-warning text-dark me-2">🎯</span>
+              <strong>Program Difficulty</strong> (PRIMARY INFLUENCING FACTOR)
+              <p class="mt-2 mb-2 text-muted small">Higher difficulty programs create cascading risk effects:</p>
+              <ul class="small text-muted mb-3">
+                <li><strong>Financial Impact:</strong> Higher tuition costs → Larger loan amounts → Greater monthly payments</li>
+                <li><strong>Duration Impact:</strong> Longer programs (5-7 years for Medicine/Law) → Extended debt accumulation</li>
+                <li><strong>Market Risk:</strong> Specialized fields → Variable employment outcomes → Income uncertainty</li>
+                <li><strong>Academic Stress:</strong> Higher failure/dropout rates → Lost investment in education</li>
+                <li><strong>Interest Rate Premium:</strong> Risk-based pricing adds 0.5-1.0% to loan rates</li>
+                <li><strong>Default Correlation:</strong> 2-4x higher delinquency risk compared to easier programs</li>
+              </ul>
+            </div>
+            
+            <div class="mb-3">
+              <strong>Income Level:</strong>
+              <ul class="small text-muted mb-2">
+                <li>Reduced payment capacity</li>
+                <li>Employment instability</li>
+                <li>Higher probability of missed payments</li>
+              </ul>
+            </div>
+            
+            <div class="mb-3">
+              <strong>Age Factor:</strong>
+              <ul class="small text-muted mb-2">
+                <li>Less financial experience</li>
+                <li>Higher rate of life changes</li>
+                <li>Increased delinquency probability</li>
+              </ul>
+            </div>
+            
+            <div class="mb-3">
+              <strong>Loan Maturity:</strong>
+              <ul class="small text-muted mb-2">
+                <li>Payment pressure before graduation</li>
+                <li>Career transition stress</li>
+                <li>Elevated default risk</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="col-lg-4">
+            <div class="bg-light p-3 rounded">
+              <h6 class="text-dark mb-2">Real-World Example Scenarios</h6>
+              
+              <div class="mb-3">
+                <span class="badge bg-success mb-1">Level 1 (Business)</span>
+                <p class="small text-muted mb-1">$35k tuition, 4 years, 88% employment, stable $55k salary</p>
+                <span class="badge bg-success">→ Low risk</span>
+              </div>
+              
+              <div class="mb-3">
+                <span class="badge bg-warning text-dark mb-1">Level 3 (Engineering)</span>
+                <p class="small text-muted mb-1">$55k tuition, 4-5 years, variable employment, $70k+ salary</p>
+                <span class="badge bg-warning text-dark">→ High risk</span>
+              </div>
+              
+              <div class="mb-3">
+                <span class="badge bg-danger mb-1">Level 3 (Medicine)</span>
+                <p class="small text-muted mb-1">$85k tuition, 8+ years total, 96% employment but delayed income</p>
+                <span class="badge bg-danger">→ High stress during study</span>
+              </div>
+            </div>
+            
+            <div class="mt-3">
+              <h6 class="text-dark mb-2">Secondary Influences</h6>
+              <ul class="small text-muted">
+                <li><strong>Geographic Location:</strong> Urban vs. rural employment opportunities</li>
+                <li><strong>Employment Status:</strong> Direct correlation with payment capacity</li>
+                <li><strong>Marital Status:</strong> Financial stability indicator</li>
+                <li><strong>Institution Type:</strong> Quality and employment outcomes correlation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

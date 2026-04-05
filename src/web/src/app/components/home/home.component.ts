@@ -43,6 +43,9 @@ export class HomeComponent implements OnInit {
   campaignResults: any = null;
   showCampaignResults = false;
   downloadLinks: any[] = [];
+  
+  // Data generation explanation
+  showDataGenerationExplanation = false;
 
   constructor(private dataService: DataService) {}
 
@@ -180,6 +183,10 @@ export class HomeComponent implements OnInit {
     localStorage.removeItem('campaignResults');
     this.campaignResults = null;
     this.downloadLinks = [];
+  }
+
+  toggleDataGenerationExplanation(): void {
+    this.showDataGenerationExplanation = !this.showDataGenerationExplanation;
   }
 
   runRiskAnalysis(): void {
