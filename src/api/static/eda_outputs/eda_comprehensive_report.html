@@ -122,22 +122,22 @@
     <div class="container">
         <h1 id="exploratory-data-analysis-report">Exploratory Data Analysis Report</h1>
 <h2 id="student-loan-delinquency-risk-assessment">Student Loan Delinquency Risk Assessment</h2>
-<p><strong>Generated on:</strong> 2026-04-04 17:00:37
+<p><strong>Generated on:</strong> 2026-04-05 11:48:54
 <strong>Database:</strong> C:\Users\ag4488\OneDrive - Finastra\Visual Studio 2022\Projects\delinquency-website\src\api\shared\student_loan_data.db</p>
 <h2 id="dataset-overview">Dataset Overview</h2>
 <ul>
 <li><strong>Total Borrowers:</strong> 1,000</li>
 <li><strong>Total Features:</strong> 47 (engineered)</li>
-<li><strong>Delinquency Rate:</strong> 5.40%</li>
+<li><strong>Delinquency Rate:</strong> 4.70%</li>
 <li><strong>Data Quality:</strong> Complete records after feature engineering</li>
 </ul>
 <h2 id="principal-component-analysis-results">Principal Component Analysis Results</h2>
 <h3 id="variance-explanation">Variance Explanation</h3>
 <ul>
-<li><strong>PC1:</strong> 13.97% of total variance</li>
-<li><strong>PC2:</strong> 11.33% of total variance</li>
-<li><strong>PC3:</strong> 8.23% of total variance</li>
-<li><strong>First 5 PCs:</strong> 47.99% of total variance</li>
+<li><strong>PC1:</strong> 14.72% of total variance</li>
+<li><strong>PC2:</strong> 11.23% of total variance</li>
+<li><strong>PC3:</strong> 8.07% of total variance</li>
+<li><strong>First 5 PCs:</strong> 47.81% of total variance</li>
 <li><strong>Components for 80% variance:</strong> 1</li>
 <li><strong>Components for 95% variance:</strong> 1</li>
 </ul>
@@ -158,7 +158,7 @@
 </ol>
 <h2 id="feature-importance-analysis">🔍 Feature Importance Analysis</h2>
 <p>This section identifies the most important features for each principal component based on their loadings. Features with higher absolute loadings have more influence on the component.</p>
-<h3 id="pc1-1397-variance-explained">PC1 (13.97% variance explained)</h3>
+<h3 id="pc1-1472-variance-explained">PC1 (14.72% variance explained)</h3>
 <h4 id="most-influential-features">Most Influential Features:</h4>
 <table>
 <thead>
@@ -174,70 +174,70 @@
 <tr>
 <td>1</td>
 <td><code>avg_payment_amount</code></td>
-<td>0.3547</td>
+<td>0.3206</td>
 <td>📈 Positive (High)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>2</td>
-<td><code>total_payments_made</code></td>
-<td>0.3371</td>
-<td>📈 Positive (Medium)</td>
-<td>Higher values increase component score</td>
+<td><code>days_since_last_payment</code></td>
+<td>-0.2932</td>
+<td>📉 Negative (Medium)</td>
+<td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>3</td>
-<td><code>on_time_payments</code></td>
-<td>0.3359</td>
+<td><code>payment_consistency</code></td>
+<td>0.2925</td>
 <td>📈 Positive (Medium)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>4</td>
-<td><code>payment_consistency</code></td>
-<td>0.3298</td>
+<td><code>total_payments_made</code></td>
+<td>0.2707</td>
 <td>📈 Positive (Medium)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>5</td>
-<td><code>days_since_last_payment</code></td>
-<td>-0.3293</td>
-<td>📉 Negative (Medium)</td>
-<td>Higher values decrease component score</td>
-</tr>
-<tr>
-<td>6</td>
-<td><code>total_amount_paid</code></td>
-<td>0.3026</td>
+<td><code>on_time_payments</code></td>
+<td>0.2693</td>
 <td>📈 Positive (Medium)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
+<td>6</td>
+<td><code>loan_progress_pct</code></td>
+<td>0.2527</td>
+<td>📈 Positive (Low)</td>
+<td>Higher values increase component score</td>
+</tr>
+<tr>
 <td>7</td>
-<td><code>days_since_disbursement</code></td>
-<td>0.2473</td>
+<td><code>loan_age_days</code></td>
+<td>0.2504</td>
 <td>📈 Positive (Low)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>8</td>
-<td><code>loan_age_days</code></td>
-<td>0.2237</td>
+<td><code>days_since_disbursement</code></td>
+<td>0.2459</td>
 <td>📈 Positive (Low)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>9</td>
-<td><code>program_type_encoded</code></td>
-<td>0.2232</td>
+<td><code>total_amount_paid</code></td>
+<td>0.2340</td>
 <td>📈 Positive (Low)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>10</td>
-<td><code>loan_progress_pct</code></td>
-<td>0.2222</td>
+<td><code>education_value</code></td>
+<td>0.2071</td>
 <td>📈 Positive (Low)</td>
 <td>Higher values increase component score</td>
 </tr>
@@ -245,17 +245,17 @@
 </table>
 <h4 id="pc1-interpretation">PC1 Interpretation:</h4>
 <p><strong>Positive Drivers:</strong> Features that increase this component:
-- <code>avg_payment_amount</code> (loading: 0.355)
-- <code>total_payments_made</code> (loading: 0.337)
-- <code>on_time_payments</code> (loading: 0.336)</p>
+- <code>avg_payment_amount</code> (loading: 0.321)
+- <code>payment_consistency</code> (loading: 0.292)
+- <code>total_payments_made</code> (loading: 0.271)</p>
 <p><strong>Negative Drivers:</strong> Features that decrease this component:
-- <code>days_since_last_payment</code> (loading: -0.329)</p>
+- <code>days_since_last_payment</code> (loading: -0.293)</p>
 <p><strong>Component Statistics:</strong>
-- Maximum loading magnitude: 0.3547
-- Average loading magnitude: 0.2906
-- Loading standard deviation: 0.0548</p>
+- Maximum loading magnitude: 0.3206
+- Average loading magnitude: 0.2636
+- Loading standard deviation: 0.0329</p>
 <hr />
-<h3 id="pc2-1133-variance-explained">PC2 (11.33% variance explained)</h3>
+<h3 id="pc2-1123-variance-explained">PC2 (11.23% variance explained)</h3>
 <h4 id="most-influential-features_1">Most Influential Features:</h4>
 <table>
 <thead>
@@ -270,89 +270,91 @@
 <tbody>
 <tr>
 <td>1</td>
-<td><code>education_value</code></td>
-<td>0.4052</td>
+<td><code>current_balance</code></td>
+<td>0.3270</td>
 <td>📈 Positive (High)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>2</td>
 <td><code>loan_amount</code></td>
-<td>0.3998</td>
-<td>📈 Positive (Medium)</td>
+<td>0.3263</td>
+<td>📈 Positive (High)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>3</td>
-<td><code>monthly_payment</code></td>
-<td>0.3817</td>
-<td>📈 Positive (Medium)</td>
+<td><code>education_value</code></td>
+<td>0.3198</td>
+<td>📈 Positive (High)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>4</td>
-<td><code>current_balance</code></td>
-<td>0.3788</td>
+<td><code>monthly_payment</code></td>
+<td>0.3035</td>
 <td>📈 Positive (Medium)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>5</td>
 <td><code>program_duration_years</code></td>
-<td>0.3640</td>
+<td>0.2810</td>
 <td>📈 Positive (Medium)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>6</td>
-<td><code>down_payment</code></td>
-<td>0.2665</td>
-<td>📈 Positive (Low)</td>
-<td>Higher values increase component score</td>
+<td><code>on_time_payments</code></td>
+<td>-0.2456</td>
+<td>📉 Negative (Low)</td>
+<td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>7</td>
-<td><code>payment_to_income_ratio</code></td>
-<td>0.1802</td>
-<td>📈 Positive (Low)</td>
-<td>Higher values increase component score</td>
+<td><code>total_payments_made</code></td>
+<td>-0.2448</td>
+<td>📉 Negative (Low)</td>
+<td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>8</td>
-<td><code>debt_to_income_ratio</code></td>
-<td>0.1705</td>
-<td>📈 Positive (Low)</td>
-<td>Higher values increase component score</td>
+<td><code>total_amount_paid</code></td>
+<td>-0.2254</td>
+<td>📉 Negative (Low)</td>
+<td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>9</td>
-<td><code>loan_progress_pct</code></td>
-<td>0.1092</td>
-<td>📈 Positive (Low)</td>
-<td>Higher values increase component score</td>
+<td><code>program_type_encoded</code></td>
+<td>-0.2137</td>
+<td>📉 Negative (Low)</td>
+<td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>10</td>
-<td><code>total_payments_made</code></td>
-<td>-0.1073</td>
-<td>📉 Negative (Low)</td>
-<td>Higher values decrease component score</td>
+<td><code>payment_to_income_ratio</code></td>
+<td>0.2004</td>
+<td>📈 Positive (Low)</td>
+<td>Higher values increase component score</td>
 </tr>
 </tbody>
 </table>
 <h4 id="pc2-interpretation">PC2 Interpretation:</h4>
 <p><strong>Positive Drivers:</strong> Features that increase this component:
-- <code>education_value</code> (loading: 0.405)
-- <code>loan_amount</code> (loading: 0.400)
-- <code>monthly_payment</code> (loading: 0.382)</p>
+- <code>current_balance</code> (loading: 0.327)
+- <code>loan_amount</code> (loading: 0.326)
+- <code>education_value</code> (loading: 0.320)</p>
 <p><strong>Negative Drivers:</strong> Features that decrease this component:
-- <code>total_payments_made</code> (loading: -0.107)</p>
+- <code>on_time_payments</code> (loading: -0.246)
+- <code>total_payments_made</code> (loading: -0.245)
+- <code>total_amount_paid</code> (loading: -0.225)</p>
 <p><strong>Component Statistics:</strong>
-- Maximum loading magnitude: 0.4052
-- Average loading magnitude: 0.2763
-- Loading standard deviation: 0.1239</p>
+- Maximum loading magnitude: 0.3270
+- Average loading magnitude: 0.2688
+- Loading standard deviation: 0.0487</p>
 <hr />
-<h3 id="pc3-823-variance-explained">PC3 (8.23% variance explained)</h3>
+<h3 id="pc3-807-variance-explained">PC3 (8.07% variance explained)</h3>
 <h4 id="most-influential-features_2">Most Influential Features:</h4>
 <table>
 <thead>
@@ -367,91 +369,91 @@
 <tbody>
 <tr>
 <td>1</td>
-<td><code>loan_progress_pct</code></td>
-<td>0.2979</td>
+<td><code>days_to_maturity</code></td>
+<td>0.3405</td>
 <td>📈 Positive (High)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>2</td>
-<td><code>days_to_maturity</code></td>
-<td>-0.2928</td>
+<td><code>loan_progress_pct</code></td>
+<td>-0.3129</td>
 <td>📉 Negative (High)</td>
 <td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>3</td>
-<td><code>program_type_encoded</code></td>
-<td>-0.2555</td>
-<td>📉 Negative (Medium)</td>
-<td>Higher values decrease component score</td>
+<td><code>loan_term_months</code></td>
+<td>0.2602</td>
+<td>📈 Positive (Medium)</td>
+<td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>4</td>
-<td><code>loan_age_days</code></td>
-<td>0.2420</td>
+<td><code>loan_term_years</code></td>
+<td>0.2602</td>
 <td>📈 Positive (Medium)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>5</td>
-<td><code>days_since_disbursement</code></td>
-<td>0.2293</td>
-<td>📈 Positive (Low)</td>
-<td>Higher values increase component score</td>
+<td><code>loan_age_days</code></td>
+<td>-0.2403</td>
+<td>📉 Negative (Low)</td>
+<td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>6</td>
-<td><code>loan_term_months</code></td>
-<td>-0.2036</td>
+<td><code>days_since_disbursement</code></td>
+<td>-0.2402</td>
 <td>📉 Negative (Low)</td>
 <td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>7</td>
-<td><code>loan_term_years</code></td>
-<td>-0.2036</td>
-<td>📉 Negative (Low)</td>
-<td>Higher values decrease component score</td>
+<td><code>program_type_encoded</code></td>
+<td>0.2225</td>
+<td>📈 Positive (Low)</td>
+<td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>8</td>
 <td><code>total_amount_paid</code></td>
-<td>-0.2003</td>
-<td>📉 Negative (Low)</td>
-<td>Higher values decrease component score</td>
+<td>0.2095</td>
+<td>📈 Positive (Low)</td>
+<td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>9</td>
-<td><code>employment_status_encoded</code></td>
-<td>-0.1939</td>
+<td><code>avg_late_fee_per_payment</code></td>
+<td>-0.1972</td>
 <td>📉 Negative (Low)</td>
 <td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>10</td>
-<td><code>annual_income_cad</code></td>
-<td>0.1888</td>
-<td>📈 Positive (Low)</td>
-<td>Higher values increase component score</td>
+<td><code>delinquency_rate</code></td>
+<td>-0.1972</td>
+<td>📉 Negative (Low)</td>
+<td>Higher values decrease component score</td>
 </tr>
 </tbody>
 </table>
 <h4 id="pc3-interpretation">PC3 Interpretation:</h4>
 <p><strong>Positive Drivers:</strong> Features that increase this component:
-- <code>loan_progress_pct</code> (loading: 0.298)
-- <code>loan_age_days</code> (loading: 0.242)
-- <code>days_since_disbursement</code> (loading: 0.229)</p>
+- <code>days_to_maturity</code> (loading: 0.341)
+- <code>loan_term_months</code> (loading: 0.260)
+- <code>loan_term_years</code> (loading: 0.260)</p>
 <p><strong>Negative Drivers:</strong> Features that decrease this component:
-- <code>days_to_maturity</code> (loading: -0.293)
-- <code>program_type_encoded</code> (loading: -0.256)
-- <code>loan_term_months</code> (loading: -0.204)</p>
+- <code>loan_progress_pct</code> (loading: -0.313)
+- <code>loan_age_days</code> (loading: -0.240)
+- <code>days_since_disbursement</code> (loading: -0.240)</p>
 <p><strong>Component Statistics:</strong>
-- Maximum loading magnitude: 0.2979
-- Average loading magnitude: 0.2308
-- Loading standard deviation: 0.0403</p>
+- Maximum loading magnitude: 0.3405
+- Average loading magnitude: 0.2481
+- Loading standard deviation: 0.0477</p>
 <hr />
-<h3 id="pc4-741-variance-explained">PC4 (7.41% variance explained)</h3>
+<h3 id="pc4-704-variance-explained">PC4 (7.04% variance explained)</h3>
 <h4 id="most-influential-features_3">Most Influential Features:</h4>
 <table>
 <thead>
@@ -467,70 +469,70 @@
 <tr>
 <td>1</td>
 <td><code>employment_status_encoded</code></td>
-<td>0.4062</td>
+<td>0.4342</td>
 <td>📈 Positive (High)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>2</td>
 <td><code>annual_income_cad</code></td>
-<td>-0.3774</td>
+<td>-0.4054</td>
 <td>📉 Negative (High)</td>
 <td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>3</td>
-<td><code>debt_to_income_ratio</code></td>
-<td>0.3533</td>
+<td><code>payment_to_income_ratio</code></td>
+<td>0.3683</td>
 <td>📈 Positive (Medium)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>4</td>
-<td><code>payment_to_income_ratio</code></td>
-<td>0.3531</td>
+<td><code>debt_to_income_ratio</code></td>
+<td>0.3668</td>
 <td>📈 Positive (Medium)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>5</td>
-<td><code>days_to_maturity</code></td>
-<td>-0.1897</td>
+<td><code>down_payment</code></td>
+<td>-0.2661</td>
 <td>📉 Negative (Low)</td>
 <td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>6</td>
-<td><code>typical_tuition_cad</code></td>
-<td>0.1851</td>
-<td>📈 Positive (Low)</td>
-<td>Higher values increase component score</td>
+<td><code>education_value</code></td>
+<td>-0.1919</td>
+<td>📉 Negative (Low)</td>
+<td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>7</td>
-<td><code>education_roi</code></td>
-<td>-0.1844</td>
+<td><code>program_duration_years</code></td>
+<td>-0.1868</td>
 <td>📉 Negative (Low)</td>
 <td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>8</td>
-<td><code>current_balance</code></td>
-<td>-0.1716</td>
-<td>📉 Negative (Low)</td>
-<td>Higher values decrease component score</td>
+<td><code>ltv_ratio</code></td>
+<td>0.1835</td>
+<td>📈 Positive (Low)</td>
+<td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>9</td>
-<td><code>loan_term_months</code></td>
-<td>-0.1683</td>
-<td>📉 Negative (Low)</td>
-<td>Higher values decrease component score</td>
+<td><code>loan_to_education_value_ratio</code></td>
+<td>0.1835</td>
+<td>📈 Positive (Low)</td>
+<td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>10</td>
-<td><code>loan_term_years</code></td>
-<td>-0.1683</td>
+<td><code>current_balance</code></td>
+<td>-0.1334</td>
 <td>📉 Negative (Low)</td>
 <td>Higher values decrease component score</td>
 </tr>
@@ -538,19 +540,19 @@
 </table>
 <h4 id="pc4-interpretation">PC4 Interpretation:</h4>
 <p><strong>Positive Drivers:</strong> Features that increase this component:
-- <code>employment_status_encoded</code> (loading: 0.406)
-- <code>debt_to_income_ratio</code> (loading: 0.353)
-- <code>payment_to_income_ratio</code> (loading: 0.353)</p>
+- <code>employment_status_encoded</code> (loading: 0.434)
+- <code>payment_to_income_ratio</code> (loading: 0.368)
+- <code>debt_to_income_ratio</code> (loading: 0.367)</p>
 <p><strong>Negative Drivers:</strong> Features that decrease this component:
-- <code>annual_income_cad</code> (loading: -0.377)
-- <code>days_to_maturity</code> (loading: -0.190)
-- <code>education_roi</code> (loading: -0.184)</p>
+- <code>annual_income_cad</code> (loading: -0.405)
+- <code>down_payment</code> (loading: -0.266)
+- <code>education_value</code> (loading: -0.192)</p>
 <p><strong>Component Statistics:</strong>
-- Maximum loading magnitude: 0.4062
-- Average loading magnitude: 0.2557
-- Loading standard deviation: 0.1018</p>
+- Maximum loading magnitude: 0.4342
+- Average loading magnitude: 0.2720
+- Loading standard deviation: 0.1110</p>
 <hr />
-<h3 id="pc5-706-variance-explained">PC5 (7.06% variance explained)</h3>
+<h3 id="pc5-675-variance-explained">PC5 (6.75% variance explained)</h3>
 <h4 id="most-influential-features_4">Most Influential Features:</h4>
 <table>
 <thead>
@@ -566,70 +568,70 @@
 <tr>
 <td>1</td>
 <td><code>typical_tuition_cad</code></td>
-<td>0.4165</td>
+<td>0.5264</td>
 <td>📈 Positive (High)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>2</td>
-<td><code>program_difficulty</code></td>
-<td>0.3662</td>
+<td><code>average_starting_salary</code></td>
+<td>0.4644</td>
 <td>📈 Positive (High)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>3</td>
-<td><code>average_starting_salary</code></td>
-<td>0.3550</td>
-<td>📈 Positive (Medium)</td>
+<td><code>program_difficulty</code></td>
+<td>0.4423</td>
+<td>📈 Positive (High)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>4</td>
 <td><code>education_roi</code></td>
-<td>-0.3321</td>
+<td>-0.3724</td>
 <td>📉 Negative (Medium)</td>
 <td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>5</td>
-<td><code>missed_payments</code></td>
-<td>0.2304</td>
+<td><code>pos_duration</code></td>
+<td>0.2061</td>
 <td>📈 Positive (Low)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>6</td>
-<td><code>delinquency_rate</code></td>
-<td>0.2241</td>
+<td><code>employment_rate</code></td>
+<td>0.1354</td>
 <td>📈 Positive (Low)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>7</td>
-<td><code>avg_late_fee_per_payment</code></td>
-<td>0.2241</td>
+<td><code>down_payment</code></td>
+<td>0.1126</td>
 <td>📈 Positive (Low)</td>
 <td>Higher values increase component score</td>
 </tr>
 <tr>
 <td>8</td>
-<td><code>pos_duration</code></td>
-<td>0.2010</td>
-<td>📈 Positive (Low)</td>
-<td>Higher values increase component score</td>
+<td><code>field_of_study_encoded</code></td>
+<td>-0.1039</td>
+<td>📉 Negative (Low)</td>
+<td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>9</td>
-<td><code>payment_to_income_ratio</code></td>
-<td>-0.2000</td>
+<td><code>ltv_ratio</code></td>
+<td>-0.0988</td>
 <td>📉 Negative (Low)</td>
 <td>Higher values decrease component score</td>
 </tr>
 <tr>
 <td>10</td>
-<td><code>debt_to_income_ratio</code></td>
-<td>-0.1894</td>
+<td><code>loan_to_education_value_ratio</code></td>
+<td>-0.0988</td>
 <td>📉 Negative (Low)</td>
 <td>Higher values decrease component score</td>
 </tr>
@@ -637,17 +639,17 @@
 </table>
 <h4 id="pc5-interpretation">PC5 Interpretation:</h4>
 <p><strong>Positive Drivers:</strong> Features that increase this component:
-- <code>typical_tuition_cad</code> (loading: 0.417)
-- <code>program_difficulty</code> (loading: 0.366)
-- <code>average_starting_salary</code> (loading: 0.355)</p>
+- <code>typical_tuition_cad</code> (loading: 0.526)
+- <code>average_starting_salary</code> (loading: 0.464)
+- <code>program_difficulty</code> (loading: 0.442)</p>
 <p><strong>Negative Drivers:</strong> Features that decrease this component:
-- <code>education_roi</code> (loading: -0.332)
-- <code>payment_to_income_ratio</code> (loading: -0.200)
-- <code>debt_to_income_ratio</code> (loading: -0.189)</p>
+- <code>education_roi</code> (loading: -0.372)
+- <code>field_of_study_encoded</code> (loading: -0.104)
+- <code>ltv_ratio</code> (loading: -0.099)</p>
 <p><strong>Component Statistics:</strong>
-- Maximum loading magnitude: 0.4165
-- Average loading magnitude: 0.2739
-- Loading standard deviation: 0.0841</p>
+- Maximum loading magnitude: 0.5264
+- Average loading magnitude: 0.2561
+- Loading standard deviation: 0.1748</p>
 <hr />
 <h2 id="generated-visualizations">📈 Generated Visualizations</h2>
 <p>All interactive charts and reports have been saved to the <code>C:\Users\ag4488\OneDrive - Finastra\Visual Studio 2022\Projects\delinquency-website\src\api\static\eda_outputs</code> directory:</p>
