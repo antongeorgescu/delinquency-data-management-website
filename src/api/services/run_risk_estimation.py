@@ -18,6 +18,7 @@ import sys
 import os
 from datetime import datetime
 import json
+import numpy as np
 
 def main():
     """
@@ -171,6 +172,20 @@ def run_risk_estimation_json(algorithm='random_forest'):
         
         # Store original sys.argv to restore later
         original_argv = sys.argv.copy()
+        
+        # Initialize session logging for web interface calls
+        # Add the delinquency_analysis directory to the Python path
+        analysis_dir = os.path.join(os.path.dirname(__file__), 'delinquency_analysis')
+        if analysis_dir not in sys.path:
+            sys.path.insert(0, analysis_dir)
+            
+        try:
+            from delinquency_analysis import init_session_logging, finalize_session_logging
+            # Initialize logging for web interface calls
+            init_session_logging()
+        except ImportError:
+            # Logging modules not available - continue without logging
+            pass
         
         # Set up arguments for the analysis script
         sys.argv = ['delinquency_analysis.py', '--algorithm', algorithm]
@@ -335,6 +350,19 @@ def run_risk_estimation_json(algorithm='random_forest'):
         # Add detailed classification metrics for web display
         results["detailed_classification_metrics"] = get_detailed_classification_display(model_results, algorithm)
         
+        # Finalize session logging for web interface calls
+        try:
+            from delinquency_analysis import finalize_session_logging
+            md_file, html_file = finalize_session_logging()
+            if md_file and html_file:
+                results["session_log"] = {
+                    "markdown_file": md_file,
+                    "html_file": html_file
+                }
+        except (ImportError, NameError):
+            # Logging modules not available - continue without logging
+            pass
+        
         # Restore original sys.argv
         sys.argv = original_argv
         
@@ -344,6 +372,19 @@ def run_risk_estimation_json(algorithm='random_forest'):
         # Restore original sys.argv in case of error
         if 'original_argv' in locals():
             sys.argv = original_argv
+        
+        # Finalize session logging even in case of error
+        try:
+            from delinquency_analysis import finalize_session_logging
+            md_file, html_file = finalize_session_logging()
+            if md_file and html_file:
+                results["session_log"] = {
+                    "markdown_file": md_file,
+                    "html_file": html_file
+                }
+        except (ImportError, NameError):
+            # Logging modules not available - continue without logging
+            pass
         
         # Get more detailed error information
         import traceback

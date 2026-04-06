@@ -62,3 +62,7 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+
+# Generated files folders
+risk_estimate_outputs/
+eda_outputs/

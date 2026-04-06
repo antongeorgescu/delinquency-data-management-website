@@ -706,8 +706,14 @@ def run_eda_reports():
         
         # Run the full EDA script
         script_path = os.path.join(os.path.dirname(__file__), 'services', 'run_eda_analysis.py')
+        
+        # Use virtual environment Python executable instead of sys.executable
+        # Get the project root (go up from src/api to project root)
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        venv_python = os.path.join(project_root, '.venv', 'Scripts', 'python.exe')
+        
         cmd = [
-            sys.executable, script_path,
+            venv_python, script_path,
             '--output_dir', output_dir,
             '--n_clusters', str(n_clusters),
             '--n_components', str(n_components)
@@ -895,6 +901,56 @@ def serve_eda_files_options(filename):
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
+
+@app.route('/api/risk-report/<filename>', methods=['GET'])
+def get_risk_report(filename):
+    """
+    Serve risk estimation report files (markdown and HTML)
+    """
+    try:
+        # Define the risk report directory path
+        reports_dir = os.path.join(os.path.dirname(__file__), 'services', 'risk_estimate_outputs')
+        
+        # Validate filename to prevent directory traversal attacks
+        if '..' in filename or '/' in filename or '\\' in filename:
+            return jsonify({
+                "success": False,
+                "error": "Invalid filename",
+                "message": "File not found or access denied"
+            }), 404
+        
+        file_path = os.path.join(reports_dir, filename)
+        
+        # Check if file exists
+        if not os.path.exists(file_path):
+            return jsonify({
+                "success": False,
+                "error": "File not found",
+                "message": f"Report file '{filename}' does not exist. Please run risk estimation first."
+            }), 404
+        
+        # Determine mimetype based on file extension
+        if filename.endswith('.html'):
+            mimetype = 'text/html'
+        elif filename.endswith('.md'):
+            mimetype = 'text/markdown'
+        else:
+            mimetype = 'text/plain'
+        
+        # Return the file for viewing (not as download)
+        from flask import send_file, make_response
+        response = make_response(send_file(file_path, mimetype=mimetype))
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+        
+    except Exception as e:
+        error_response = {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to serve report file"
+        }
+        
+        return jsonify(error_response), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
