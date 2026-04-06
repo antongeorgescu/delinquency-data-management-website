@@ -35,6 +35,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   // Risk estimation results
   riskEstimationResults: any = null;
   showRiskResults = false;
+  showClassificationAccuracy = true; // Show by default when risk results are available
   showCampaignDialog = false;
   
   // EDA results
@@ -178,6 +179,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.showRiskResults = false;
     localStorage.removeItem('riskEstimationResults');
     this.riskEstimationResults = null;
+  }
+
+  closeClassificationAccuracy(): void {
+    this.showClassificationAccuracy = false;
   }
 
   closeEdaResults(): void {

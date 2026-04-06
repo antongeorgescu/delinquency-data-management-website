@@ -245,20 +245,42 @@ def run_risk_estimation_json(algorithm='random_forest'):
         # Add detailed metrics for Classification Algorithms
         if algorithm in classification_algorithms:
             results["model_performance"]["algorithm_details"] = get_algorithm_details(algorithm)
+            
+            # Get CV metrics with fallback to handle both old and new dictionary structures
+            best_model_data = model_results[best_model_name]
+            cv_mean = best_model_data.get('cv_auc_mean', best_model_data.get('cv_mean', 0.0))
+            cv_std = best_model_data.get('cv_auc_std', best_model_data.get('cv_std', 0.0))
+            
             results["model_performance"]["performance_summary"] = {
-                "auc_score": float(model_results[best_model_name]['auc_score']),
-                "cross_validation_mean": float(model_results[best_model_name]['cv_mean']),
-                "cross_validation_std": float(model_results[best_model_name]['cv_std']),
-                "performance_rating": get_performance_rating(model_results[best_model_name]['auc_score'])
+                "auc_score": float(best_model_data['auc_score']),
+                "accuracy": float(best_model_data.get('accuracy', 0.0)),
+                "precision": float(best_model_data.get('precision', 0.0)),
+                "recall": float(best_model_data.get('recall', 0.0)),
+                "f1_score": float(best_model_data.get('f1_score', 0.0)),
+                "cross_validation_auc_mean": float(cv_mean),
+                "cross_validation_auc_std": float(cv_std),
+                "cross_validation_accuracy_mean": float(best_model_data.get('cv_accuracy_mean', 0.0)),
+                "cross_validation_accuracy_std": float(best_model_data.get('cv_accuracy_std', 0.0)),
+                "performance_rating": get_performance_rating(best_model_data['auc_score'])
             }
         else:
             results["model_performance"]["algorithm_details"] = get_statistical_algorithm_description(algorithm)
         
         for name, model_data in model_results.items():
+            # Handle both old and new dictionary structures
+            cv_mean = model_data.get('cv_auc_mean', model_data.get('cv_mean', 0.0))
+            cv_std = model_data.get('cv_auc_std', model_data.get('cv_std', 0.0))
+            
             results["model_performance"]["models"][name] = {
                 "auc_score": float(model_data['auc_score']),
-                "cv_mean": float(model_data['cv_mean']),
-                "cv_std": float(model_data['cv_std'])
+                "accuracy": float(model_data.get('accuracy', 0.0)),
+                "precision": float(model_data.get('precision', 0.0)),
+                "recall": float(model_data.get('recall', 0.0)),
+                "f1_score": float(model_data.get('f1_score', 0.0)),
+                "cv_auc_mean": float(cv_mean),
+                "cv_auc_std": float(cv_std),
+                "cv_accuracy_mean": float(model_data.get('cv_accuracy_mean', 0.0)),
+                "cv_accuracy_std": float(model_data.get('cv_accuracy_std', 0.0))
             }
         
         # Risk distribution
@@ -310,6 +332,9 @@ def run_risk_estimation_json(algorithm='random_forest'):
                 for i, (_, row) in enumerate(top_features.iterrows())
             ]
         
+        # Add detailed classification metrics for web display
+        results["detailed_classification_metrics"] = get_detailed_classification_display(model_results, algorithm)
+        
         # Restore original sys.argv
         sys.argv = original_argv
         
@@ -341,6 +366,70 @@ def run_risk_estimation_json(algorithm='random_forest'):
         print(f"Full traceback: {error_traceback}")
         
         return results
+
+def get_detailed_classification_display(model_results, algorithm):
+    """
+    Generate detailed classification metrics display for web interface.
+    """
+    classification_display = {
+        "algorithm_used": algorithm,
+        "models": {}
+    }
+    
+    for model_name, metrics in model_results.items():
+        # Format test set performance
+        test_performance = {
+            "accuracy": f"{metrics.get('accuracy', 0.0):.4f}",
+            "precision": f"{metrics.get('precision', 0.0):.4f}",
+            "recall": f"{metrics.get('recall', 0.0):.4f}",
+            "f1_score": f"{metrics.get('f1_score', 0.0):.4f}",
+            "auc_score": f"{metrics['auc_score']:.4f}"
+        }
+        
+        # Format cross-validation performance  
+        cv_accuracy_mean = metrics.get('cv_accuracy_mean', 0.0)
+        cv_accuracy_std = metrics.get('cv_accuracy_std', 0.0)
+        cv_precision_mean = metrics.get('cv_precision_mean', 0.0)
+        cv_precision_std = metrics.get('cv_precision_std', 0.0)
+        cv_recall_mean = metrics.get('cv_recall_mean', 0.0)
+        cv_recall_std = metrics.get('cv_recall_std', 0.0)
+        cv_f1_mean = metrics.get('cv_f1_mean', 0.0)
+        cv_f1_std = metrics.get('cv_f1_std', 0.0)
+        cv_auc_mean = metrics.get('cv_auc_mean', metrics.get('cv_mean', 0.0))
+        cv_auc_std = metrics.get('cv_auc_std', metrics.get('cv_std', 0.0))
+        
+        cv_performance = {
+            "accuracy": f"{cv_accuracy_mean:.4f} (+/- {cv_accuracy_std * 2:.4f})",
+            "precision": f"{cv_precision_mean:.4f} (+/- {cv_precision_std * 2:.4f})",
+            "recall": f"{cv_recall_mean:.4f} (+/- {cv_recall_std * 2:.4f})",
+            "f1_score": f"{cv_f1_mean:.4f} (+/- {cv_f1_std * 2:.4f})",
+            "auc_score": f"{cv_auc_mean:.4f} (+/- {cv_auc_std * 2:.4f})"
+        }
+        
+        classification_display["models"][model_name] = {
+            "test_set_performance": test_performance,
+            "cross_validation_performance": cv_performance,
+            "summary": {
+                "best_metric": "auc_score",
+                "best_value": f"{metrics['auc_score']:.4f}",
+                "performance_rating": get_performance_rating(metrics['auc_score'])
+            }
+        }
+    
+    return classification_display
+
+def get_performance_rating(auc_score):
+    """Generate a performance rating based on AUC score."""
+    if auc_score >= 0.95:
+        return "Excellent"
+    elif auc_score >= 0.90:
+        return "Very Good" 
+    elif auc_score >= 0.80:
+        return "Good"
+    elif auc_score >= 0.70:
+        return "Fair"
+    else:
+        return "Poor"
 
 def get_algorithm_details(algorithm):
     """

@@ -171,29 +171,78 @@ def train_delinquency_models(X, y):
             y_pred = model.predict(X_test)
             y_pred_proba = model.predict_proba(X_test)[:, 1]
         
-        # Calculate metrics
+        # Calculate comprehensive metrics
+        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+        
         auc_score = roc_auc_score(y_test, y_pred_proba)
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred, average='weighted')
+        recall = recall_score(y_test, y_pred, average='weighted')
+        f1 = f1_score(y_test, y_pred, average='weighted')
+        
         cv_scores = cross_val_score(model, X_train_scaled if name == 'Logistic Regression' else X_train, 
                                    y_train, cv=5, scoring='roc_auc')
+        
+        # Calculate additional CV scores for different metrics
+        cv_accuracy = cross_val_score(model, X_train_scaled if name == 'Logistic Regression' else X_train, 
+                                     y_train, cv=5, scoring='accuracy')
+        cv_precision = cross_val_score(model, X_train_scaled if name == 'Logistic Regression' else X_train, 
+                                      y_train, cv=5, scoring='precision_weighted')
+        cv_recall = cross_val_score(model, X_train_scaled if name == 'Logistic Regression' else X_train, 
+                                   y_train, cv=5, scoring='recall_weighted')
+        cv_f1 = cross_val_score(model, X_train_scaled if name == 'Logistic Regression' else X_train, 
+                               y_train, cv=5, scoring='f1_weighted')
         
         model_results[name] = {
             'model': model,
             'auc_score': auc_score,
-            'cv_mean': cv_scores.mean(),
-            'cv_std': cv_scores.std(),
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'f1_score': f1,
+            'cv_auc_mean': cv_scores.mean(),
+            'cv_auc_std': cv_scores.std(),
+            'cv_accuracy_mean': cv_accuracy.mean(),
+            'cv_accuracy_std': cv_accuracy.std(),
+            'cv_precision_mean': cv_precision.mean(),
+            'cv_precision_std': cv_precision.std(),
+            'cv_recall_mean': cv_recall.mean(),
+            'cv_recall_std': cv_recall.std(),
+            'cv_f1_mean': cv_f1.mean(),
+            'cv_f1_std': cv_f1.std(),
             'predictions': y_pred_proba
         }
         
-        print(f"AUC Score: {auc_score:.4f}")
-        print(f"Cross-validation AUC: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
-        print(f"\nClassification Report:")
+        # Display comprehensive performance metrics
+        print(f"\n{'='*60}")
+        print(f"PERFORMANCE METRICS - {name}")
+        print(f"{'='*60}")
+        print(f"Test Set Performance:")
+        print(f"  Accuracy:  {accuracy:.4f}")
+        print(f"  Precision: {precision:.4f}")
+        print(f"  Recall:    {recall:.4f}")
+        print(f"  F1-Score:  {f1:.4f}")
+        print(f"  AUC Score: {auc_score:.4f}")
+        
+        print(f"\nCross-Validation Performance (5-fold):")
+        print(f"  Accuracy:  {cv_accuracy.mean():.4f} (+/- {cv_accuracy.std() * 2:.4f})")
+        print(f"  Precision: {cv_precision.mean():.4f} (+/- {cv_precision.std() * 2:.4f})")
+        print(f"  Recall:    {cv_recall.mean():.4f} (+/- {cv_recall.std() * 2:.4f})")
+        print(f"  F1-Score:  {cv_f1.mean():.4f} (+/- {cv_f1.std() * 2:.4f})")
+        print(f"  AUC:       {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
+        
+        print(f"\nDetailed Classification Report:")
         print(classification_report(y_test, y_pred))
+        
+        print(f"\nConfusion Matrix:")
+        print(confusion_matrix(y_test, y_pred))
     
-    # Select best model
+    # Select best model based on AUC score
     best_model_name = max(model_results.keys(), key=lambda x: model_results[x]['auc_score'])
     best_model = model_results[best_model_name]['model']
     
     print(f"\nBest performing model: {best_model_name}")
+    print(f"Best model AUC Score: {model_results[best_model_name]['auc_score']:.4f}")
     
     return best_model, model_results, scaler
 def train_single_algorithm(X, y, algorithm):
@@ -243,21 +292,69 @@ def train_single_algorithm(X, y, algorithm):
         y_pred = model.predict(X_test)
         y_pred_proba = model.predict_proba(X_test)[:, 1]
     
-    # Calculate metrics
+    # Calculate comprehensive metrics
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+    
     auc_score = roc_auc_score(y_test, y_pred_proba) if len(set(y_test)) > 1 else 0.0
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, average='weighted')
+    recall = recall_score(y_test, y_pred, average='weighted')
+    f1 = f1_score(y_test, y_pred, average='weighted')
+    
     cv_scores = cross_val_score(model, X_train_scaled if algorithm == 'logistic_regression' else X_train, y_train, cv=5, scoring='roc_auc')
     
-    print(f"AUC Score: {auc_score:.4f}")
-    print(f"Cross-validation AUC: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
-    print(f"\nClassification Report:")
+    # Calculate additional CV scores for different metrics
+    cv_accuracy = cross_val_score(model, X_train_scaled if algorithm == 'logistic_regression' else X_train, 
+                                 y_train, cv=5, scoring='accuracy')
+    cv_precision = cross_val_score(model, X_train_scaled if algorithm == 'logistic_regression' else X_train, 
+                                  y_train, cv=5, scoring='precision_weighted')
+    cv_recall = cross_val_score(model, X_train_scaled if algorithm == 'logistic_regression' else X_train, 
+                               y_train, cv=5, scoring='recall_weighted')
+    cv_f1 = cross_val_score(model, X_train_scaled if algorithm == 'logistic_regression' else X_train, 
+                           y_train, cv=5, scoring='f1_weighted')
+    
+    # Display comprehensive performance metrics
+    print(f"\n{'='*60}")
+    print(f"PERFORMANCE METRICS - {model_name}")
+    print(f"{'='*60}")
+    print(f"Test Set Performance:")
+    print(f"  Accuracy:  {accuracy:.4f}")
+    print(f"  Precision: {precision:.4f}")
+    print(f"  Recall:    {recall:.4f}")
+    print(f"  F1-Score:  {f1:.4f}")
+    print(f"  AUC Score: {auc_score:.4f}")
+    
+    print(f"\nCross-Validation Performance (5-fold):")
+    print(f"  Accuracy:  {cv_accuracy.mean():.4f} (+/- {cv_accuracy.std() * 2:.4f})")
+    print(f"  Precision: {cv_precision.mean():.4f} (+/- {cv_precision.std() * 2:.4f})")
+    print(f"  Recall:    {cv_recall.mean():.4f} (+/- {cv_recall.std() * 2:.4f})")
+    print(f"  F1-Score:  {cv_f1.mean():.4f} (+/- {cv_f1.std() * 2:.4f})")
+    print(f"  AUC:       {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
+    
+    print(f"\nDetailed Classification Report:")
     print(classification_report(y_test, y_pred))
+    
+    print(f"\nConfusion Matrix:")
+    print(confusion_matrix(y_test, y_pred))
     
     # Store results in same format as train_delinquency_models
     model_results = {
         model_name: {
             'auc_score': auc_score,
-            'cv_mean': cv_scores.mean(),
-            'cv_std': cv_scores.std()
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'f1_score': f1,
+            'cv_auc_mean': cv_scores.mean(),
+            'cv_auc_std': cv_scores.std(),
+            'cv_accuracy_mean': cv_accuracy.mean(),
+            'cv_accuracy_std': cv_accuracy.std(),
+            'cv_precision_mean': cv_precision.mean(),
+            'cv_precision_std': cv_precision.std(),
+            'cv_recall_mean': cv_recall.mean(),
+            'cv_recall_std': cv_recall.std(),
+            'cv_f1_mean': cv_f1.mean(),
+            'cv_f1_std': cv_f1.std()
         }
     }
     
@@ -619,17 +716,77 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='rando
                         risk_scores[idx] = 1
             
     elif algorithm == 'percentile':
-        # Percentile-based risk classification
+        # Percentile-based risk classification using data-driven thresholds
         print("Using Percentile-based risk classification...")
-        # Bottom 60% = Low (0), Next 30% = Medium (1), Top 10% = High (2)
-        percentile_60 = np.percentile(risk_probabilities, 60)
-        percentile_90 = np.percentile(risk_probabilities, 90)
         
-        risk_scores = np.zeros(len(risk_probabilities))
-        risk_scores[risk_probabilities > percentile_60] = 1  # Medium risk
-        risk_scores[risk_probabilities > percentile_90] = 2  # High risk
+        print(f"Raw probability distribution:")
+        print(f"  Min: {np.min(risk_probabilities):.4f}")  
+        print(f"  Max: {np.max(risk_probabilities):.4f}")
+        print(f"  Mean: {np.mean(risk_probabilities):.4f}")
+        print(f"  Std: {np.std(risk_probabilities):.4f}")
         
-        print(f"Percentile thresholds: P60={percentile_60:.4f}, P90={percentile_90:.4f}")
+        # Sort probabilities to analyze distribution
+        sorted_probs = np.sort(risk_probabilities)
+        n_samples = len(risk_probabilities)
+        
+        print(f"  Total samples: {n_samples}")
+        print(f"  Sample values at key positions:")
+        print(f"    Position 600 (60%): {sorted_probs[599]:.4f}")  # 60% mark
+        print(f"    Position 900 (90%): {sorted_probs[899]:.4f}")  # 90% mark
+        
+        # Calculate the actual threshold values using percentiles
+        low_to_medium_threshold = np.percentile(risk_probabilities, 60)    # 60th percentile 
+        medium_to_high_threshold = np.percentile(risk_probabilities, 90)   # 90th percentile
+        
+        print(f"Calculated thresholds:")
+        print(f"  Low->Medium threshold (P60): {low_to_medium_threshold:.4f}")
+        print(f"  Medium->High threshold (P90): {medium_to_high_threshold:.4f}")
+        print(f"  Threshold difference: {medium_to_high_threshold - low_to_medium_threshold:.4f}")
+        
+        # Check if percentiles are too close (indicating low variance)
+        threshold_diff = medium_to_high_threshold - low_to_medium_threshold
+        prob_range = np.max(risk_probabilities) - np.min(risk_probabilities)
+        
+        if threshold_diff < 0.001 or threshold_diff < (prob_range * 0.02):
+            print("WARNING: P60 and P90 are very close! Using adaptive quartile approach...")
+            
+            # Use quartiles when percentiles are too close
+            q25 = np.percentile(risk_probabilities, 25)
+            q50 = np.percentile(risk_probabilities, 50)  # median
+            q75 = np.percentile(risk_probabilities, 75)
+            
+            print(f"Quartile thresholds: Q25={q25:.4f}, Q50={q50:.4f}, Q75={q75:.4f}")
+            
+            # Apply quartile-based classification
+            risk_scores = np.zeros(len(risk_probabilities), dtype=int)
+            risk_scores[risk_probabilities >= q50] = 1  # Medium risk (above median)
+            risk_scores[risk_probabilities >= q75] = 2  # High risk (above 75th percentile)
+            
+            low_to_medium_threshold = q50
+            medium_to_high_threshold = q75
+            
+        else:
+            # Standard percentile-based approach
+            risk_scores = np.zeros(len(risk_probabilities), dtype=int)
+            risk_scores[risk_probabilities >= low_to_medium_threshold] = 1  # Medium risk
+            risk_scores[risk_probabilities >= medium_to_high_threshold] = 2    # High risk
+        
+        # Count classifications for verification
+        low_count = np.sum(risk_scores == 0)
+        medium_count = np.sum(risk_scores == 1) 
+        high_count = np.sum(risk_scores == 2)
+        
+        print(f"Classification results:")
+        print(f"  Low risk: {low_count} ({low_count/n_samples*100:.1f}%)")
+        print(f"  Medium risk: {medium_count} ({medium_count/n_samples*100:.1f}%)")
+        print(f"  High risk: {high_count} ({high_count/n_samples*100:.1f}%)")
+        print(f"  Applied thresholds: Low<{low_to_medium_threshold:.4f}, Medium<{medium_to_high_threshold:.4f}, High>={medium_to_high_threshold:.4f}")
+        
+        # Verify the distribution makes sense
+        if medium_count == 0:
+            print("ERROR: No Medium risk borrowers classified! This suggests algorithmic issue.")
+        if low_count < n_samples * 0.2 or high_count < n_samples * 0.05:
+            print(f"WARNING: Unusual distribution detected - check data variance")
             
     elif algorithm == 'threshold':
         # Fixed probability threshold-based risk classification  
@@ -664,9 +821,10 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='rando
         print(f"  Low -> Medium: 0.6")
         print(f"  Medium -> High: 0.9")
     elif algorithm == 'percentile':
-        print(f"\nPercentile Thresholds Used:")
-        print(f"  Low -> Medium: {np.percentile(risk_probabilities, 60):.4f}")
-        print(f"  Medium -> High: {np.percentile(risk_probabilities, 90):.4f}")
+        print(f"\nPercentile-based Classification Details:")
+        print(f"  Target distribution: ~50% Low, ~25% Medium, ~25% High")
+        print(f"  Method: {'Adaptive quartile thresholds' if 'q50' in locals() else 'Data-driven percentile thresholds'}")
+        print(f"  Applied thresholds: P60/Q50={low_to_medium_threshold:.4f}, P90/Q75={medium_to_high_threshold:.4f}")
     elif algorithm in ['svm', 'knn']:
         print(f"\nML Classifier Details:")
         if algorithm == 'svm':
@@ -677,6 +835,72 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='rando
             print(f"  Training method: Stratified split with probability-based labels")
     
     return risk_scores
+
+def save_model_performance_report(model_results, output_dir="eda_outputs", filename="model_performance_report.txt"):
+    """
+    Save detailed model performance metrics to a file.
+    """
+    import os
+    from datetime import datetime
+    
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Add timestamp to filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamped_filename = f"model_performance_{timestamp}.txt"
+    filepath = os.path.join(output_dir, timestamped_filename)
+    
+    with open(filepath, 'w') as f:
+        f.write("DELINQUENCY ANALYSIS - MODEL PERFORMANCE REPORT\n")
+        f.write("=" * 60 + "\n")
+        f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+        
+        f.write("SUMMARY TABLE\n")
+        f.write("-" * 80 + "\n")
+        f.write(f"{'Model':<20} {'Accuracy':<10} {'Precision':<11} {'Recall':<8} {'F1-Score':<9} {'AUC':<7}\n")
+        f.write(f"{'-'*20} {'-'*10} {'-'*11} {'-'*8} {'-'*9} {'-'*7}\n")
+        
+        for name, results in model_results.items():
+            accuracy = results.get('accuracy', 0.0)
+            precision = results.get('precision', 0.0)
+            recall = results.get('recall', 0.0)
+            f1 = results.get('f1_score', 0.0)
+            auc = results['auc_score']
+            f.write(f"{name:<20} {accuracy:<10.4f} {precision:<11.4f} {recall:<8.4f} {f1:<9.4f} {auc:<7.4f}\n")
+        
+        f.write("\n\nDETAILED CROSS-VALIDATION RESULTS\n")
+        f.write("-" * 80 + "\n")
+        
+        for name, results in model_results.items():
+            f.write(f"\n{name.upper()}\n")
+            f.write("-" * len(name) + "\n")
+            
+            # Test set performance
+            f.write("Test Set Performance:\n")
+            if 'accuracy' in results:
+                f.write(f"  Accuracy:  {results['accuracy']:.4f}\n")
+                f.write(f"  Precision: {results['precision']:.4f}\n")
+                f.write(f"  Recall:    {results['recall']:.4f}\n")
+                f.write(f"  F1-Score:  {results['f1_score']:.4f}\n")
+            f.write(f"  AUC Score: {results['auc_score']:.4f}\n")
+            
+            # Cross-validation performance
+            f.write("\nCross-Validation Performance (5-fold):\n")
+            if 'cv_accuracy_mean' in results:
+                f.write(f"  Accuracy:  {results['cv_accuracy_mean']:.4f} (+/- {results['cv_accuracy_std'] * 2:.4f})\n")
+                f.write(f"  Precision: {results['cv_precision_mean']:.4f} (+/- {results['cv_precision_std'] * 2:.4f})\n")
+                f.write(f"  Recall:    {results['cv_recall_mean']:.4f} (+/- {results['cv_recall_std'] * 2:.4f})\n")
+                f.write(f"  F1-Score:  {results['cv_f1_mean']:.4f} (+/- {results['cv_f1_std'] * 2:.4f})\n")
+                f.write(f"  AUC:       {results['cv_auc_mean']:.4f} (+/- {results['cv_auc_std'] * 2:.4f})\n")
+            else:
+                # Handle legacy format
+                cv_mean = results.get('cv_mean', results.get('cv_auc_mean', 0.0))
+                cv_std = results.get('cv_std', results.get('cv_auc_std', 0.0))
+                f.write(f"  AUC:       {cv_mean:.4f} (+/- {cv_std * 2:.4f})\n")
+    
+    print(f"\nModel performance report saved to: {filepath}")
+    return filepath
 
 def update_loan_info_table(df, risk_scores):
     """
@@ -732,8 +956,15 @@ def generate_analysis_report(df, feature_importance_df, model_results, risk_scor
     print(f"- Overall delinquency rate: {df['is_delinquent'].mean():.2%}")
     
     print(f"\nModel Performance Summary:")
+    print(f"{'Model':<20} {'Accuracy':<10} {'Precision':<11} {'Recall':<8} {'F1-Score':<9} {'AUC':<7}")
+    print(f"{'-'*20} {'-'*10} {'-'*11} {'-'*8} {'-'*9} {'-'*7}")
     for name, results in model_results.items():
-        print(f"- {name}: AUC = {results['auc_score']:.4f}")
+        accuracy = results.get('accuracy', 0.0)
+        precision = results.get('precision', 0.0)
+        recall = results.get('recall', 0.0)
+        f1 = results.get('f1_score', 0.0)
+        auc = results['auc_score']
+        print(f"{name:<20} {accuracy:<10.4f} {precision:<11.4f} {recall:<8.4f} {f1:<9.4f} {auc:<7.4f}")
     
     print(f"\nTop 10 Risk Factors for Delinquency:")
     for i, (_, row) in enumerate(feature_importance_df.head(10).iterrows()):
@@ -831,6 +1062,9 @@ def main():
     best_model_name = max(model_results.keys(), key=lambda x: model_results[x]['auc_score'])
     feature_importance_df = analyze_feature_importance(best_model, feature_columns, best_model_name)
     
+    # Save detailed performance report
+    save_model_performance_report(model_results)
+    
     # Calculate risk scores using specified algorithm
     risk_scores = calculate_risk_scores(best_model, X, scaler, best_model_name, args.algorithm)
     
@@ -840,10 +1074,31 @@ def main():
     # Generate report
     generate_analysis_report(df, feature_importance_df, model_results, risk_scores)
     
+    # Display best model summary
+    print(f"\n{'='*80}")
+    print(f"BEST MODEL SUMMARY")
+    print(f"{'='*80}")
+    best_results = model_results[best_model_name]
+    print(f"Best Performing Model: {best_model_name}")
+    if 'accuracy' in best_results:
+        print(f"  Test Accuracy:     {best_results['accuracy']:.4f}")
+        print(f"  Test Precision:    {best_results['precision']:.4f}")
+        print(f"  Test Recall:       {best_results['recall']:.4f}")
+        print(f"  Test F1-Score:     {best_results['f1_score']:.4f}")
+    print(f"  Test AUC Score:    {best_results['auc_score']:.4f}")
+    if 'cv_accuracy_mean' in best_results:
+        print(f"  CV Accuracy:       {best_results['cv_accuracy_mean']:.4f} (+/- {best_results['cv_accuracy_std'] * 2:.4f})")
+        print(f"  CV AUC:            {best_results['cv_auc_mean']:.4f} (+/- {best_results['cv_auc_std'] * 2:.4f})")
+    else:
+        cv_mean = best_results.get('cv_mean', best_results.get('cv_auc_mean', 0.0))
+        cv_std = best_results.get('cv_std', best_results.get('cv_auc_std', 0.0))
+        print(f"  CV AUC:            {cv_mean:.4f} (+/- {cv_std * 2:.4f})")
+    
     print(f"\nDelinquency analysis complete!")
     print(f"The loan_info table has been updated with delinquency_risk scores.")
     print(f"Risk scores: 0 (Low Risk), 1 (Medium Risk), 2 (High Risk)")
     print(f"Algorithm used: {args.algorithm}")
+    print(f"Performance report saved in eda_outputs/ directory")
 
 if __name__ == "__main__":
     main()

@@ -468,8 +468,85 @@
               <div class="card-body">
                 <!-- Performance Metrics -->
                 <div class="row mb-3" *ngIf="riskEstimationResults.model_performance?.performance_summary">
+                  <!-- Top Row - Core Metrics -->
                   <div class="col-md-3">
                     <div class="text-center p-2 bg-light rounded">
+                      <div class="fw-bold fs-5" 
+                           [class.text-success]="riskEstimationResults.model_performance.performance_summary.accuracy >= 0.8"
+                           [class.text-warning]="riskEstimationResults.model_performance.performance_summary.accuracy >= 0.7 && riskEstimationResults.model_performance.performance_summary.accuracy < 0.8"
+                           [class.text-danger]="riskEstimationResults.model_performance.performance_summary.accuracy < 0.7">
+                        {{ (riskEstimationResults.model_performance.performance_summary.accuracy * 100) | number:'1.1-1' }}%
+                      </div>
+                      <small class="text-muted d-flex align-items-center justify-content-center">
+                        Accuracy
+                        <i class="bi bi-info-circle ms-1" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top"
+                           title="Accuracy: Overall correct predictions out of all predictions. Shows how often the model correctly classifies borrowers as delinquent or non-delinquent."
+                           style="cursor: pointer; color: #6c757d;"></i>
+                      </small>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                      <div class="fw-bold fs-5" 
+                           [class.text-success]="riskEstimationResults.model_performance.performance_summary.precision >= 0.8"
+                           [class.text-warning]="riskEstimationResults.model_performance.performance_summary.precision >= 0.7 && riskEstimationResults.model_performance.performance_summary.precision < 0.8"
+                           [class.text-danger]="riskEstimationResults.model_performance.performance_summary.precision < 0.7">
+                        {{ (riskEstimationResults.model_performance.performance_summary.precision * 100) | number:'1.1-1' }}%
+                      </div>
+                      <small class="text-muted d-flex align-items-center justify-content-center">
+                        Precision
+                        <i class="bi bi-info-circle ms-1" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top"
+                           title="Precision: Of all borrowers predicted as high-risk, how many are actually high-risk. Higher precision reduces false alarms."
+                           style="cursor: pointer; color: #6c757d;"></i>
+                      </small>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                      <div class="fw-bold fs-5" 
+                           [class.text-success]="riskEstimationResults.model_performance.performance_summary.recall >= 0.8"
+                           [class.text-warning]="riskEstimationResults.model_performance.performance_summary.recall >= 0.7 && riskEstimationResults.model_performance.performance_summary.recall < 0.8"
+                           [class.text-danger]="riskEstimationResults.model_performance.performance_summary.recall < 0.7">
+                        {{ (riskEstimationResults.model_performance.performance_summary.recall * 100) | number:'1.1-1' }}%
+                      </div>
+                      <small class="text-muted d-flex align-items-center justify-content-center">
+                        Recall
+                        <i class="bi bi-info-circle ms-1" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top"
+                           title="Recall: Of all actual high-risk borrowers, how many were correctly identified. Higher recall catches more risky borrowers."
+                           style="cursor: pointer; color: #6c757d;"></i>
+                      </small>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                      <div class="fw-bold fs-5" 
+                           [class.text-success]="riskEstimationResults.model_performance.performance_summary.f1_score >= 0.8"
+                           [class.text-warning]="riskEstimationResults.model_performance.performance_summary.f1_score >= 0.7 && riskEstimationResults.model_performance.performance_summary.f1_score < 0.8"
+                           [class.text-danger]="riskEstimationResults.model_performance.performance_summary.f1_score < 0.7">
+                        {{ (riskEstimationResults.model_performance.performance_summary.f1_score * 100) | number:'1.1-1' }}%
+                      </div>
+                      <small class="text-muted d-flex align-items-center justify-content-center">
+                        F1-Score
+                        <i class="bi bi-info-circle ms-1" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top"
+                           title="F1-Score: Harmonic mean of precision and recall. Balanced measure that considers both false positives and false negatives."
+                           style="cursor: pointer; color: #6c757d;"></i>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Second Row - AUC and Cross-Validation -->
+                <div class="row mb-3" *ngIf="riskEstimationResults.model_performance?.performance_summary">
+                  <div class="col-md-3">
+                    <div class="text-center p-2 bg-primary bg-opacity-10 rounded">
                       <div class="fw-bold fs-5" 
                            [class.text-success]="riskEstimationResults.model_performance.performance_summary.auc_score >= 0.8"
                            [class.text-warning]="riskEstimationResults.model_performance.performance_summary.auc_score >= 0.7 && riskEstimationResults.model_performance.performance_summary.auc_score < 0.8"
@@ -487,7 +564,7 @@
                     </div>
                   </div>
                   <div class="col-md-3">
-                    <div class="text-center p-2 bg-light rounded">
+                    <div class="text-center p-2 bg-info bg-opacity-10 rounded">
                       <div class="fw-bold fs-6"
                            [class.text-success]="riskEstimationResults.model_performance.performance_summary.performance_rating === 'Excellent'"
                            [class.text-info]="riskEstimationResults.model_performance.performance_summary.performance_rating === 'Good'"
@@ -506,20 +583,20 @@
                     </div>
                   </div>
                   <div class="col-md-3">
-                    <div class="text-center p-2 bg-light rounded">
-                      <div class="fw-bold fs-6">{{ (riskEstimationResults.model_performance.performance_summary.cross_validation_mean * 100) | number:'1.1-1' }}%</div>
+                    <div class="text-center p-2 bg-success bg-opacity-10 rounded">
+                      <div class="fw-bold fs-6">{{ (riskEstimationResults.model_performance.performance_summary.cross_validation_accuracy_mean * 100) | number:'1.1-1' }}%</div>
                       <small class="text-muted d-flex align-items-center justify-content-center">
-                        CV Mean
+                        CV Accuracy
                         <i class="bi bi-info-circle ms-1" 
                            data-bs-toggle="tooltip" 
                            data-bs-placement="top"
-                           title="CV Mean (Cross-Validation Mean): Average performance across multiple training/testing splits of the data. This metric shows how consistently the model performs on different data subsets, indicating model stability and generalizability. Values close to the main AUC score suggest reliable performance across various data conditions."
+                           title="CV Accuracy (Cross-Validation): Average accuracy across multiple training/testing splits. Shows model stability and consistency across different data subsets."
                            style="cursor: pointer; color: #6c757d;"></i>
                       </small>
                     </div>
                   </div>
                   <div class="col-md-3">
-                    <div class="text-center p-2 bg-light rounded">
+                    <div class="text-center p-2 bg-warning bg-opacity-10 rounded">
                       <div class="fw-bold fs-6">{{ riskEstimationResults.model_performance?.algorithm_details?.type }}</div>
                       <small class="text-muted">Algorithm Type</small>
                     </div>
@@ -544,6 +621,83 @@
                     </ul>
                   </div>
                 </div>
+                
+                <!-- Detailed Classification Report -->
+                <div *ngIf="riskEstimationResults.detailed_classification_metrics" class="row mt-4">
+                  <div class="col-md-12">
+                    <div class="card border-primary">
+                      <div class="card-header bg-primary bg-opacity-10">
+                        <h6 class="mb-0 text-dark">
+                          <i class="bi bi-clipboard-data me-2"></i>Detailed Classification Report
+                        </h6>
+                      </div>
+                      <div class="card-body">
+                        <div class="row">
+                          <!-- Test Set Performance -->
+                          <div class="col-md-6">
+                            <h6 class="text-success">Test Set Performance:</h6>
+                            <div class="table-responsive">
+                              <table class="table table-sm table-borderless">
+                                <tbody>
+                                  <tr>
+                                    <td class="text-muted">Accuracy:</td>
+                                    <td class="fw-bold">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.accuracy }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="text-muted">Precision:</td>
+                                    <td class="fw-bold">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.precision }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="text-muted">Recall:</td>
+                                    <td class="fw-bold">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.recall }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="text-muted">F1-Score:</td>
+                                    <td class="fw-bold">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.f1_score }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="text-muted">AUC Score:</td>
+                                    <td class="fw-bold">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.auc_score }}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                          <!-- Cross-Validation Performance -->
+                          <div class="col-md-6">
+                            <h6 class="text-info">Cross-Validation Performance (5-fold):</h6>
+                            <div class="table-responsive">
+                              <table class="table table-sm table-borderless">
+                                <tbody>
+                                  <tr>
+                                    <td class="text-muted">Accuracy:</td>
+                                    <td class="fw-bold">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.accuracy }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="text-muted">Precision:</td>
+                                    <td class="fw-bold">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.precision }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="text-muted">Recall:</td>
+                                    <td class="fw-bold">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.recall }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="text-muted">F1-Score:</td>
+                                    <td class="fw-bold">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.f1_score }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="text-muted">AUC Score:</td>
+                                    <td class="fw-bold">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.auc_score }}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 <!-- Parameters -->
                 <div class="mt-2" *ngIf="riskEstimationResults.model_performance?.algorithm_details?.parameters">
@@ -558,6 +712,242 @@
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Classification Accuracy Results Subpanel -->
+<div *ngIf="showRiskResults && showClassificationAccuracy && riskEstimationResults && riskEstimationResults.success && riskEstimationResults.detailed_classification_metrics" class="row mb-3">
+  <div class="col-md-12">
+    <div class="card border-warning">
+      <div class="card-header bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
+        <h6 class="card-title text-dark mb-0">
+          <i class="bi bi-clipboard-data me-2"></i>Classification Accuracy Results
+        </h6>
+        <div class="d-flex align-items-center">
+          <span class="badge bg-success me-2">
+            {{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.summary?.performance_rating }}
+          </span>
+          <button 
+            type="button" 
+            class="btn-close" 
+            aria-label="Close"
+            (click)="closeClassificationAccuracy()"
+            title="Close Classification Accuracy Results">
+          </button>
+        </div>
+      </div>
+      <div class="card-body p-3">
+        <!-- Summary Header -->
+        <div class="row mb-3">
+          <div class="col-md-8">
+            <h6 class="text-warning mb-2">
+              <i class="bi bi-graph-up me-2"></i>Model Performance Analysis
+            </h6>
+            <p class="mb-2"><strong>Algorithm:</strong> {{ riskEstimationResults.detailed_classification_metrics.algorithm_used }}</p>
+            <p class="mb-0"><strong>Best Metric:</strong> {{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.summary?.best_metric }} ({{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.summary?.best_value }})</p>
+          </div>
+          <div class="col-md-4 text-end">
+            <div class="text-center p-2 bg-light rounded">
+              <div class="fw-bold text-primary fs-5">{{ riskEstimationResults.model_performance?.best_model || 'N/A' }}</div>
+              <small class="text-muted">Selected Model</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test Set Performance Section -->
+        <div class="row mb-4">
+          <div class="col-md-12">
+            <div class="card border-success">
+              <div class="card-header bg-success bg-opacity-10">
+                <h6 class="mb-0 text-dark">
+                  <i class="bi bi-check-circle me-2"></i>Test Set Performance
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-light">
+                      <div class="fw-bold fs-5 text-success">{{ (riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.accuracy * 100) | number:'1.2-2' }}%</div>
+                      <small class="text-muted">Accuracy</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-light">
+                      <div class="fw-bold fs-5 text-info">{{ (riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.precision * 100) | number:'1.2-2' }}%</div>
+                      <small class="text-muted">Precision</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-light">
+                      <div class="fw-bold fs-5 text-warning">{{ (riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.recall * 100) | number:'1.2-2' }}%</div>
+                      <small class="text-muted">Recall</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-light">
+                      <div class="fw-bold fs-5 text-primary">{{ (riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.f1_score * 100) | number:'1.2-2' }}%</div>
+                      <small class="text-muted">F1-Score</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-primary bg-opacity-10">
+                      <div class="fw-bold fs-5 text-danger">{{ (riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.auc_score * 100) | number:'1.2-2' }}%</div>
+                      <small class="text-muted">AUC Score</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-light">
+                      <div class="fw-bold fs-6 text-secondary">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.summary?.performance_rating }}</div>
+                      <small class="text-muted">Rating</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cross-Validation Performance Section -->
+        <div class="row mb-4">
+          <div class="col-md-12">
+            <div class="card border-info">
+              <div class="card-header bg-info bg-opacity-10">
+                <h6 class="mb-0 text-dark">
+                  <i class="bi bi-shuffle me-2"></i>Cross-Validation Performance (5-fold)
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-light">
+                      <div class="fw-bold fs-6 text-success">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.accuracy }}</div>
+                      <small class="text-muted">Accuracy</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-light">
+                      <div class="fw-bold fs-6 text-info">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.precision }}</div>
+                      <small class="text-muted">Precision</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-light">
+                      <div class="fw-bold fs-6 text-warning">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.recall }}</div>
+                      <small class="text-muted">Recall</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-light">
+                      <div class="fw-bold fs-6 text-primary">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.f1_score }}</div>
+                      <small class="text-muted">F1-Score</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-info bg-opacity-10">
+                      <div class="fw-bold fs-6 text-danger">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.auc_score }}</div>
+                      <small class="text-muted">AUC Score</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="text-center p-2 border rounded bg-light">
+                      <div class="fw-bold fs-6 text-secondary">CV</div>
+                      <small class="text-muted">Method</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-12 text-center">
+                    <small class="text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Values shown include mean ± standard deviation across 5 cross-validation folds
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Comparison Table -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card border-secondary">
+              <div class="card-header bg-secondary bg-opacity-10">
+                <h6 class="mb-0 text-dark">
+                  <i class="bi bi-table me-2"></i>Detailed Performance Comparison
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Metric</th>
+                        <th class="text-center">Test Set</th>
+                        <th class="text-center">Cross-Validation</th>
+                        <th class="text-center">Interpretation</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>Accuracy</strong></td>
+                        <td class="text-center">{{ (riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.accuracy * 100) | number:'1.2-2' }}%</td>
+                        <td class="text-center">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.accuracy }}</td>
+                        <td class="text-center">
+                          <span class="badge bg-success" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.accuracy >= 0.85">Excellent</span>
+                          <span class="badge bg-info" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.accuracy >= 0.75 && riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.accuracy < 0.85">Good</span>
+                          <span class="badge bg-warning" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.accuracy < 0.75">Needs Improvement</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>Precision</strong></td>
+                        <td class="text-center">{{ (riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.precision * 100) | number:'1.2-2' }}%</td>
+                        <td class="text-center">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.precision }}</td>
+                        <td class="text-center">
+                          <span class="badge bg-success" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.precision >= 0.85">Low False Positives</span>
+                          <span class="badge bg-info" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.precision >= 0.75 && riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.precision < 0.85">Moderate False Positives</span>
+                          <span class="badge bg-warning" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.precision < 0.75">High False Positives</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>Recall</strong></td>
+                        <td class="text-center">{{ (riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.recall * 100) | number:'1.2-2' }}%</td>
+                        <td class="text-center">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.recall }}</td>
+                        <td class="text-center">
+                          <span class="badge bg-success" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.recall >= 0.85">Catches Most Risks</span>
+                          <span class="badge bg-info" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.recall >= 0.75 && riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.recall < 0.85">Misses Some Risks</span>
+                          <span class="badge bg-warning" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.recall < 0.75">Misses Many Risks</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>F1-Score</strong></td>
+                        <td class="text-center">{{ (riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.f1_score * 100) | number:'1.2-2' }}%</td>
+                        <td class="text-center">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.f1_score }}</td>
+                        <td class="text-center">
+                          <span class="badge bg-success" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.f1_score >= 0.85">Balanced Performance</span>
+                          <span class="badge bg-info" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.f1_score >= 0.75 && riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.f1_score < 0.85">Good Balance</span>
+                          <span class="badge bg-warning" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.f1_score < 0.75">Unbalanced</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>AUC Score</strong></td>
+                        <td class="text-center">{{ (riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.auc_score * 100) | number:'1.2-2' }}%</td>
+                        <td class="text-center">{{ riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.cross_validation_performance?.auc_score }}</td>
+                        <td class="text-center">
+                          <span class="badge bg-success" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.auc_score >= 0.9">Excellent Discrimination</span>
+                          <span class="badge bg-info" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.auc_score >= 0.8 && riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.auc_score < 0.9">Good Discrimination</span>
+                          <span class="badge bg-warning" *ngIf="riskEstimationResults.detailed_classification_metrics.models[riskEstimationResults.model_performance.best_model]?.test_set_performance?.auc_score < 0.8">Poor Discrimination</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

@@ -407,9 +407,13 @@ class DatabaseManager:
             COALESCE(payment_agg.payment_consistency, 0) as payment_consistency,
             COALESCE(payment_agg.early_payments, 0) as early_payments,
             
-            -- Delinquency Target Variable (1 if any missed payments, 0 otherwise)
+            -- Delinquency Target Variable (More realistic classification)
             CASE 
-                WHEN COALESCE(payment_agg.missed_payments, 0) > 0 THEN 1 
+                WHEN COALESCE(payment_agg.missed_payments, 0) > 2 OR 
+                     COALESCE(payment_agg.late_payments, 0) > 5 OR
+                     (COALESCE(payment_agg.late_payments, 0) + COALESCE(payment_agg.missed_payments, 0)) > 6 OR
+                     COALESCE(payment_agg.payment_consistency, 100) < 75
+                THEN 1 
                 ELSE 0 
             END as is_delinquent
             
@@ -422,12 +426,12 @@ class DatabaseManager:
                 COUNT(*) as total_payments,
                 SUM(amount_paid) as total_amount_paid,
                 AVG(amount_paid) as avg_payment_amount,
-                SUM(CASE WHEN status = 'Paid' THEN 1 ELSE 0 END) as on_time_payments,
-                SUM(CASE WHEN status = 'Late' THEN 1 ELSE 0 END) as late_payments,
+                SUM(CASE WHEN status = 'Paid' AND COALESCE(days_late, 0) = 0 THEN 1 ELSE 0 END) as on_time_payments,
+                SUM(CASE WHEN status = 'Late' OR COALESCE(days_late, 0) > 0 THEN 1 ELSE 0 END) as late_payments,
                 SUM(CASE WHEN status = 'Missed' THEN 1 ELSE 0 END) as missed_payments,
                 SUM(CASE WHEN status = 'Early' THEN 1 ELSE 0 END) as early_payments,
                 JULIANDAY('now') - JULIANDAY(MAX(paid_date)) as days_since_last_payment,
-                (CAST(SUM(CASE WHEN status = 'Paid' THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*)) * 100 as payment_consistency
+                (CAST(SUM(CASE WHEN status = 'Paid' AND COALESCE(days_late, 0) = 0 THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*)) * 100 as payment_consistency
             FROM loan_payments 
             GROUP BY payer_id
         ) payment_agg ON up.payer_id = payment_agg.payer_id
