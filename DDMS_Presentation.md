@@ -51,9 +51,9 @@ Department: Risk Analytics & Technology Innovation
 
 ```mermaid
 flowchart LR
-    DL["**Data Layer**<br/>• User Profiles<br/>• Loan Data<br/>• Programs<br/>• Payments"]
-    AE["**Analytics Engine**<br/>• ML Pipeline<br/>• Risk Models<br/>• EDA Engine<br/>• PCA Analysis"]
-    PL["**Presentation Layer**<br/>• Angular SPA<br/>• Interactive Dashboards<br/>• Real-time Visuals"]
+    DL["<b>Data Layer</b><br/>• User Profiles<br/>• Loan Data<br/>• Programs<br/>• Payments"]
+    AE["<b>Analytics Engine</b><br/>• ML Pipeline<br/>• Risk Models<br/>• EDA Engine<br/>• PCA Analysis"]
+    PL["<b>Presentation Layer</b><br/>• Angular SPA<br/>• Interactive Dashboards<br/>• Real-time Visuals"]
 
     DL --> AE --> PL
 ```
