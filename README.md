@@ -2,6 +2,29 @@
 
 A comprehensive full-stack application for synthetic student loan delinquency analysis, featuring advanced machine learning risk prediction with 9 algorithms, exploratory data analysis (EDA), and interactive performance visualizations. Built with Angular 17 frontend and Flask ML backend.
 
+## DDMS (Delinquency Data Management System) – Architecture Overview
+
+Below is a **brief architecture description** based on the uploaded diagram:
+
+***
+
+## DDMS (Delinquency Data Management System) – Architecture Overview
+
+The architecture centers on the **DDMS API**, which acts as the core integration and processing layer. It ingests data from two primary sources:
+
+*   **Operational Data**: Real or production‑like borrower and loan information used for analysis and decisioning.
+*   **Synthetic Delinquency Data Generator**: A controlled data generation component used to simulate delinquency scenarios for testing, analytics, and model development.
+
+The **DDMS API** exposes standardized endpoints that aggregate, process, and serve delinquency‑related data to downstream consumers.
+
+On the presentation layer, the **DDMS Website** consumes the API to provide a user‑facing interface. This web application enables users to interact with the data, trigger analyses, and visualize results.
+
+Finally, the system produces **Exploratory Data Analysis (EDA) reports**, which are generated from processed data and surfaced through the web interface for end users. These reports support insight discovery, risk assessment, and ongoing monitoring.
+
+**In summary**, the design cleanly separates data generation and ingestion, core analytics services, and user presentation, allowing the platform to scale and evolve while supporting both operational and exploratory analytics use cases.
+
+![DDMS Architecture Diagram](assets/DDMS.jpg)
+
 ## 🚀 Key Features
 
 - 🎲 **Synthetic Data Generation**: Generate comprehensive mock student loan datasets (100-5,000 borrowers)
