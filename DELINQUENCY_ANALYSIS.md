@@ -2,12 +2,13 @@
 
 ## Overview
 
-The student loan analytics system provides comprehensive machine learning-powered data analysis capabilities through three primary components:
+The student loan analytics system provides comprehensive machine learning-powered data analysis capabilities through four primary components:
 1. **Advanced ML Risk Analysis**: 9 sophisticated algorithms with individual training and performance optimization
-2. **Exploratory Data Analysis (EDA)**: Interactive visualizations and statistical insights with PCA and clustering
+2. **Exploratory Data Analysis (EDA)**: Interactive visualizations and statistical insights with PCA and clustering  
 3. **Campaign Management**: Risk-based borrower segmentation with automated file generation
+4. **Session Logging**: Multi-format analysis tracking (text, markdown, HTML) with comprehensive performance capture
 
-The system integrates data from all four database tables to provide actionable insights for loan portfolio management using state-of-the-art machine learning techniques.
+The system integrates data from all four database tables to provide actionable insights for loan portfolio management using state-of-the-art machine learning techniques with full traceability through session logging.
 
 ## 🤖 Machine Learning Architecture
 
@@ -33,7 +34,8 @@ flowchart TB
         F1[Statistical Methods]
         F2[Percentile Algorithm]
         F3[Threshold Algorithm] 
-        F4[K-Means Clustering]
+        G1[Clustering Algorithm]
+        G2[K-Means Clustering]
     end
     
     subgraph analysis_engines[⚡ Analysis Engines]
@@ -41,14 +43,16 @@ flowchart TB
         H[Performance Metrics Engine]
         I[EDA Visualization Engine]
         J[Campaign Generator]
+        K[Session Logging Engine]
     end
     
     subgraph output_layer[📋 Enhanced Output Layer]
-        K[Updated Database with Risk Scores]
-        L[Performance Metrics & AUC Scores]
-        M[Interactive Visualizations]
-        N[Targeted Campaign Files]
-        O[Detailed Analysis Reports]
+        L[Updated Database with Risk Scores]
+        M[Performance Metrics & AUC Scores]
+        N[Interactive Visualizations]
+        O[Targeted Campaign Files]
+        P[Detailed Analysis Reports]
+        Q[Session Logs (Text/Markdown/HTML)]
     end
     
     subgraph web_interface[🌐 Enhanced Web Interface]
@@ -106,7 +110,8 @@ flowchart TD
     
     E2 --> G1[Percentile Algorithm<br/>60th/90th Percentiles]
     E2 --> G2[Threshold Algorithm<br/>0.6/0.9 Cutoffs]  
-    E2 --> G3[K-Means Clustering<br/>3 Risk Clusters]
+    
+    E3 --> H1[K-Means Clustering<br/>3 Risk Clusters]
     
     F1 --> H[Performance Metrics Engine]
     F2 --> H
@@ -175,7 +180,7 @@ flowchart TD
 - **Parameters**: n_neighbors=5, weights='distance', algorithm='auto'
 - **Best For**: Local pattern recognition and similarity-based classification
 
-##### **Statistical Methods (3)**
+##### **Statistical Methods (2)**
 
 **7. Percentile Algorithm**
 - **Type**: Statistical Distribution Analysis
@@ -189,11 +194,15 @@ flowchart TD
 - **Thresholds**: Fixed cutoffs at 0.6 (Low<0.6) and 0.9 (High>0.9)
 - **Best For**: Simple rule-based classification with clear business logic
 
+##### **Clustering Algorithm (1)**
+
 **9. K-Means Clustering**
-- **Type**: Unsupervised Learning
-- **Category**: Unsupervised Learning
-- **Clusters**: 3 risk-based clusters mapped to Low/Medium/High
-- **Best For**: Unsupervised risk pattern discovery and natural groupings
+- **Type**: Unsupervised Learning adapted for Classification
+- **Category**: Clustering Algorithm
+- **Implementation**: Clusters probability distributions into 3 risk-based groups
+- **Training Process**: Uses Random Forest classifier to create probability-based training labels, then applies K-Means clustering for final risk categorization
+- **Best For**: Risk classification based on natural data clustering patterns and unsupervised pattern discovery
+- **Dual Usage**: Also used in EDA for pattern discovery on PCA components
 
 #### 🎯 Updated Risk Classification System
 
@@ -454,6 +463,197 @@ payer_id,first_name,last_name,email,phone,risk_level,risk_probability,algorithm_
 1001,John,Doe,john.doe@email.com,555-0123,2,0.9234,random_forest,0.95,intensive_counseling
 1002,Jane,Smith,jane.smith@email.com,555-0124,2,0.8967,gradient_boosting,0.92,payment_restructuring
 ```
+
+### 4. Advanced Session Logging System
+
+**Purpose**: Comprehensive analysis tracking and session management system providing multi-format logging capability (text, markdown, HTML) for complete audit trail and performance analysis documentation.
+
+#### Session Logging Architecture
+```mermaid
+flowchart TD
+    A[Risk Analysis Start] --> B[Initialize Session Logger]
+    B --> C[RiskEstimationLogger Instance]
+    C --> D[Multi-Format File Initialization]
+    D --> E[Print Statement Interception]
+    E --> F[Real-time Logging to Multiple Formats]
+    F --> G[Analysis Execution with Full Capture]
+    G --> H[Session Finalization]
+    H --> I[Markdown to HTML Conversion]
+    I --> J[File Path Return]
+    J --> K[API Response with File Links]
+    
+    D --> D1[risk_estimate_session.txt<br/>Plain text format]
+    D --> D2[risk_estimate_session.md<br/>Markdown with formatting]
+    D --> D3[risk_estimate_session.html<br/>Styled HTML output]
+    
+    F --> F1[Console Output<br/>Normal developer experience]
+    F --> F2[Text File<br/>Raw unformatted logging]  
+    F --> F3[Markdown File<br/>Structured documentation]
+    
+    I --> I1[markdown2 Library<br/>Professional HTML styling]
+    I --> I2[CSS Styling<br/>Enhanced readability]
+```
+
+#### RiskEstimationLogger Implementation
+
+**Core Features:**
+- **Multi-format Output**: Simultaneous logging to text, markdown, and HTML
+- **Print Interception**: Captures all analysis output without code changes
+- **Session Management**: Automatic file cleanup and initialization
+- **HTML Conversion**: Professional styling with markdown2 library
+- **Path Resolution**: Absolute paths for consistent file location
+- **Error Handling**: Graceful fallbacks for missing dependencies
+
+```python
+class RiskEstimationLogger:
+    """Enhanced session logging system with multi-format output."""
+    
+    def __init__(self):
+        self.output_dir = os.path.join(os.path.dirname(__file__), '..', 'risk_estimate_outputs')
+        os.makedirs(self.output_dir, exist_ok=True)
+        
+        self.session_id = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Multi-format file paths
+        self.md_file = os.path.join(self.output_dir, "risk_estimate_session.md")
+        self.html_file = os.path.join(self.output_dir, "risk_estimate_session.html")
+        self.txt_file = os.path.join(self.output_dir, "risk_estimate_session.txt")
+        
+        # Initialize all formats
+        self._initialize_markdown()
+        self._initialize_text()
+        
+        # Replace built-in print function
+        self.original_print = print
+        builtins.print = self.log_print
+    
+    def log_print(self, *args, sep=' ', end='\\n', file=None, flush=False):
+        """Custom print function that logs to console, markdown and text files."""
+        # Call original print for console output
+        self.original_print(*args, sep=sep, end=end, file=file, flush=flush)
+        
+        # Format the message
+        message = sep.join(str(arg) for arg in args) + end
+        
+        # Append to text file (simple, unformatted)
+        with open(self.txt_file, 'a', encoding='utf-8') as f:
+            f.write(message)
+        
+        # Append to markdown file
+        with open(self.md_file, 'a', encoding='utf-8') as f:
+            f.write(message)
+    
+    def finalize_session(self):
+        """Finalize the session and convert markdown to HTML."""
+        # Add session footer
+        with open(self.md_file, 'a', encoding='utf-8') as f:
+            f.write(f"\\n\\n---\\n*Session completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*\\n")
+        
+        # Convert markdown to HTML
+        self._convert_to_html()
+        
+        # Restore original print
+        builtins.print = self.original_print
+        
+        return self.md_file, self.html_file, self.txt_file
+```
+
+#### Session Log File Structure
+
+**Text Format** (`risk_estimate_session.txt`):
+```text
+Risk Estimation Analysis Session
+Session ID: 2026-04-07 10:30:15
+================================
+
+Loaded 1,000 records for analysis
+Dataset shape: (1000, 46)
+Features available: ['payer_id', 'age', 'annual_income_cad', ...]
+
+Training Random Forest...
+
+============================================================
+PERFORMANCE METRICS - Random Forest
+============================================================
+Test Set Performance:
+  Accuracy:  1.0000
+  Precision: 1.0000
+  Recall:    1.0000
+  F1-Score:  1.0000
+  AUC Score: 1.0000
+
+Cross-Validation Performance (5-fold):
+  Accuracy:  0.9950 (+/- 0.0094)
+  ...
+```
+
+**HTML Format** (`risk_estimate_session.html`):
+- Professional styling with CSS
+- Syntax highlighting for code blocks
+- Responsive design for mobile viewing
+- Enhanced typography and spacing
+- Bootstrap-inspired styling
+
+#### API Integration
+
+```python
+# Flask endpoint for serving session logs
+@app.route('/api/risk-report/<filename>', methods=['GET'])
+def get_risk_report(filename):
+    """Serve risk estimation report files (markdown and HTML)"""
+    try:
+        reports_dir = os.path.join(os.path.dirname(__file__), 'services', 'risk_estimate_outputs')
+        file_path = os.path.join(reports_dir, filename)
+        
+        if filename.endswith('.html'):
+            return send_file(file_path, mimetype='text/html')
+        elif filename.endswith('.md'):
+            return send_file(file_path, mimetype='text/markdown', as_attachment=True)
+        elif filename.endswith('.txt'):
+            return send_file(file_path, mimetype='text/plain', as_attachment=True)
+```
+
+#### Frontend Session Log Access
+
+**Enhanced UI Buttons:**
+```html
+<!-- Session Log Access Buttons -->
+<div class="btn-group me-2" role="group">
+  <a [href]="'http://localhost:5000/api/risk-report/risk_estimate_session.md'" 
+     class="btn btn-sm btn-outline-primary" 
+     download
+     title="Download session log in Markdown format">
+    <i class="bi bi-file-earmark-text me-1"></i>Session Log (Markdown)
+  </a>
+  
+  <a [href]="'http://localhost:5000/api/risk-report/risk_estimate_session.html'" 
+     class="btn btn-sm btn-outline-success" 
+     target="_blank"
+     title="View session log in formatted HTML">
+    <i class="bi bi-file-earmark-richtext me-1"></i>Session Log (HTML)
+  </a>
+  
+  <a [href]="'http://localhost:5000/api/risk-report/risk_estimate_session.txt'" 
+     class="btn btn-sm btn-outline-dark" 
+     download
+     title="Download session log in plain text format">
+    <i class="bi bi-file-earmark-text me-1"></i>Session Log (Text) 
+  </a>
+</div>
+```
+
+### Enhanced File Serving & API Endpoints
+
+#### Updated EDA File Serving
+- **Previous**: `/api/static/eda_outputs/<filename>`  
+- **Current**: `/api/services/eda_outputs/<filename>`
+- **Purpose**: Direct serving from generation location without static folder duplication
+
+#### Session Log File Serving
+- **Endpoint**: `/api/risk-report/<filename>`
+- **Supported Formats**: `.md`, `.html`, `.txt`
+- **Security**: Path traversal protection, filename validation
+- **CORS**: Properly configured for cross-origin requests
 
 ## 🌐 Enhanced Technology Stack & UI Features
 

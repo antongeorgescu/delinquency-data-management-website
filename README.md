@@ -34,6 +34,8 @@ Finally, the system produces **Exploratory Data Analysis (EDA) reports**, which 
 - 💻 **Modern Web Interface**: Responsive Angular SPA with Bootstrap 5 and performance metrics tooltips
 - 🎯 **Individual Algorithm Training**: Each algorithm trains independently for optimized performance
 - 📄 **Enhanced Performance Display**: AUC scores, cross-validation metrics, and detailed algorithm insights
+- 📝 **Comprehensive Session Logging**: Multi-format session logs (text, markdown, HTML) for analysis tracking
+- 🔗 **Dual K-Means Usage**: K-means clustering for both EDA pattern discovery and risk classification
 
 ## 📋 Technology Stack
 
@@ -54,10 +56,12 @@ Finally, the system produces **Exploratory Data Analysis (EDA) reports**, which 
 5. **Support Vector Machine (SVM)** - Kernel-based classification with optimal boundaries
 6. **K-Nearest Neighbors (KNN)** - Instance-based learning using neighbor similarity
 
-### Statistical Methods (3)
+### Statistical Methods (2)
 7. **Percentile Algorithm** - Risk based on 60th/90th percentile distribution
 8. **Threshold Algorithm** - Fixed cutoffs at 0.6/0.9 risk score thresholds  
-9. **K-Means Clustering** - Unsupervised clustering for risk segmentation
+
+### Clustering Algorithm (1)
+9. **K-Means Clustering** - Unsupervised clustering adapted for risk classification into discrete risk categories
 
 ## 🎯 Risk Classification System
 
@@ -124,10 +128,11 @@ delinquency-website/
 │   │   │   │   ├── generate_payments.py
 │   │   │   │   └── generate_programs.py
 │   │   │   ├── campaigns/            # Generated campaign files
-│   │   │   ├── eda_outputs/          # EDA visualization files
+│   │   │   ├── eda_outputs/          # EDA visualization files (served via API)
+│   │   │   ├── risk_estimate_outputs/ # Session logging files (text/markdown/HTML)
 │   │   │   └── database_exports/     # CSV data exports
-│   │   └── static/                   # Static file serving
-│   │       └── eda_outputs/          # Public EDA files
+│   │   └── shared/                   # Core database and utilities
+│   │       └── database.py           # SQLite database management
 │   └── web/                          # Angular Frontend (TypeScript)
 │       ├── package.json              # Node.js dependencies
 │       ├── angular.json              # Angular CLI configuration
@@ -316,7 +321,8 @@ Base URL: `http://localhost:5000/api`
 | Endpoint | Method | Description | Parameters |
 |----------|--------|-------------|------------|
 | `/campaign-files` | POST | Generate targeted campaign CSV files | - |
-| `/static/eda_outputs/<filename>` | GET | Serve generated EDA visualization files | `filename` |
+| `/services/eda_outputs/<filename>` | GET | Serve generated EDA visualization files | `filename` |
+| `/risk-report/<filename>` | GET | Serve risk estimation session logs (markdown/HTML) | `filename` |
 
 ### System Health
 | Endpoint | Method | Description | Parameters |
