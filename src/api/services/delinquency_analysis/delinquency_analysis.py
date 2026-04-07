@@ -1646,11 +1646,12 @@ def main():
         
     finally:
         # Finalize session logging and create output files
-        md_file, html_file = finalize_session_logging()
+        md_file, html_file, txt_file = finalize_session_logging()
         if md_file and html_file:
             print(f"\nSession logs saved to:")
             print(f"  Markdown: {os.path.basename(md_file)}")
             print(f"  HTML: {os.path.basename(html_file)}")
+            print(f"  Text: {os.path.basename(txt_file)}")
             print(f"  Location: {os.path.dirname(md_file)}")
         
         print(f"\nRisk estimation session completed successfully!")
