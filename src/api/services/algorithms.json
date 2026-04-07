@@ -119,9 +119,3 @@
     "pattern_discovery": "Exploratory unsupervised analysis"
   }
 }
-  "complexity_levels": {
-    "low": "Simple and fast",
-    "medium": "Moderate complexity",
-    "high": "Complex but powerful"
-  }
-}

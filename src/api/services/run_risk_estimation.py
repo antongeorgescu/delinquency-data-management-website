@@ -352,12 +352,18 @@ def run_risk_estimation_json(algorithm='random_forest'):
         
         # Finalize session logging for web interface calls
         try:
-            from delinquency_analysis import finalize_session_logging
-            md_file, html_file = finalize_session_logging()
+            from delinquency_analysis import finalize_session_logging, save_model_performance_report
+            md_file, html_file, txt_file = finalize_session_logging()
+            
+            # Save model performance report
+            model_performance_file = save_model_performance_report(model_results)
+            
             if md_file and html_file:
                 results["session_log"] = {
                     "markdown_file": md_file,
-                    "html_file": html_file
+                    "html_file": html_file,
+                    "text_file": txt_file,
+                    "model_performance_file": model_performance_file
                 }
         except (ImportError, NameError):
             # Logging modules not available - continue without logging
@@ -375,13 +381,22 @@ def run_risk_estimation_json(algorithm='random_forest'):
         
         # Finalize session logging even in case of error
         try:
-            from delinquency_analysis import finalize_session_logging
-            md_file, html_file = finalize_session_logging()
+            from delinquency_analysis import finalize_session_logging, save_model_performance_report
+            md_file, html_file, txt_file = finalize_session_logging()
+            
+            # Save model performance report even on error if we have model results
+            model_performance_file = None
+            if 'model_results' in locals() and model_results:
+                model_performance_file = save_model_performance_report(model_results)
+            
             if md_file and html_file:
                 results["session_log"] = {
                     "markdown_file": md_file,
-                    "html_file": html_file
+                    "html_file": html_file,
+                    "text_file": txt_file
                 }
+                if model_performance_file:
+                    results["session_log"]["model_performance_file"] = model_performance_file
         except (ImportError, NameError):
             # Logging modules not available - continue without logging
             pass

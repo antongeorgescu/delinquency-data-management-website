@@ -199,7 +199,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_payers", type=int, default=1000, help="Number of distinct student loan payers.")
     parser.add_argument("--start_date", type=str, default="2020-01-01", help="Start date for payments (YYYY-MM-DD)")
     parser.add_argument("--end_date", type=str, default="2023-12-31", help="End date for payments (YYYY-MM-DD)")
-    parser.add_argument("--db_path", type=str, default="student_loan_data.db", help="SQLite database path")
+    parser.add_argument("--db_path", type=str, default=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "shared", "student_loan_data.db")), help="SQLite database path")
     parser.add_argument("--export_csv", action="store_true", help="Export data to CSV files")
         
     args = parser.parse_args()

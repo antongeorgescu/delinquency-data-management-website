@@ -697,7 +697,7 @@ def run_eda_reports():
             }), 404
         
         # Set up output directory for EDA files
-        output_dir = os.path.join(os.path.dirname(__file__), 'static', 'eda_outputs')
+        output_dir = os.path.join(os.path.dirname(__file__), 'services', 'eda_outputs')
         os.makedirs(output_dir, exist_ok=True)
         
         # Run full EDA analysis with file generation
@@ -739,47 +739,47 @@ def run_eda_reports():
             {
                 "filename": "pca_scree_plot.html",
                 "description": "Variance explained by each principal component",
-                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/pca_scree_plot.html"
+                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/pca_scree_plot.html"
             },
             {
                 "filename": "pca_scatter_plot.html", 
                 "description": "PC1 vs PC2 scatter plot colored by delinquency risk",
-                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/pca_scatter_plot.html"
+                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/pca_scatter_plot.html"
             },
             {
                 "filename": f"pca_biplot_pc1_vs_pc2.html",
                 "description": "Biplot showing feature contribution vectors",
-                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/pca_biplot_pc1_vs_pc2.html"
+                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/pca_biplot_pc1_vs_pc2.html"
             },
             {
                 "filename": "pca_feature_contributions.html",
                 "description": "Feature contributions to each principal component",
-                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/pca_feature_contributions.html"
+                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/pca_feature_contributions.html"
             },
             {
                 "filename": "feature_correlation_heatmap.html",
                 "description": "Correlation matrix heatmap of original features",
-                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/feature_correlation_heatmap.html"
+                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/feature_correlation_heatmap.html"
             },
             {
                 "filename": f"pca_clustering_k{n_clusters}.html",
                 "description": f"K-means clustering results (k={n_clusters}) on PCA components",
-                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/pca_clustering_k{n_clusters}.html"
+                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/pca_clustering_k{n_clusters}.html"
             },
             {
                 "filename": "cluster_analysis_summary.csv",
                 "description": "Statistical summary of cluster analysis",
-                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/cluster_analysis_summary.csv"
+                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/cluster_analysis_summary.csv"
             },
             {
                 "filename": "eda_comprehensive_report.md",
                 "description": "Comprehensive analysis report with insights",
-                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/eda_comprehensive_report.md"
+                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/eda_comprehensive_report.md"
             },
             {
                 "filename": "eda_comprehensive_report.html",
                 "description": "Comprehensive analysis report (HTML format)",
-                "url": f"http://127.0.0.1:5000/api/static/eda_outputs/eda_comprehensive_report.html"
+                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/eda_comprehensive_report.html"
             }
         ]
         
@@ -848,14 +848,14 @@ def run_eda_reports():
         
         return jsonify(error_response), 500
 
-@app.route('/api/static/eda_outputs/<path:filename>')
+@app.route('/api/services/eda_outputs/<path:filename>')
 def serve_eda_files(filename):
     """
-    Serve static EDA output files (HTML, CSV, MD)
+    Serve EDA output files (HTML, CSV, MD)
     """
     try:
-        # Define the static directory for EDA outputs
-        eda_outputs_dir = os.path.join(os.path.dirname(__file__), 'static', 'eda_outputs')
+        # Define the services directory for EDA outputs
+        eda_outputs_dir = os.path.join(os.path.dirname(__file__), 'services', 'eda_outputs')
         
         # Security check: ensure filename doesn't contain path traversal
         if '..' in filename or filename.startswith('/'):
@@ -890,10 +890,10 @@ def serve_eda_files(filename):
     except Exception as e:
         return jsonify({"error": f"Failed to serve file: {str(e)}"}), 500
 
-@app.route('/api/static/eda_outputs/<path:filename>', methods=['OPTIONS'])
+@app.route('/api/services/eda_outputs/<path:filename>', methods=['OPTIONS'])
 def serve_eda_files_options(filename):
     """
-    Handle CORS preflight requests for EDA static files
+    Handle CORS preflight requests for EDA files
     """
     from flask import make_response
     response = make_response()
@@ -948,6 +948,58 @@ def get_risk_report(filename):
             "success": False,
             "error": str(e),
             "message": "Failed to serve report file"
+        }
+        
+        return jsonify(error_response), 500
+
+@app.route('/api/services/risk_estimate_outputs/<filename>', methods=['GET'])
+def get_risk_estimate_output(filename):
+    """
+    Serve risk estimation output files (text, markdown and HTML)
+    """
+    try:
+        # Define the risk estimate outputs directory path
+        outputs_dir = os.path.join(os.path.dirname(__file__), 'services', 'risk_estimate_outputs')
+        
+        # Validate filename to prevent directory traversal attacks
+        if '..' in filename or '/' in filename or '\\' in filename:
+            return jsonify({
+                "success": False,
+                "error": "Invalid filename",
+                "message": "File not found or access denied"
+            }), 404
+        
+        file_path = os.path.join(outputs_dir, filename)
+        
+        # Check if file exists
+        if not os.path.exists(file_path):
+            return jsonify({
+                "success": False,
+                "error": "File not found",
+                "message": f"Output file '{filename}' does not exist. Please run risk estimation first."
+            }), 404
+        
+        # Determine mimetype based on file extension
+        if filename.endswith('.html'):
+            mimetype = 'text/html'
+        elif filename.endswith('.md'):
+            mimetype = 'text/markdown'
+        elif filename.endswith('.txt'):
+            mimetype = 'text/plain'
+        else:
+            mimetype = 'application/octet-stream'
+        
+        # Return the file for viewing (not as download)
+        from flask import send_file, make_response
+        response = make_response(send_file(file_path, mimetype=mimetype))
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+        
+    except Exception as e:
+        error_response = {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to serve output file"
         }
         
         return jsonify(error_response), 500
