@@ -321,6 +321,13 @@ def get_risk_models():
                 'short_name': 'KNN',
                 'description': 'K-Nearest Neighbors classifier with optimal k and distance weighting',
                 'type': 'Classification Algorithm'
+            },
+            {
+                'id': 'kmeans',
+                'name': 'K-Means Clustering',
+                'short_name': 'K-Means',
+                'description': 'Clustering algorithm adapted for risk classification - groups borrowers into distinct risk categories',
+                'type': 'Clustering Algorithm'
             }
         ]
         

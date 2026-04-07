@@ -153,13 +153,7 @@
               </tbody>
             </table>
             
-            <!-- K-Means Note -->
-            <div class="mt-2">
-              <small class="text-muted">
-                <i class="bi bi-info-circle me-1"></i>
-                <strong>Note:</strong> All models use K-Means = 3 to categorize borrowers into 3 risk groups: Low, Medium, and High risk levels.
-              </small>
-            </div>
+
           </div>
           
           <!-- No algorithms message -->
@@ -251,6 +245,15 @@
             <li><i class="bi bi-check2 me-1"></i>Comprehensive reporting</li>
           </ul>
         </div>
+        
+        <!-- K-means Clustering Explanation -->
+        <div class="mb-3">
+          <small class="text-muted">
+            <i class="bi bi-info-circle me-1"></i>
+            <strong>K-means Clustering in EDA:</strong> This unsupervised algorithm groups borrowers based on PCA components to discover natural data patterns, create visual clusters for better data understanding, identify borrower segments for targeted analysis, and reduce complexity while finding meaningful groups.
+          </small>
+        </div>
+        
         <button 
           class="btn btn-primary px-3 py-2 text-nowrap w-100"
           [disabled]="isRunningEDA"

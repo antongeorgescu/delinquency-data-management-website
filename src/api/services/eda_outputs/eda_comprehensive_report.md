@@ -2,7 +2,7 @@
 # Exploratory Data Analysis Report
 ## Student Loan Delinquency Risk Assessment
 
-**Generated on:** 2026-04-06 21:15:33
+**Generated on:** 2026-04-07 06:57:05
 **Database:** C:\Users\ag4488\OneDrive - Finastra\Visual Studio 2022\Projects\delinquency-website\src\api\shared\student_loan_data.db
 
 ## Dataset Overview
@@ -113,16 +113,16 @@ This section identifies the most important features for each principal component
 
 | Rank | Feature | Loading | Impact | Description |
 |------|---------|---------|--------|-------------|
-| 1 | `employment_status_encoded` | 0.3048 | 📈 Positive (High) | Higher values increase component score |
-| 2 | `annual_income_cad` | -0.2995 | 📉 Negative (High) | Higher values decrease component score |
-| 3 | `low_income_risk` | 0.2667 | 📈 Positive (Medium) | Higher values increase component score |
+| 1 | `employment_status_encoded` | 0.3047 | 📈 Positive (High) | Higher values increase component score |
+| 2 | `annual_income_cad` | -0.2994 | 📉 Negative (High) | Higher values decrease component score |
+| 3 | `low_income_risk` | 0.2666 | 📈 Positive (Medium) | Higher values increase component score |
 | 4 | `debt_to_income_ratio` | 0.2533 | 📈 Positive (Medium) | Higher values increase component score |
 | 5 | `program_type_encoded` | 0.2418 | 📈 Positive (Low) | Higher values increase component score |
-| 6 | `payment_to_income_ratio` | 0.2322 | 📈 Positive (Low) | Higher values increase component score |
+| 6 | `payment_to_income_ratio` | 0.2321 | 📈 Positive (Low) | Higher values increase component score |
 | 7 | `average_starting_salary` | 0.2287 | 📈 Positive (Low) | Higher values increase component score |
-| 8 | `days_to_maturity` | 0.2239 | 📈 Positive (Low) | Higher values increase component score |
+| 8 | `days_to_maturity` | 0.2240 | 📈 Positive (Low) | Higher values increase component score |
 | 9 | `loan_progress_pct` | -0.2189 | 📉 Negative (Low) | Higher values decrease component score |
-| 10 | `low_employment_rate` | -0.2181 | 📉 Negative (Low) | Higher values decrease component score |
+| 10 | `low_employment_rate` | -0.2180 | 📉 Negative (Low) | Higher values decrease component score |
 
 #### PC3 Interpretation:
 
@@ -132,12 +132,12 @@ This section identifies the most important features for each principal component
 - `debt_to_income_ratio` (loading: 0.253)
 
 **Negative Drivers:** Features that decrease this component:
-- `annual_income_cad` (loading: -0.300)
+- `annual_income_cad` (loading: -0.299)
 - `loan_progress_pct` (loading: -0.219)
 - `low_employment_rate` (loading: -0.218)
 
 **Component Statistics:**
-- Maximum loading magnitude: 0.3048
+- Maximum loading magnitude: 0.3047
 - Average loading magnitude: 0.2488
 - Loading standard deviation: 0.0320
 
@@ -151,14 +151,14 @@ This section identifies the most important features for each principal component
 |------|---------|---------|--------|-------------|
 | 1 | `loan_term_years` | 0.3640 | 📈 Positive (High) | Higher values increase component score |
 | 2 | `loan_term_months` | 0.3640 | 📈 Positive (High) | Higher values increase component score |
-| 3 | `days_to_maturity` | 0.3445 | 📈 Positive (Medium) | Higher values increase component score |
-| 4 | `long_term_loan_risk` | 0.3334 | 📈 Positive (Medium) | Higher values increase component score |
-| 5 | `employment_status_encoded` | -0.2789 | 📉 Negative (Medium) | Higher values decrease component score |
-| 6 | `annual_income_cad` | 0.2693 | 📈 Positive (Low) | Higher values increase component score |
-| 7 | `low_income_risk` | -0.2439 | 📉 Negative (Low) | Higher values decrease component score |
+| 3 | `days_to_maturity` | 0.3444 | 📈 Positive (Medium) | Higher values increase component score |
+| 4 | `long_term_loan_risk` | 0.3333 | 📈 Positive (Medium) | Higher values increase component score |
+| 5 | `employment_status_encoded` | -0.2790 | 📉 Negative (Medium) | Higher values decrease component score |
+| 6 | `annual_income_cad` | 0.2694 | 📈 Positive (Low) | Higher values increase component score |
+| 7 | `low_income_risk` | -0.2440 | 📉 Negative (Low) | Higher values decrease component score |
 | 8 | `current_balance` | 0.2169 | 📈 Positive (Low) | Higher values increase component score |
 | 9 | `payment_to_income_ratio` | -0.1928 | 📉 Negative (Low) | Higher values decrease component score |
-| 10 | `debt_to_income_ratio` | -0.1754 | 📉 Negative (Low) | Higher values decrease component score |
+| 10 | `debt_to_income_ratio` | -0.1755 | 📉 Negative (Low) | Higher values decrease component score |
 
 #### PC4 Interpretation:
 
