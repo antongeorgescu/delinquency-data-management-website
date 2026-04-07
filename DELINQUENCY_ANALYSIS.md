@@ -288,6 +288,66 @@ def train_single_algorithm(algorithm_name, X_train, y_train):
 - `geographic_risk_factors`: Location-based economic indicators
 - `degree_level_multipliers`: Education level risk adjustments
 
+#### 🚨 Delinquency Classification Methodology
+
+**Target Variable Definition**: The system uses a sophisticated business rule-based approach to classify borrowers as delinquent or non-delinquent, based on comprehensive payment behavior analysis rather than traditional 30/60/90-day past due thresholds.
+
+**Classification Rule (SQL Logic)**:
+```sql
+CASE 
+    WHEN missed_payments > 2 OR 
+         late_payments > 5 OR
+         (late_payments + missed_payments) > 6 OR
+         payment_consistency < 75%
+    THEN 1 -- Delinquent
+    ELSE 0 -- Not Delinquent
+END as is_delinquent
+```
+
+**Rule Components Explained**:
+
+**1. Missed Payments Threshold (`missed_payments > 2`)**
+- **Purpose**: Identifies borrowers with significant payment gaps
+- **Business Logic**: More than 2 completely missed payments indicate serious financial distress
+- **Impact**: Captures borrowers who have stopped making payments entirely
+- **Risk Level**: High - indicates potential default trajectory
+
+**2. Late Payments Threshold (`late_payments > 5`)**  
+- **Purpose**: Identifies chronic late payment patterns
+- **Business Logic**: More than 5 late payments show persistent payment struggles
+- **Impact**: Captures borrowers with consistent timing issues but still making payments
+- **Risk Level**: Medium-High - indicates financial stress but continued payment intent
+
+**3. Combined Payment Issues (`(late_payments + missed_payments) > 6`)**
+- **Purpose**: Comprehensive payment problem assessment
+- **Business Logic**: Total payment issues exceeding 6 indicates severe payment difficulties
+- **Impact**: Captures borrowers with mixed payment problems (combination of late/missed)
+- **Risk Level**: High - indicates comprehensive payment management failure
+
+**4. Payment Consistency Threshold (`payment_consistency < 75%`)**
+- **Purpose**: Measures overall payment reliability and predictability
+- **Business Logic**: Less than 75% consistency indicates unreliable payment behavior
+- **Calculation**: `(on_time_payments / total_payments_made) * 100`
+- **Impact**: Captures borrowers with erratic payment patterns even if amounts are correct
+- **Risk Level**: Medium - indicates behavioral inconsistency and potential future problems
+
+**Business Rationale**:
+- **Multi-dimensional Assessment**: Considers frequency, consistency, and severity of payment issues
+- **Early Warning System**: Identifies risk before traditional 90+ days delinquent classification
+- **Behavioral Analysis**: Focuses on payment patterns rather than just timing
+- **Intervention Opportunity**: Enables proactive outreach and support before severe delinquency
+
+**Classification Outcomes**:
+- **Delinquent (1)**: Borrowers meeting any of the four criteria - requiring immediate attention and intervention
+- **Non-Delinquent (0)**: Borrowers with acceptable payment behavior - standard monitoring and engagement
+
+**Validation & Performance**:
+- **Model Training Target**: This classification serves as the target variable for all ML algorithms
+- **Performance Assessment**: ML models are evaluated on their ability to predict this derived delinquency status
+- **Business Alignment**: Rules align with institutional risk management policies and early intervention strategies
+
+**Important Note**: This is a **derived classification** based on payment behavior patterns in the synthetic dataset, not absolute delinquency status. The ML models are trained to predict this business rule-based classification, making the "Risk Score Performance Assessment" a comparison of ML predictions against these derived labels rather than ground truth delinquency status.
+
 #### 🏆 Enhanced ML Model Performance
 
 **Classification Algorithms Performance (Individual Training Results)**:

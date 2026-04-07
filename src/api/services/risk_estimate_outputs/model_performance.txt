@@ -1,12 +1,15 @@
 DELINQUENCY ANALYSIS - MODEL PERFORMANCE REPORT
 ============================================================
-Generated: 2026-04-07 13:01:36
+Generated: 2026-04-07 16:19:24
 
 SUMMARY TABLE
 --------------------------------------------------------------------------------
 Model                Accuracy   Precision   Recall   F1-Score  AUC    
 -------------------- ---------- ----------- -------- --------- -------
 Random Forest        0.9990     0.9990      0.9990   0.9990    1.0000 
+Gradient Boosting    1.0000     1.0000      1.0000   1.0000    1.0000 
+Logistic Regression  0.9990     0.9990      0.9990   0.9990    0.9999 
+SVC                  0.9690     0.9703      0.9690   0.9690    0.9970 
 
 
 DETAILED CROSS-VALIDATION RESULTS
@@ -27,3 +30,51 @@ Cross-Validation Performance (5-fold):
   Recall:    0.9995 (+/- 0.0012)
   F1-Score:  0.9995 (+/- 0.0012)
   AUC:       1.0000 (+/- 0.0002)
+
+GRADIENT BOOSTING
+-----------------
+Test Set Performance:
+  Accuracy:  1.0000
+  Precision: 1.0000
+  Recall:    1.0000
+  F1-Score:  1.0000
+  AUC Score: 1.0000
+
+Cross-Validation Performance (5-fold):
+  Accuracy:  0.9998 (+/- 0.0010)
+  Precision: 0.9998 (+/- 0.0010)
+  Recall:    0.9998 (+/- 0.0010)
+  F1-Score:  0.9998 (+/- 0.0010)
+  AUC:       0.9998 (+/- 0.0010)
+
+LOGISTIC REGRESSION
+-------------------
+Test Set Performance:
+  Accuracy:  0.9990
+  Precision: 0.9990
+  Recall:    0.9990
+  F1-Score:  0.9990
+  AUC Score: 0.9999
+
+Cross-Validation Performance (5-fold):
+  Accuracy:  0.9977 (+/- 0.0029)
+  Precision: 0.9978 (+/- 0.0029)
+  Recall:    0.9977 (+/- 0.0029)
+  F1-Score:  0.9978 (+/- 0.0029)
+  AUC:       1.0000 (+/- 0.0000)
+
+SVC
+---
+Test Set Performance:
+  Accuracy:  0.9690
+  Precision: 0.9703
+  Recall:    0.9690
+  F1-Score:  0.9690
+  AUC Score: 0.9970
+
+Cross-Validation Performance (5-fold):
+  Accuracy:  0.9520 (+/- 0.0207)
+  Precision: 0.9545 (+/- 0.0187)
+  Recall:    0.9520 (+/- 0.0207)
+  F1-Score:  0.9519 (+/- 0.0208)
+  AUC:       0.9962 (+/- 0.0027)

@@ -1526,13 +1526,16 @@ def generate_analysis_report(df, feature_importance_df, model_results, risk_scor
     
     # Correlation with actual delinquency - improved analysis
     print(f"\nRisk Score Validation (Actual Delinquency Rates by Risk Level):")
+    total_borrowers = len(df_with_risk)
     for risk_level in [0, 1, 2]:
         level_data = df_with_risk[df_with_risk['calculated_risk'] == risk_level]
         if len(level_data) > 0:
             actual_delinq_rate = level_data['is_delinquent'].mean()
+            borrowers_count = len(level_data)
+            borrowers_pct = (borrowers_count / total_borrowers) * 100
             print(f"- {risk_labels[risk_level]} ({risk_level}):")
             print(f"    Actual Delinquency Rate: {actual_delinq_rate:.1%}")
-            print(f"    Borrowers in Level: {len(level_data):,}")
+            print(f"    Borrowers in Level: {borrowers_count:,} ({borrowers_pct:.1f}% of total)")
     
     # Show examples by risk level
     for risk_level in [2, 1, 0]:  # Start with highest risk

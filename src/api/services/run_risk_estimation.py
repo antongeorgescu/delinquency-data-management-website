@@ -324,13 +324,17 @@ def run_risk_estimation_json(algorithm='random_forest'):
         df_with_risk['calculated_risk'] = risk_scores
         
         validation_metrics = {}
+        total_borrowers = len(df_with_risk)
         for risk_level in [0, 1, 2]:
             level_data = df_with_risk[df_with_risk['calculated_risk'] == risk_level]
             if len(level_data) > 0:
                 actual_delinq_rate = float(level_data['is_delinquent'].mean())
+                borrower_count = len(level_data)
+                percentage_of_total = (borrower_count / total_borrowers) * 100
                 validation_metrics[str(risk_level)] = {
                     "actual_delinquency_rate": round(actual_delinq_rate * 100, 1),
-                    "borrower_count": len(level_data)
+                    "borrower_count": borrower_count,
+                    "percentage_of_total": round(percentage_of_total, 1)
                 }
         
         results["validation_metrics"] = validation_metrics

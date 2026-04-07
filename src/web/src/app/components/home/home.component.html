@@ -408,25 +408,83 @@
           <div class="col-md-3">
             <div class="text-center p-2 bg-light rounded">
               <div class="fw-bold text-primary fs-5">{{ riskEstimationResults.statistics?.total_borrowers || 0 | number }}</div>
-              <small class="text-muted">Total Borrowers</small>
+              <small class="text-muted">
+                <i class="bi bi-people me-1"></i>Total Borrowers
+                <i class="bi bi-info-circle ms-1" 
+                   title="Total number of student loan borrowers in the analyzed dataset"
+                   data-bs-toggle="tooltip"></i>
+              </small>
             </div>
           </div>
           <div class="col-md-3">
             <div class="text-center p-2 bg-light rounded">
               <div class="fw-bold text-danger fs-5">{{ riskEstimationResults.statistics?.delinquent_borrowers || 0 | number }}</div>
-              <small class="text-muted">Delinquent</small>
+              <small class="text-muted">
+                <i class="bi bi-exclamation-triangle me-1"></i>Currently Delinquent
+                <i class="bi bi-info-circle ms-1" 
+                   title="Number of borrowers who are currently behind on their loan payments (90+ days past due)"
+                   data-bs-toggle="tooltip"></i>
+              </small>
             </div>
           </div>
           <div class="col-md-3">
             <div class="text-center p-2 bg-light rounded">
               <div class="fw-bold text-info fs-5">{{ (riskEstimationResults.statistics?.overall_delinquency_rate * 100) | number:'1.1-1' }}%</div>
-              <small class="text-muted">Delinquency Rate</small>
+              <small class="text-muted">
+                <i class="bi bi-percent me-1"></i>Overall Delinquency Rate
+                <i class="bi bi-info-circle ms-1" 
+                   title="Percentage of total borrowers who are currently delinquent (Delinquent ÷ Total Borrowers × 100)"
+                   data-bs-toggle="tooltip"></i>
+              </small>
             </div>
           </div>
           <div class="col-md-3">
             <div class="text-center p-2 bg-light rounded">
               <div class="fw-bold text-success fs-5">{{ riskEstimationResults.model_performance?.best_model || 'N/A' }}</div>
-              <small class="text-muted">Best Model</small>
+              <small class="text-muted">
+                <i class="bi bi-cpu me-1"></i>Best ML Model
+                <i class="bi bi-info-circle ms-1" 
+                   title="Machine learning algorithm that achieved the highest accuracy in predicting delinquency risk"
+                   data-bs-toggle="tooltip"></i>
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Statistics Explanation -->
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <div class="alert alert-info">
+              <h6 class="alert-heading mb-2">
+                <i class="bi bi-lightbulb me-2"></i>Understanding the Numbers
+              </h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <p class="mb-2">
+                    <strong>Delinquent Borrowers ({{ riskEstimationResults.statistics?.delinquent_borrowers || 0 | number }}):</strong> 
+                    These are student loan borrowers who are currently <em>90+ days behind</em> on their scheduled payments. 
+                    This indicates they are experiencing significant financial difficulty.
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <p class="mb-2">
+                    <strong>Delinquency Rate ({{ (riskEstimationResults.statistics?.overall_delinquency_rate * 100) | number:'1.1-1' }}%):</strong> 
+                    This percentage shows what portion of all borrowers are currently delinquent. 
+                    <span class="text-muted">
+                      Calculation: {{ riskEstimationResults.statistics?.delinquent_borrowers || 0 | number }} ÷ {{ riskEstimationResults.statistics?.total_borrowers || 0 | number }} × 100
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <small class="text-muted">
+                    <i class="bi bi-calendar-check me-1"></i>
+                    <strong>Note:</strong> Delinquency is typically defined as being 90 or more days past due on loan payments. 
+                    This analysis helps identify borrowers who may need intervention or support to avoid default.
+                  </small>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -452,6 +510,118 @@
                 <div class="p-2 border rounded text-center">
                   <div class="fw-bold text-danger">{{ riskEstimationResults.risk_distribution.high_risk?.count || 0 | number }}</div>
                   <small class="text-muted">High Risk ({{ riskEstimationResults.risk_distribution.high_risk?.percentage || 0 }}%)</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Score Performance Assessment Section -->
+        <div *ngIf="riskEstimationResults.validation_metrics" class="row mb-3">
+          <div class="col-md-12">
+            <h6 class="mb-2">
+              <i class="bi bi-graph-up me-2"></i>Risk Score Performance Assessment:
+              <i class="bi bi-info-circle ms-1" 
+                 title="This compares ML model predictions against derived delinquency labels calculated from payment patterns"
+                 data-bs-toggle="tooltip"></i>
+            </h6>
+            <div class="alert alert-light py-2 mb-2">
+              <small class="text-muted">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                <strong>Note:</strong> "Actual delinquency" represents labels derived from payment behavior patterns 
+                (missed payments > 2, late payments > 5, payment consistency < 75%), not absolute delinquency status. 
+                This assessment shows how well the ML model predictions align with these business rule-derived classifications.
+              </small>
+            </div>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="card border-success">
+                  <div class="card-header bg-success bg-opacity-10 py-2">
+                    <small class="fw-bold text-success">Low Risk (0)</small>
+                  </div>
+                  <div class="card-body py-2">
+                    <div class="row text-center">
+                      <div class="col-6">
+                        <div class="fs-6 fw-bold text-success">
+                          {{ riskEstimationResults.validation_metrics['0']?.actual_delinquency_rate || 0 }}%
+                        </div>
+                        <small class="text-muted">
+                          Derived Delinquency Rate
+                          <i class="bi bi-info-circle ms-1" 
+                             title="Based on payment behavior: missed payments > 2, late payments > 5, or consistency < 75%"
+                             data-bs-toggle="tooltip"></i>
+                        </small>
+                      </div>
+                      <div class="col-6">
+                        <div class="fs-6 fw-bold text-success">
+                          {{ riskEstimationResults.validation_metrics['0']?.borrower_count || 0 | number }}
+                        </div>
+                        <small class="text-muted">
+                          ({{ riskEstimationResults.validation_metrics['0']?.percentage_of_total || 0 }}% of total)
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card border-warning">
+                  <div class="card-header bg-warning bg-opacity-10 py-2">
+                    <small class="fw-bold text-warning">Medium Risk (1)</small>
+                  </div>
+                  <div class="card-body py-2">
+                    <div class="row text-center">
+                      <div class="col-6">
+                        <div class="fs-6 fw-bold text-warning">
+                          {{ riskEstimationResults.validation_metrics['1']?.actual_delinquency_rate || 0 }}%
+                        </div>
+                        <small class="text-muted">
+                          Derived Delinquency Rate
+                          <i class="bi bi-info-circle ms-1" 
+                             title="Based on payment behavior: missed payments > 2, late payments > 5, or consistency < 75%"
+                             data-bs-toggle="tooltip"></i>
+                        </small>
+                      </div>
+                      <div class="col-6">
+                        <div class="fs-6 fw-bold text-warning">
+                          {{ riskEstimationResults.validation_metrics['1']?.borrower_count || 0 | number }}
+                        </div>
+                        <small class="text-muted">
+                          ({{ riskEstimationResults.validation_metrics['1']?.percentage_of_total || 0 }}% of total)
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card border-danger">
+                  <div class="card-header bg-danger bg-opacity-10 py-2">
+                    <small class="fw-bold text-danger">High Risk (2)</small>
+                  </div>
+                  <div class="card-body py-2">
+                    <div class="row text-center">
+                      <div class="col-6">
+                        <div class="fs-6 fw-bold text-danger">
+                          {{ riskEstimationResults.validation_metrics['2']?.actual_delinquency_rate || 0 }}%
+                        </div>
+                        <small class="text-muted">
+                          Derived Delinquency Rate
+                          <i class="bi bi-info-circle ms-1" 
+                             title="Based on payment behavior: missed payments > 2, late payments > 5, or consistency < 75%"
+                             data-bs-toggle="tooltip"></i>
+                        </small>
+                      </div>
+                      <div class="col-6">
+                        <div class="fs-6 fw-bold text-danger">
+                          {{ riskEstimationResults.validation_metrics['2']?.borrower_count || 0 | number }}
+                        </div>
+                        <small class="text-muted">
+                          ({{ riskEstimationResults.validation_metrics['2']?.percentage_of_total || 0 }}% of total)
+                        </small>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
