@@ -2,10 +2,6 @@
 
 A comprehensive full-stack application for synthetic student loan delinquency analysis, featuring advanced machine learning risk prediction with 9 algorithms, exploratory data analysis (EDA), and interactive performance visualizations. Built with Angular 17 frontend and Flask ML backend.
 
-## DDMS (Delinquency Data Management System) – Architecture Overview
-
-Below is a **brief architecture description** based on the uploaded diagram:
-
 ***
 
 ## DDMS (Delinquency Data Management System) – Architecture Overview
