@@ -2,23 +2,23 @@
 # Exploratory Data Analysis Report
 ## Student Loan Delinquency Risk Assessment
 
-**Generated on:** 2026-04-07 13:02:29
+**Generated on:** 2026-04-07 20:19:05
 **Database:** C:\Users\ag4488\OneDrive - Finastra\Visual Studio 2022\Projects\delinquency-website\src\api\shared\student_loan_data.db
 
 ## Dataset Overview
 
-- **Total Borrowers:** 5,000
+- **Total Borrowers:** 1,000
 - **Total Features:** 54 (engineered)
-- **Delinquency Rate:** 48.76%
+- **Delinquency Rate:** 50.40%
 - **Data Quality:** Complete records after feature engineering
 
 ## Principal Component Analysis Results
 
 ### Variance Explanation
-- **PC1:** 13.26% of total variance
-- **PC2:** 9.55% of total variance
-- **PC3:** 7.73% of total variance
-- **First 5 PCs:** 44.69% of total variance
+- **PC1:** 13.55% of total variance
+- **PC2:** 9.87% of total variance
+- **PC3:** 7.70% of total variance
+- **First 5 PCs:** 45.21% of total variance
 - **Components for 80% variance:** 1
 - **Components for 95% variance:** 1
 
@@ -38,178 +38,178 @@
 
 This section identifies the most important features for each principal component based on their loadings. Features with higher absolute loadings have more influence on the component.
 
-### PC1 (13.26% variance explained)
+### PC1 (13.55% variance explained)
 
 #### Most Influential Features:
 
 | Rank | Feature | Loading | Impact | Description |
 |------|---------|---------|--------|-------------|
-| 1 | `avg_payment_amount` | 0.3338 | 📈 Positive (High) | Higher values increase component score |
-| 2 | `total_payments_made` | 0.3262 | 📈 Positive (Medium) | Higher values increase component score |
-| 3 | `late_payments` | 0.3199 | 📈 Positive (Medium) | Higher values increase component score |
-| 4 | `on_time_payments` | 0.3163 | 📈 Positive (Medium) | Higher values increase component score |
-| 5 | `total_amount_paid` | 0.2985 | 📈 Positive (Medium) | Higher values increase component score |
-| 6 | `days_since_last_payment` | -0.2784 | 📉 Negative (Medium) | Higher values decrease component score |
-| 7 | `payment_consistency` | 0.2268 | 📈 Positive (Low) | Higher values increase component score |
-| 8 | `program_type_encoded` | 0.2141 | 📈 Positive (Low) | Higher values increase component score |
-| 9 | `days_since_disbursement` | 0.2032 | 📈 Positive (Low) | Higher values increase component score |
-| 10 | `job_market_outlook_encoded` | 0.1991 | 📈 Positive (Low) | Higher values increase component score |
+| 1 | `avg_payment_amount` | 0.3285 | 📈 Positive (High) | Higher values increase component score |
+| 2 | `total_payments_made` | 0.3114 | 📈 Positive (Medium) | Higher values increase component score |
+| 3 | `late_payments` | 0.3067 | 📈 Positive (Medium) | Higher values increase component score |
+| 4 | `on_time_payments` | 0.3007 | 📈 Positive (Medium) | Higher values increase component score |
+| 5 | `total_amount_paid` | 0.2880 | 📈 Positive (Medium) | Higher values increase component score |
+| 6 | `days_since_last_payment` | -0.2753 | 📉 Negative (Medium) | Higher values decrease component score |
+| 7 | `program_type_encoded` | 0.2201 | 📈 Positive (Low) | Higher values increase component score |
+| 8 | `payment_consistency` | 0.2164 | 📈 Positive (Low) | Higher values increase component score |
+| 9 | `days_since_disbursement` | 0.2103 | 📈 Positive (Low) | Higher values increase component score |
+| 10 | `loan_progress_pct` | 0.2060 | 📈 Positive (Low) | Higher values increase component score |
 
 #### PC1 Interpretation:
 
 **Positive Drivers:** Features that increase this component:
-- `avg_payment_amount` (loading: 0.334)
-- `total_payments_made` (loading: 0.326)
-- `late_payments` (loading: 0.320)
+- `avg_payment_amount` (loading: 0.328)
+- `total_payments_made` (loading: 0.311)
+- `late_payments` (loading: 0.307)
 
 **Negative Drivers:** Features that decrease this component:
-- `days_since_last_payment` (loading: -0.278)
+- `days_since_last_payment` (loading: -0.275)
 
 **Component Statistics:**
-- Maximum loading magnitude: 0.3338
-- Average loading magnitude: 0.2716
-- Loading standard deviation: 0.0550
+- Maximum loading magnitude: 0.3285
+- Average loading magnitude: 0.2663
+- Loading standard deviation: 0.0479
 
 ---
 
-### PC2 (9.55% variance explained)
+### PC2 (9.87% variance explained)
 
 #### Most Influential Features:
 
 | Rank | Feature | Loading | Impact | Description |
 |------|---------|---------|--------|-------------|
-| 1 | `loan_amount` | 0.3643 | 📈 Positive (High) | Higher values increase component score |
-| 2 | `education_value` | 0.3588 | 📈 Positive (High) | Higher values increase component score |
-| 3 | `monthly_payment` | 0.3469 | 📈 Positive (Medium) | Higher values increase component score |
-| 4 | `current_balance` | 0.3409 | 📈 Positive (Medium) | Higher values increase component score |
-| 5 | `program_duration_years` | 0.3168 | 📈 Positive (Medium) | Higher values increase component score |
-| 6 | `down_payment` | 0.2071 | 📈 Positive (Low) | Higher values increase component score |
-| 7 | `payment_to_income_ratio` | 0.1949 | 📈 Positive (Low) | Higher values increase component score |
-| 8 | `debt_to_income_ratio` | 0.1875 | 📈 Positive (Low) | Higher values increase component score |
-| 9 | `total_payments_made` | -0.1637 | 📉 Negative (Low) | Higher values decrease component score |
-| 10 | `late_payments` | -0.1625 | 📉 Negative (Low) | Higher values decrease component score |
+| 1 | `loan_amount` | 0.3294 | 📈 Positive (High) | Higher values increase component score |
+| 2 | `education_value` | 0.3276 | 📈 Positive (High) | Higher values increase component score |
+| 3 | `monthly_payment` | 0.3217 | 📈 Positive (High) | Higher values increase component score |
+| 4 | `current_balance` | 0.3128 | 📈 Positive (Medium) | Higher values increase component score |
+| 5 | `program_duration_years` | 0.2922 | 📈 Positive (Medium) | Higher values increase component score |
+| 6 | `payment_to_income_ratio` | 0.2180 | 📈 Positive (Low) | Higher values increase component score |
+| 7 | `debt_to_income_ratio` | 0.2096 | 📈 Positive (Low) | Higher values increase component score |
+| 8 | `down_payment` | 0.2065 | 📈 Positive (Low) | Higher values increase component score |
+| 9 | `program_type_encoded` | -0.1882 | 📉 Negative (Low) | Higher values decrease component score |
+| 10 | `total_payments_made` | -0.1820 | 📉 Negative (Low) | Higher values decrease component score |
 
 #### PC2 Interpretation:
 
 **Positive Drivers:** Features that increase this component:
-- `loan_amount` (loading: 0.364)
-- `education_value` (loading: 0.359)
-- `monthly_payment` (loading: 0.347)
+- `loan_amount` (loading: 0.329)
+- `education_value` (loading: 0.328)
+- `monthly_payment` (loading: 0.322)
 
 **Negative Drivers:** Features that decrease this component:
-- `total_payments_made` (loading: -0.164)
-- `late_payments` (loading: -0.162)
+- `program_type_encoded` (loading: -0.188)
+- `total_payments_made` (loading: -0.182)
 
 **Component Statistics:**
-- Maximum loading magnitude: 0.3643
-- Average loading magnitude: 0.2643
-- Loading standard deviation: 0.0875
+- Maximum loading magnitude: 0.3294
+- Average loading magnitude: 0.2588
+- Loading standard deviation: 0.0627
 
 ---
 
-### PC3 (7.73% variance explained)
+### PC3 (7.70% variance explained)
 
 #### Most Influential Features:
 
 | Rank | Feature | Loading | Impact | Description |
 |------|---------|---------|--------|-------------|
-| 1 | `days_to_maturity` | 0.3771 | 📈 Positive (High) | Higher values increase component score |
-| 2 | `loan_term_months` | 0.3366 | 📈 Positive (High) | Higher values increase component score |
-| 3 | `loan_term_years` | 0.3366 | 📈 Positive (High) | Higher values increase component score |
-| 4 | `long_term_loan_risk` | 0.3104 | 📈 Positive (Medium) | Higher values increase component score |
-| 5 | `loan_progress_pct` | -0.2701 | 📉 Negative (Medium) | Higher values decrease component score |
-| 6 | `debt_to_income_ratio` | 0.2298 | 📈 Positive (Low) | Higher values increase component score |
-| 7 | `employment_status_encoded` | 0.2215 | 📈 Positive (Low) | Higher values increase component score |
-| 8 | `annual_income_cad` | -0.2096 | 📉 Negative (Low) | Higher values decrease component score |
-| 9 | `payment_to_income_ratio` | 0.2027 | 📈 Positive (Low) | Higher values increase component score |
-| 10 | `low_income_risk` | 0.1754 | 📈 Positive (Low) | Higher values increase component score |
+| 1 | `employment_status_encoded` | 0.3122 | 📈 Positive (High) | Higher values increase component score |
+| 2 | `annual_income_cad` | -0.2973 | 📉 Negative (High) | Higher values decrease component score |
+| 3 | `debt_to_income_ratio` | 0.2722 | 📈 Positive (Medium) | Higher values increase component score |
+| 4 | `low_income_risk` | 0.2643 | 📈 Positive (Medium) | Higher values increase component score |
+| 5 | `payment_to_income_ratio` | 0.2547 | 📈 Positive (Low) | Higher values increase component score |
+| 6 | `typical_tuition_cad` | -0.2476 | 📉 Negative (Low) | Higher values decrease component score |
+| 7 | `high_difficulty_program` | -0.2434 | 📉 Negative (Low) | Higher values decrease component score |
+| 8 | `days_to_maturity` | 0.2359 | 📈 Positive (Low) | Higher values increase component score |
+| 9 | `program_difficulty` | -0.2248 | 📉 Negative (Low) | Higher values decrease component score |
+| 10 | `average_starting_salary` | -0.2019 | 📉 Negative (Low) | Higher values decrease component score |
 
 #### PC3 Interpretation:
 
 **Positive Drivers:** Features that increase this component:
-- `days_to_maturity` (loading: 0.377)
-- `loan_term_months` (loading: 0.337)
-- `loan_term_years` (loading: 0.337)
+- `employment_status_encoded` (loading: 0.312)
+- `debt_to_income_ratio` (loading: 0.272)
+- `low_income_risk` (loading: 0.264)
 
 **Negative Drivers:** Features that decrease this component:
-- `loan_progress_pct` (loading: -0.270)
-- `annual_income_cad` (loading: -0.210)
+- `annual_income_cad` (loading: -0.297)
+- `typical_tuition_cad` (loading: -0.248)
+- `high_difficulty_program` (loading: -0.243)
 
 **Component Statistics:**
-- Maximum loading magnitude: 0.3771
-- Average loading magnitude: 0.2670
-- Loading standard deviation: 0.0691
+- Maximum loading magnitude: 0.3122
+- Average loading magnitude: 0.2554
+- Loading standard deviation: 0.0329
 
 ---
 
-### PC4 (7.34% variance explained)
+### PC4 (7.23% variance explained)
 
 #### Most Influential Features:
 
 | Rank | Feature | Loading | Impact | Description |
 |------|---------|---------|--------|-------------|
-| 1 | `employment_status_encoded` | 0.3784 | 📈 Positive (High) | Higher values increase component score |
-| 2 | `annual_income_cad` | -0.3675 | 📉 Negative (High) | Higher values decrease component score |
-| 3 | `low_income_risk` | 0.3294 | 📈 Positive (Medium) | Higher values increase component score |
-| 4 | `payment_to_income_ratio` | 0.2763 | 📈 Positive (Medium) | Higher values increase component score |
-| 5 | `debt_to_income_ratio` | 0.2712 | 📈 Positive (Medium) | Higher values increase component score |
-| 6 | `loan_term_months` | -0.1997 | 📉 Negative (Low) | Higher values decrease component score |
-| 7 | `loan_term_years` | -0.1997 | 📉 Negative (Low) | Higher values decrease component score |
-| 8 | `long_term_loan_risk` | -0.1884 | 📉 Negative (Low) | Higher values decrease component score |
-| 9 | `current_balance` | -0.1874 | 📉 Negative (Low) | Higher values decrease component score |
-| 10 | `days_to_maturity` | -0.1832 | 📉 Negative (Low) | Higher values decrease component score |
+| 1 | `loan_term_years` | 0.3581 | 📈 Positive (High) | Higher values increase component score |
+| 2 | `loan_term_months` | 0.3581 | 📈 Positive (High) | Higher values increase component score |
+| 3 | `long_term_loan_risk` | 0.3385 | 📈 Positive (Medium) | Higher values increase component score |
+| 4 | `days_to_maturity` | 0.3304 | 📈 Positive (Medium) | Higher values increase component score |
+| 5 | `typical_tuition_cad` | 0.3069 | 📈 Positive (Medium) | Higher values increase component score |
+| 6 | `program_difficulty` | 0.2918 | 📈 Positive (Medium) | Higher values increase component score |
+| 7 | `high_difficulty_program` | 0.2636 | 📈 Positive (Low) | Higher values increase component score |
+| 8 | `average_starting_salary` | 0.2545 | 📈 Positive (Low) | Higher values increase component score |
+| 9 | `education_roi` | -0.2483 | 📉 Negative (Low) | Higher values decrease component score |
+| 10 | `pos_duration` | 0.1619 | 📈 Positive (Low) | Higher values increase component score |
 
 #### PC4 Interpretation:
 
 **Positive Drivers:** Features that increase this component:
-- `employment_status_encoded` (loading: 0.378)
-- `low_income_risk` (loading: 0.329)
-- `payment_to_income_ratio` (loading: 0.276)
+- `loan_term_years` (loading: 0.358)
+- `loan_term_months` (loading: 0.358)
+- `long_term_loan_risk` (loading: 0.338)
 
 **Negative Drivers:** Features that decrease this component:
-- `annual_income_cad` (loading: -0.367)
-- `loan_term_months` (loading: -0.200)
-- `loan_term_years` (loading: -0.200)
+- `education_roi` (loading: -0.248)
 
 **Component Statistics:**
-- Maximum loading magnitude: 0.3784
-- Average loading magnitude: 0.2581
-- Loading standard deviation: 0.0777
+- Maximum loading magnitude: 0.3581
+- Average loading magnitude: 0.2912
+- Loading standard deviation: 0.0611
 
 ---
 
-### PC5 (6.81% variance explained)
+### PC5 (6.85% variance explained)
 
 #### Most Influential Features:
 
 | Rank | Feature | Loading | Impact | Description |
 |------|---------|---------|--------|-------------|
-| 1 | `typical_tuition_cad` | 0.4390 | 📈 Positive (High) | Higher values increase component score |
-| 2 | `program_difficulty` | 0.4134 | 📈 Positive (High) | Higher values increase component score |
-| 3 | `high_difficulty_program` | 0.3818 | 📈 Positive (Medium) | Higher values increase component score |
-| 4 | `average_starting_salary` | 0.3701 | 📈 Positive (Medium) | Higher values increase component score |
-| 5 | `education_roi` | -0.3138 | 📉 Negative (Medium) | Higher values decrease component score |
-| 6 | `employment_status_encoded` | 0.1973 | 📈 Positive (Low) | Higher values increase component score |
-| 7 | `annual_income_cad` | -0.1911 | 📉 Negative (Low) | Higher values decrease component score |
-| 8 | `low_income_risk` | 0.1768 | 📈 Positive (Low) | Higher values increase component score |
-| 9 | `pos_duration` | 0.1729 | 📈 Positive (Low) | Higher values increase component score |
-| 10 | `program_type_encoded` | 0.1384 | 📈 Positive (Low) | Higher values increase component score |
+| 1 | `employment_status_encoded` | 0.3582 | 📈 Positive (High) | Higher values increase component score |
+| 2 | `annual_income_cad` | -0.3518 | 📉 Negative (High) | Higher values decrease component score |
+| 3 | `low_income_risk` | 0.3088 | 📈 Positive (Medium) | Higher values increase component score |
+| 4 | `debt_to_income_ratio` | 0.2494 | 📈 Positive (Low) | Higher values increase component score |
+| 5 | `payment_to_income_ratio` | 0.2466 | 📈 Positive (Low) | Higher values increase component score |
+| 6 | `typical_tuition_cad` | 0.2424 | 📈 Positive (Low) | Higher values increase component score |
+| 7 | `program_difficulty` | 0.2225 | 📈 Positive (Low) | Higher values increase component score |
+| 8 | `current_balance` | -0.2109 | 📉 Negative (Low) | Higher values decrease component score |
+| 9 | `education_roi` | -0.2030 | 📉 Negative (Low) | Higher values decrease component score |
+| 10 | `high_difficulty_program` | 0.1979 | 📈 Positive (Low) | Higher values increase component score |
 
 #### PC5 Interpretation:
 
 **Positive Drivers:** Features that increase this component:
-- `typical_tuition_cad` (loading: 0.439)
-- `program_difficulty` (loading: 0.413)
-- `high_difficulty_program` (loading: 0.382)
+- `employment_status_encoded` (loading: 0.358)
+- `low_income_risk` (loading: 0.309)
+- `debt_to_income_ratio` (loading: 0.249)
 
 **Negative Drivers:** Features that decrease this component:
-- `education_roi` (loading: -0.314)
-- `annual_income_cad` (loading: -0.191)
+- `annual_income_cad` (loading: -0.352)
+- `current_balance` (loading: -0.211)
+- `education_roi` (loading: -0.203)
 
 **Component Statistics:**
-- Maximum loading magnitude: 0.4390
-- Average loading magnitude: 0.2794
-- Loading standard deviation: 0.1153
+- Maximum loading magnitude: 0.3582
+- Average loading magnitude: 0.2591
+- Loading standard deviation: 0.0596
 
 ---
 

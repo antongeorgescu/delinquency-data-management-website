@@ -628,6 +628,125 @@
           </div>
         </div>
 
+        <!-- Risk Level Interpretation Section -->
+        <div *ngIf="riskEstimationResults.validation_metrics" class="row mb-3">
+          <div class="col-md-12">
+            <h6 class="mb-2">
+              <i class="bi bi-calculator me-2"></i>Risk Level Interpretation:
+              <i class="bi bi-info-circle ms-1" 
+                 title="Practical interpretation of what each risk level means in terms of likelihood and frequency"
+                 data-bs-toggle="tooltip"></i>
+            </h6>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="card border-success h-100">
+                  <div class="card-header bg-success bg-opacity-10 py-2 text-center">
+                    <small class="fw-bold text-success">
+                      <i class="bi bi-check-circle me-1"></i>Low Risk Interpretation
+                    </small>
+                  </div>
+                  <div class="card-body py-2 text-center">
+                    <div class="fs-5 fw-bold text-success mb-1">
+                      {{ riskEstimationResults.validation_metrics['0']?.actual_delinquency_rate || 0 }}% chance
+                    </div>
+                    <div class="text-muted mb-2">
+                      <ng-container *ngIf="riskEstimationResults.validation_metrics['0']?.actual_delinquency_rate > 0">
+                        <ng-container *ngIf="riskEstimationResults.validation_metrics['0']?.actual_delinquency_rate >= 10">
+                          {{ Math.round(riskEstimationResults.validation_metrics['0']?.actual_delinquency_rate / 10) }} in 10 will have issues
+                        </ng-container>
+                        <ng-container *ngIf="riskEstimationResults.validation_metrics['0']?.actual_delinquency_rate < 10">
+                          1 in {{ Math.round(100 / riskEstimationResults.validation_metrics['0']?.actual_delinquency_rate) | number }} will have issues
+                        </ng-container>
+                      </ng-container>
+                      <ng-container *ngIf="!riskEstimationResults.validation_metrics['0']?.actual_delinquency_rate || riskEstimationResults.validation_metrics['0']?.actual_delinquency_rate == 0">
+                        Virtually no payment issues expected
+                      </ng-container>
+                    </div>
+                    <small class="text-success">
+                      <strong>Minimal intervention required</strong><br>
+                      Standard monitoring and engagement
+                    </small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card border-warning h-100">
+                  <div class="card-header bg-warning bg-opacity-10 py-2 text-center">
+                    <small class="fw-bold text-warning">
+                      <i class="bi bi-exclamation-triangle me-1"></i>Medium Risk Interpretation
+                    </small>
+                  </div>
+                  <div class="card-body py-2 text-center">
+                    <div class="fs-5 fw-bold text-warning mb-1">
+                      {{ riskEstimationResults.validation_metrics['1']?.actual_delinquency_rate || 0 }}% chance
+                    </div>
+                    <div class="text-muted mb-2">
+                      <ng-container *ngIf="riskEstimationResults.validation_metrics['1']?.actual_delinquency_rate > 0">
+                        <ng-container *ngIf="riskEstimationResults.validation_metrics['1']?.actual_delinquency_rate >= 10">
+                          {{ Math.round(riskEstimationResults.validation_metrics['1']?.actual_delinquency_rate / 10) }} in 10 will have issues
+                        </ng-container>
+                        <ng-container *ngIf="riskEstimationResults.validation_metrics['1']?.actual_delinquency_rate < 10">
+                          1 in {{ Math.round(100 / riskEstimationResults.validation_metrics['1']?.actual_delinquency_rate) | number }} will have issues
+                        </ng-container>
+                      </ng-container>
+                      <ng-container *ngIf="!riskEstimationResults.validation_metrics['1']?.actual_delinquency_rate || riskEstimationResults.validation_metrics['1']?.actual_delinquency_rate == 0">
+                        Very low risk of payment issues
+                      </ng-container>
+                    </div>
+                    <small class="text-warning">
+                      <strong>Enhanced monitoring recommended</strong><br>
+                      Proactive outreach and financial wellness programs
+                    </small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card border-danger h-100">
+                  <div class="card-header bg-danger bg-opacity-10 py-2 text-center">
+                    <small class="fw-bold text-danger">
+                      <i class="bi bi-exclamation-octagon me-1"></i>High Risk Interpretation
+                    </small>
+                  </div>
+                  <div class="card-body py-2 text-center">
+                    <div class="fs-5 fw-bold text-danger mb-1">
+                      {{ riskEstimationResults.validation_metrics['2']?.actual_delinquency_rate || 0 }}% chance
+                    </div>
+                    <div class="text-muted mb-2">
+                      <ng-container *ngIf="riskEstimationResults.validation_metrics['2']?.actual_delinquency_rate > 0">
+                        <ng-container *ngIf="riskEstimationResults.validation_metrics['2']?.actual_delinquency_rate >= 10">
+                          {{ Math.round(riskEstimationResults.validation_metrics['2']?.actual_delinquency_rate / 10) }} in 10 will have issues
+                        </ng-container>
+                        <ng-container *ngIf="riskEstimationResults.validation_metrics['2']?.actual_delinquency_rate < 10">
+                          1 in {{ Math.round(100 / riskEstimationResults.validation_metrics['2']?.actual_delinquency_rate) | number }} will have issues
+                        </ng-container>
+                      </ng-container>
+                      <ng-container *ngIf="!riskEstimationResults.validation_metrics['2']?.actual_delinquency_rate || riskEstimationResults.validation_metrics['2']?.actual_delinquency_rate == 0">
+                        Risk assessment indicates concern
+                      </ng-container>
+                    </div>
+                    <small class="text-danger">
+                      <strong>Immediate intervention required</strong><br>
+                      Intensive support, payment plans, retention efforts
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-md-12">
+                <div class="alert alert-info py-2">
+                  <small>
+                    <i class="bi bi-info-circle me-1"></i>
+                    <strong>Interpretation Guide:</strong> These percentages represent the likelihood that borrowers in each risk category will exhibit the derived delinquency behavior patterns. 
+                    The "1 in X" frequency helps understand how often intervention might be needed within each group. 
+                    Higher percentages indicate more frequent intervention requirements and closer monitoring needs.
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Generated Reports Section -->
         <div class="row mb-3">
           <div class="col-md-12">

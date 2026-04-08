@@ -50,6 +50,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   // Data generation explanation
   showDataGenerationExplanation = false;
 
+  // Math object for template calculations
+  Math = Math;
+
   constructor(private dataService: DataService) {}
 
   ngOnInit(): void {

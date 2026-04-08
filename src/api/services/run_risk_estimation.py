@@ -19,6 +19,37 @@ import os
 from datetime import datetime
 import json
 import numpy as np
+import math
+
+def sanitize_json_data(obj):
+    """
+    Recursively sanitize data to ensure JSON compatibility
+    Converts None, NaN, inf, -inf to null or appropriate values
+    """
+    if obj is None:
+        return None
+    elif isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None  # Convert NaN and infinite values to null
+        return obj
+    elif isinstance(obj, dict):
+        return {key: sanitize_json_data(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [sanitize_json_data(item) for item in obj]
+    else:
+        return obj
+
+def safe_float_conversion(value, default=0.0):
+    """
+    Safely convert a value to float, handling NaN and inf values
+    """
+    try:
+        result = float(value)
+        if math.isnan(result) or math.isinf(result):
+            return default
+        return result
+    except (ValueError, TypeError):
+        return default
 
 def main():
     """
@@ -144,7 +175,7 @@ def run_risk_estimation_json(algorithm='random_forest'):
         # Check if database exists
         if not os.path.exists(db_path):
             results["message"] = f"Database file '{db_path}' not found. Please run data generation first."
-            return results
+            return sanitize_json_data(results)
         
         # Check if database is not empty
         try:
@@ -156,10 +187,10 @@ def run_risk_estimation_json(algorithm='random_forest'):
             
             if count == 0:
                 results["message"] = f"Database '{db_path}' is empty. Please run data generation first."
-                return results
+                return sanitize_json_data(results)
         except Exception as db_check_error:
             results["message"] = f"Error reading database '{db_path}': {str(db_check_error)}. Please ensure data is generated first."
-            return results
+            return sanitize_json_data(results)
         
         # Check if required packages are available
         try:
@@ -168,7 +199,7 @@ def run_risk_estimation_json(algorithm='random_forest'):
             import sklearn
         except ImportError as e:
             results["message"] = f"Required package not found: {e}"
-            return results
+            return sanitize_json_data(results)
         
         # Store original sys.argv to restore later
         original_argv = sys.argv.copy()
@@ -206,13 +237,13 @@ def run_risk_estimation_json(algorithm='random_forest'):
             # Restore original sys.argv
             sys.argv = original_argv
             results["message"] = f"Failed to import analysis modules: {str(import_error)}"
-            return results
+            return sanitize_json_data(results)
         
         # Load and prepare data
         df = load_comprehensive_dataset()
         if df.empty:
             results["message"] = "No data found in database for analysis"
-            return results
+            return sanitize_json_data(results)
         
         df = engineer_features(df)
         X, y, feature_columns, label_encoders = prepare_ml_features(df)
@@ -242,7 +273,7 @@ def run_risk_estimation_json(algorithm='random_forest'):
         results["statistics"] = {
             "total_borrowers": len(df),
             "delinquent_borrowers": int(df['is_delinquent'].sum()),
-            "overall_delinquency_rate": float(df['is_delinquent'].mean()),
+            "overall_delinquency_rate": safe_float_conversion(df['is_delinquent'].mean()),
             "features_analyzed": len(feature_columns),
             "records_updated": len(risk_scores)
         }
@@ -267,15 +298,15 @@ def run_risk_estimation_json(algorithm='random_forest'):
             cv_std = best_model_data.get('cv_auc_std', best_model_data.get('cv_std', 0.0))
             
             results["model_performance"]["performance_summary"] = {
-                "auc_score": float(best_model_data['auc_score']),
-                "accuracy": float(best_model_data.get('accuracy', 0.0)),
-                "precision": float(best_model_data.get('precision', 0.0)),
-                "recall": float(best_model_data.get('recall', 0.0)),
-                "f1_score": float(best_model_data.get('f1_score', 0.0)),
-                "cross_validation_auc_mean": float(cv_mean),
-                "cross_validation_auc_std": float(cv_std),
-                "cross_validation_accuracy_mean": float(best_model_data.get('cv_accuracy_mean', 0.0)),
-                "cross_validation_accuracy_std": float(best_model_data.get('cv_accuracy_std', 0.0)),
+                "auc_score": safe_float_conversion(best_model_data['auc_score']),
+                "accuracy": safe_float_conversion(best_model_data.get('accuracy', 0.0)),
+                "precision": safe_float_conversion(best_model_data.get('precision', 0.0)),
+                "recall": safe_float_conversion(best_model_data.get('recall', 0.0)),
+                "f1_score": safe_float_conversion(best_model_data.get('f1_score', 0.0)),
+                "cross_validation_auc_mean": safe_float_conversion(cv_mean),
+                "cross_validation_auc_std": safe_float_conversion(cv_std),
+                "cross_validation_accuracy_mean": safe_float_conversion(best_model_data.get('cv_accuracy_mean', 0.0)),
+                "cross_validation_accuracy_std": safe_float_conversion(best_model_data.get('cv_accuracy_std', 0.0)),
                 "performance_rating": get_performance_rating(best_model_data['auc_score'])
             }
         else:
@@ -287,15 +318,15 @@ def run_risk_estimation_json(algorithm='random_forest'):
             cv_std = model_data.get('cv_auc_std', model_data.get('cv_std', 0.0))
             
             results["model_performance"]["models"][name] = {
-                "auc_score": float(model_data['auc_score']),
-                "accuracy": float(model_data.get('accuracy', 0.0)),
-                "precision": float(model_data.get('precision', 0.0)),
-                "recall": float(model_data.get('recall', 0.0)),
-                "f1_score": float(model_data.get('f1_score', 0.0)),
-                "cv_auc_mean": float(cv_mean),
-                "cv_auc_std": float(cv_std),
-                "cv_accuracy_mean": float(model_data.get('cv_accuracy_mean', 0.0)),
-                "cv_accuracy_std": float(model_data.get('cv_accuracy_std', 0.0))
+                "auc_score": safe_float_conversion(model_data['auc_score']),
+                "accuracy": safe_float_conversion(model_data.get('accuracy', 0.0)),
+                "precision": safe_float_conversion(model_data.get('precision', 0.0)),
+                "recall": safe_float_conversion(model_data.get('recall', 0.0)),
+                "f1_score": safe_float_conversion(model_data.get('f1_score', 0.0)),
+                "cv_auc_mean": safe_float_conversion(cv_mean),
+                "cv_auc_std": safe_float_conversion(cv_std),
+                "cv_accuracy_mean": safe_float_conversion(model_data.get('cv_accuracy_mean', 0.0)),
+                "cv_accuracy_std": safe_float_conversion(model_data.get('cv_accuracy_std', 0.0))
             }
         
         # Risk distribution
@@ -328,7 +359,7 @@ def run_risk_estimation_json(algorithm='random_forest'):
         for risk_level in [0, 1, 2]:
             level_data = df_with_risk[df_with_risk['calculated_risk'] == risk_level]
             if len(level_data) > 0:
-                actual_delinq_rate = float(level_data['is_delinquent'].mean())
+                actual_delinq_rate = safe_float_conversion(level_data['is_delinquent'].mean())
                 borrower_count = len(level_data)
                 percentage_of_total = (borrower_count / total_borrowers) * 100
                 validation_metrics[str(risk_level)] = {
@@ -345,7 +376,7 @@ def run_risk_estimation_json(algorithm='random_forest'):
             results["feature_importance"] = [
                 {
                     "feature": row['feature'],
-                    "importance": round(float(row['importance']), 4),
+                    "importance": round(safe_float_conversion(row['importance'], 0.0), 4),
                     "rank": i + 1
                 }
                 for i, (_, row) in enumerate(top_features.iterrows())
@@ -376,7 +407,8 @@ def run_risk_estimation_json(algorithm='random_forest'):
         # Restore original sys.argv
         sys.argv = original_argv
         
-        return results
+        # Sanitize all data to ensure JSON compatibility
+        return sanitize_json_data(results)
         
     except Exception as e:
         # Restore original sys.argv in case of error
@@ -425,7 +457,8 @@ def run_risk_estimation_json(algorithm='random_forest'):
         print(f"Risk estimation error: {str(e)}")
         print(f"Full traceback: {error_traceback}")
         
-        return results
+        # Sanitize all data to ensure JSON compatibility
+        return sanitize_json_data(results)
 
 def get_detailed_classification_display(model_results, algorithm):
     """
