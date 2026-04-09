@@ -49,6 +49,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   
   // Data generation explanation
   showDataGenerationExplanation = false;
+  
+  // Risk estimation explanation
+  showRiskEstimationExplanation = false;
 
   // Math object for template calculations
   Math = Math;
@@ -203,6 +206,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   toggleDataGenerationExplanation(): void {
     this.showDataGenerationExplanation = !this.showDataGenerationExplanation;
+  }
+
+  toggleRiskEstimationExplanation(): void {
+    this.showRiskEstimationExplanation = !this.showRiskEstimationExplanation;
   }
 
   runRiskAnalysis(): void {

@@ -1477,13 +1477,13 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='rando
     elif algorithm == 'threshold':
         # Fixed probability threshold-based risk classification  
         print("Using Fixed Threshold-based risk classification...")
-        # Updated thresholds: <0.6=Low, 0.6-0.9=Medium, >0.9=High
+        # Updated thresholds: <0.5=Low, 0.5-0.8=Medium, >0.8=High
         
         risk_scores = np.zeros(len(risk_probabilities))
-        risk_scores[risk_probabilities >= 0.6] = 1  # Medium risk
-        risk_scores[risk_probabilities > 0.9] = 2   # High risk
+        risk_scores[risk_probabilities >= 0.5] = 1  # Medium risk
+        risk_scores[risk_probabilities > 0.8] = 2   # High risk
         
-        print(f"Fixed thresholds: Low<0.6, Medium=0.6-0.9, High>0.9")
+        print(f"Fixed thresholds: Low<0.5, Medium=0.5-0.8, High>0.8")
             
     else:
         raise ValueError(f"Unknown algorithm: {algorithm}. Choose from 'random_forest', 'gradient_boosting', 'logistic_regression', 'neural_network', 'svm', 'knn', 'kmeans', 'percentile', 'threshold'")
@@ -1601,8 +1601,8 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='rando
     
     if algorithm == 'threshold':
         print(f"\n🔧 Probability Thresholds Used:")
-        print(f"  Low -> Medium: 0.6")
-        print(f"  Medium -> High: 0.9")
+        print(f"  Low -> Medium: 0.5")
+        print(f"  Medium -> High: 0.8")
     elif algorithm == 'percentile':
         print(f"\n🔧 Percentile-based Classification Details:")
         print(f"  Target distribution: ~50% Low, ~25% Medium, ~25% High")

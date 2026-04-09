@@ -277,7 +277,7 @@ def get_risk_models():
                 'id': 'threshold',
                 'name': 'Fixed Threshold',
                 'short_name': 'Threshold',
-                'description': 'Fixed probability thresholds: <0.6=Low, 0.6-0.9=Medium, >0.9=High',
+                'description': 'Fixed probability thresholds: <0.5=Low, 0.5-0.8=Medium, >0.8=High',
                 'type': 'Statistical Distribution'
             },
             {
