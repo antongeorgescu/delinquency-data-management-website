@@ -1003,11 +1003,52 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='rando
     
     print(f"\nUsing '{algorithm}' classification algorithm for risk scoring...")
     
-    # Create training labels from probability distribution for classification algorithms
-    prob_percentiles = np.percentile(risk_probabilities, [40, 80])  # 40-40-20 split
-    training_labels = np.zeros(len(risk_probabilities))
-    training_labels[risk_probabilities > prob_percentiles[0]] = 1
-    training_labels[risk_probabilities > prob_percentiles[1]] = 2
+    # Debug: Analyze probability distribution
+    print(f"Probability distribution analysis:")
+    print(f"  Min: {np.min(risk_probabilities):.4f}, Max: {np.max(risk_probabilities):.4f}")
+    print(f"  Mean: {np.mean(risk_probabilities):.4f}, Std: {np.std(risk_probabilities):.4f}")
+    print(f"  Unique values: {len(np.unique(risk_probabilities))}")
+    
+    # Enhanced training labels creation with position-based ranking for overfitted models
+    prob_std = np.std(risk_probabilities)
+    prob_range = np.max(risk_probabilities) - np.min(risk_probabilities)
+    
+    print(f"  Standard deviation: {prob_std:.4f}, Range: {prob_range:.4f}")
+    
+    # Check if model is overfitted (very low variance in probabilities)
+    is_overfitted = prob_std < 0.1 or prob_range < 0.2 or len(np.unique(risk_probabilities)) < 10
+    
+    if is_overfitted:
+        print("  ⚠️  Detected overfitted model with low probability variance.")
+        print("  ✅ Using position-based ranking for balanced risk distribution...")
+        
+        # Use position-based ranking instead of probability thresholds
+        sorted_indices = np.argsort(risk_probabilities)
+        n_samples = len(risk_probabilities)
+        
+        # Create more balanced distribution: 50% low, 30% medium, 20% high
+        low_count = int(n_samples * 0.50)
+        medium_count = int(n_samples * 0.30)
+        
+        training_labels = np.zeros(len(risk_probabilities))
+        
+        # Assign based on sorted position, not probability values
+        training_labels[sorted_indices[low_count:low_count + medium_count]] = 1  # Medium risk
+        training_labels[sorted_indices[low_count + medium_count:]] = 2  # High risk
+        
+        print(f"  Position-based distribution: {np.sum(training_labels == 0)} low, {np.sum(training_labels == 1)} medium, {np.sum(training_labels == 2)} high")
+        
+    else:
+        print("  ✅ Using probability-based percentile classification...")
+        
+        # Original probability-based approach for well-distributed models
+        prob_percentiles = np.percentile(risk_probabilities, [40, 80])  # 40-40-20 split
+        training_labels = np.zeros(len(risk_probabilities))
+        training_labels[risk_probabilities > prob_percentiles[0]] = 1
+        training_labels[risk_probabilities > prob_percentiles[1]] = 2
+        
+        print(f"  Percentile thresholds: P40={prob_percentiles[0]:.4f}, P80={prob_percentiles[1]:.4f}")
+        print(f"  Percentile-based distribution: {np.sum(training_labels == 0)} low, {np.sum(training_labels == 1)} medium, {np.sum(training_labels == 2)} high")
     
     # Prepare data for classification
     if algorithm == 'knn':
@@ -1450,34 +1491,137 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='rando
     # Convert to integers
     risk_scores = risk_scores.astype(int)
     
+    # ✅ VALIDATION AND CORRECTION: Ensure all 3 risk levels are represented
+    unique_scores = np.unique(risk_scores)
+    print(f"\n🔍 Risk Distribution Validation:")
+    print(f"   Unique risk levels found: {unique_scores}")
+    
+    if len(unique_scores) < 3:
+        print("   ⚠️  Missing risk levels detected! Applying balanced correction...")
+        
+        # Get original probability rankings for intelligent redistribution
+        sorted_indices = np.argsort(risk_probabilities)
+        n_samples = len(risk_scores)
+        
+        if len(unique_scores) == 1:
+            # Only one risk level - complete redistribution needed
+            print("   🔧 Complete redistribution: 50% low, 30% medium, 20% high")
+            risk_scores = np.zeros(n_samples, dtype=int)
+            low_count = int(n_samples * 0.50)
+            medium_count = int(n_samples * 0.30)
+            
+            risk_scores[sorted_indices[low_count:low_count + medium_count]] = 1
+            risk_scores[sorted_indices[low_count + medium_count:]] = 2
+            
+        elif len(unique_scores) == 2:
+            # Two risk levels - add the missing one
+            missing_level = [i for i in [0, 1, 2] if i not in unique_scores][0]
+            print(f"   🔧 Adding missing level {missing_level}")
+            
+            if missing_level == 1:  # Missing medium risk
+                # Convert some low or high to medium
+                min_samples = max(10, int(n_samples * 0.15))  # At least 15%
+                
+                if 0 in unique_scores and np.sum(risk_scores == 0) > min_samples:
+                    # Convert highest low-risk to medium
+                    low_mask = risk_scores == 0
+                    low_probs = risk_probabilities[low_mask]
+                    low_indices = np.where(low_mask)[0]
+                    highest_low_indices = low_indices[np.argsort(low_probs)[-min_samples:]]
+                    risk_scores[highest_low_indices] = 1
+                    
+                elif 2 in unique_scores and np.sum(risk_scores == 2) > min_samples:
+                    # Convert lowest high-risk to medium  
+                    high_mask = risk_scores == 2
+                    high_probs = risk_probabilities[high_mask]
+                    high_indices = np.where(high_mask)[0]
+                    lowest_high_indices = high_indices[np.argsort(high_probs)[:min_samples]]
+                    risk_scores[lowest_high_indices] = 1
+                    
+            elif missing_level == 2:  # Missing high risk
+                # Convert highest probability samples to high risk
+                min_samples = max(10, int(n_samples * 0.15))
+                highest_indices = sorted_indices[-min_samples:]
+                risk_scores[highest_indices] = 2
+                
+            elif missing_level == 0:  # Missing low risk
+                # Convert lowest probability samples to low risk
+                min_samples = max(10, int(n_samples * 0.15))
+                lowest_indices = sorted_indices[:min_samples] 
+                risk_scores[lowest_indices] = 0
+        
+        # Verify correction worked
+        final_unique = np.unique(risk_scores)
+        print(f"   ✅ After correction: {len(final_unique)} risk levels present")
+    
+    else:
+        print("   ✅ All 3 risk levels properly represented")
+    
     # Distribution summary
     low_risk = np.sum(risk_scores == 0)
     medium_risk = np.sum(risk_scores == 1)
     high_risk = np.sum(risk_scores == 2)
     
-    print(f"\nRisk Score Distribution Summary:")
+    print(f"\n📊 Final Risk Score Distribution Summary:")
     print(f"  Algorithm: {algorithm}")
     print(f"  Low Risk (0): {low_risk:,} borrowers ({low_risk/len(risk_scores)*100:.1f}%)")
     print(f"  Medium Risk (1): {medium_risk:,} borrowers ({medium_risk/len(risk_scores)*100:.1f}%)")
     print(f"  High Risk (2): {high_risk:,} borrowers ({high_risk/len(risk_scores)*100:.1f}%)")
     
+    # 🎯 VALIDATION: Show actual delinquency rates by risk level
+    try:
+        # Load actual delinquency data for validation
+        db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'shared', 'student_loan_data.db'))
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        
+        # Get actual delinquency status
+        cursor = conn.execute("SELECT payer_id, is_delinquent FROM user_profile ORDER BY payer_id")
+        actual_delinquency = {row[0]: row[1] for row in cursor.fetchall()}
+        conn.close()
+        
+        print(f"\n✅ Risk Classification Validation (Actual Delinquency Rates):")
+        
+        for risk_level in [0, 1, 2]:
+            risk_mask = risk_scores == risk_level
+            if np.sum(risk_mask) > 0:
+                # Calculate actual delinquency rate for this risk level
+                risk_payer_ids = np.where(risk_mask)[0] + 1  # Convert to 1-based payer_id
+                actual_delinq_count = sum(1 for pid in risk_payer_ids if actual_delinquency.get(pid, False))
+                actual_delinq_rate = actual_delinq_count / len(risk_payer_ids) * 100
+                
+                risk_names = ['Low Risk', 'Medium Risk', 'High Risk']
+                print(f"  {risk_names[risk_level]}: {actual_delinq_rate:.1f}% actual delinquency ({actual_delinq_count}/{len(risk_payer_ids)})")
+            
+        # Overall validation message
+        print(f"  📈 Expected pattern: Low < Medium < High delinquency rates")
+        
+    except Exception as e:
+        print(f"\n⚠️  Could not validate with actual delinquency data: {e}")
+    
     if algorithm == 'threshold':
-        print(f"\nProbability Thresholds Used:")
+        print(f"\n🔧 Probability Thresholds Used:")
         print(f"  Low -> Medium: 0.6")
         print(f"  Medium -> High: 0.9")
     elif algorithm == 'percentile':
-        print(f"\nPercentile-based Classification Details:")
+        print(f"\n🔧 Percentile-based Classification Details:")
         print(f"  Target distribution: ~50% Low, ~25% Medium, ~25% High")
         print(f"  Method: {'Adaptive quartile thresholds' if 'q50' in locals() else 'Data-driven percentile thresholds'}")
         print(f"  Applied thresholds: P60/Q50={low_to_medium_threshold:.4f}, P90/Q75={medium_to_high_threshold:.4f}")
     elif algorithm in ['svm', 'knn']:
-        print(f"\nML Classifier Details:")
+        print(f"\n🔧 ML Classifier Details:")
         if algorithm == 'svm':
             print(f"  Kernel: RBF (Radial Basis Function)")
             print(f"  Training method: Stratified split with probability-based labels")
         else:
             print(f"  K-value: {optimal_k} (distance-weighted)")
             print(f"  Training method: Stratified split with probability-based labels")
+    else:
+        print(f"\n🔧 Algorithm Details:")
+        if is_overfitted:
+            print(f"  Method: Position-based ranking (compensated for overfitting)")
+        else:
+            print(f"  Method: Probability-based percentile classification")
     
     return risk_scores
 
