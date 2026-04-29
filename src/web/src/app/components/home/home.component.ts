@@ -80,13 +80,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
         console.error('Error loading risk models:', error);
         // Fallback to default algorithms if API fails
         this.algorithms = [
-          {
-            id: 'percentile',
-            name: 'Percentile Based',
-            short_name: 'Percentile',
-            description: 'Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)',
-            type: 'Statistical Distribution'
-          }
+          { id: 'percentile', name: 'Percentile Based', short_name: 'Percentile', description: 'Bottom 60% = Low(0), Next 30% = Medium(1), Top 10% = High(2)', type: 'Statistical Distribution' },
+          { id: 'threshold', name: 'Fixed Threshold', short_name: 'Threshold', description: 'Fixed probability thresholds: <0.5=Low, 0.5-0.8=Medium, >0.8=High', type: 'Statistical Distribution' },
+          { id: 'random_forest', name: 'Random Forest Classifier', short_name: 'Random Forest', description: 'Ensemble classifier with balanced classes and feature importance analysis', type: 'Classification Algorithm' },
+          { id: 'gradient_boosting', name: 'Gradient Boosting Classifier', short_name: 'Gradient Boosting', description: 'Gradient Boosting classifier for complex patterns and high accuracy', type: 'Classification Algorithm' },
+          { id: 'logistic_regression', name: 'Logistic Regression Classifier', short_name: 'Logistic Regression', description: 'Linear classifier with L2 regularization and balanced class handling', type: 'Classification Algorithm' },
+          { id: 'neural_network', name: 'Neural Network (MLP)', short_name: 'Neural Network', description: 'Multi-layer Perceptron with adaptive learning for complex pattern detection', type: 'Classification Algorithm' },
+          { id: 'svm', name: 'Support Vector Machine', short_name: 'SVM', description: 'Support Vector Machine classifier trained on probability-based risk labels', type: 'Classification Algorithm' },
+          { id: 'knn', name: 'K-Nearest Neighbors', short_name: 'KNN', description: 'K-Nearest Neighbors classifier with optimal k and distance weighting', type: 'Classification Algorithm' },
+          { id: 'kmeans', name: 'K-Means Clustering', short_name: 'K-Means', description: 'Clustering algorithm adapted for risk classification', type: 'Clustering Algorithm' }
         ];
       }
     });
@@ -286,7 +288,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   downloadFile(url: string, filename: string): void {
     try {
       const link = document.createElement('a');
-      link.href = `http://localhost:5000${url}`;
+      link.href = url;
       link.download = filename;
       document.body.appendChild(link);
       link.click();

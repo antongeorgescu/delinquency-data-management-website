@@ -22,8 +22,9 @@ export class DataService {
   private baseUrl: string;
 
   constructor(private http: HttpClient) {
-    // Use local Flask API server
-    this.baseUrl = 'http://localhost:5000/api';
+    // Use relative path so nginx can proxy /api to the Flask backend in production
+    // and localhost:5000 in local dev via proxy.conf.json
+    this.baseUrl = '/api';
   }
 
   // Generate synthetic data

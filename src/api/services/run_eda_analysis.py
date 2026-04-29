@@ -68,8 +68,8 @@ Examples:
     # Parse arguments
     args = parser.parse_args()
     
-    # Database path is automatically determined - always in the shared directory
-    db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'shared', 'student_loan_data.db'))
+    # Use DB_PATH env var if set (container), otherwise fall back to shared folder beside app
+    db_path = os.environ.get('DB_PATH', os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'shared', 'student_loan_data.db')))
     
     # Validate database file exists
     if not os.path.exists(db_path):

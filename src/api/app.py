@@ -6,6 +6,11 @@ import os
 import json
 import math
 from datetime import datetime
+
+# Must set matplotlib backend BEFORE any pyplot import (headless container)
+import matplotlib
+matplotlib.use('Agg')
+
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 
@@ -19,6 +24,17 @@ from explore_database import explore_database
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
+
+@app.errorhandler(Exception)
+def handle_unhandled_exception(e):
+    """Return JSON for all unhandled exceptions instead of Flask HTML error page."""
+    import traceback
+    return jsonify({
+        "success": False,
+        "error": str(e),
+        "traceback": traceback.format_exc(),
+        "message": "Internal server error"
+    }), 500
 
 def sanitize_json_data(obj):
     """
@@ -53,12 +69,11 @@ def generate_data():
         end_date = data.get('end_date', '2024-12-31')
         validate = data.get('validate', False)
         
-        # Database path for the current database
-        db_path = os.path.join(os.path.dirname(__file__), 'shared', 'student_loan_data.db')
+        # Database path - use DB_PATH env var if set (container), else local shared folder
+        db_path = os.environ.get('DB_PATH', os.path.join(os.path.dirname(__file__), 'shared', 'student_loan_data.db'))
         
-        # Ensure the shared directory exists
-        shared_dir = os.path.join(os.path.dirname(__file__), 'shared')
-        os.makedirs(shared_dir, exist_ok=True)
+        # Ensure the parent directory exists
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
         
         # Call the data generation service
         print(f"Generating data for {num_payers} payers from {start_date} to {end_date}")
@@ -692,8 +707,8 @@ def run_eda_reports():
                 "message": "Invalid n_components value"
             }), 400
         
-        # Database path for the current database
-        db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'shared', 'student_loan_data.db'))
+        # Database path - use DB_PATH env var if set (container), else local shared folder
+        db_path = os.environ.get('DB_PATH', os.path.abspath(os.path.join(os.path.dirname(__file__), 'shared', 'student_loan_data.db')))
         
         # Check if database exists
         if not os.path.exists(db_path):
@@ -706,87 +721,81 @@ def run_eda_reports():
         # Set up output directory for EDA files
         output_dir = os.path.join(os.path.dirname(__file__), 'services', 'eda_outputs')
         os.makedirs(output_dir, exist_ok=True)
-        
-        # Run full EDA analysis with file generation
-        import subprocess
+
+        # Set matplotlib to headless Agg backend before any import of matplotlib
+        # (already set at module level, this is a no-op but kept for clarity)
         import sys
-        
-        # Run the full EDA script
-        script_path = os.path.join(os.path.dirname(__file__), 'services', 'run_eda_analysis.py')
-        
-        # Use virtual environment Python executable instead of sys.executable
-        # Get the project root (go up from src/api to project root)
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-        venv_python = os.path.join(project_root, '.venv', 'Scripts', 'python.exe')
-        
-        cmd = [
-            venv_python, script_path,
-            '--output_dir', output_dir,
-            '--n_clusters', str(n_clusters),
-            '--n_components', str(n_components)
-        ]
-        
-        # Execute EDA script
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.path.dirname(__file__))
-        
-        if result.returncode != 0:
-            return jsonify({
-                "success": False,
-                "error": f"EDA script failed: {result.stderr}",
-                "stdout": result.stdout,
-                "message": "EDA script execution failed"
-            }), 500
-        
+        services_dir = os.path.join(os.path.dirname(__file__), 'services')
+        if services_dir not in sys.path:
+            sys.path.insert(0, services_dir)
+
+        # Run EDA via direct Python function call (avoids subprocess PATH issues)
+        from delinquency_analysis.exploratory_data_analysis import ExploratoryDataAnalysis
+
+        eda = ExploratoryDataAnalysis(db_path, output_dir)
+        eda.load_and_process_data()
+        eda.perform_pca_analysis(n_components if n_components else None)
+        eda.create_scree_plot()
+        eda.create_pca_scatter_plot()
+        eda.create_biplot()
+        eda.analyze_feature_contributions()
+        eda.create_correlation_heatmap()
+        eda.perform_clustering_analysis(n_clusters)
+        markdown_report = eda.generate_comprehensive_report()
+        eda.convert_markdown_to_html(markdown_report)
+
         # Get analysis summary using JSON function
-        from services.run_eda_analysis_json import run_eda_analysis_json
+        # services_dir is already on sys.path, so import directly (not via 'services.' prefix)
+        from run_eda_analysis_json import run_eda_analysis_json
         json_results = run_eda_analysis_json(n_clusters=n_clusters, n_components=n_components)
         
         # Define the generated files with descriptions
+        # Use relative URLs so nginx proxies them correctly in any environment
         files_info = [
             {
                 "filename": "pca_scree_plot.html",
                 "description": "Variance explained by each principal component",
-                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/pca_scree_plot.html"
+                "url": "/api/services/eda_outputs/pca_scree_plot.html"
             },
             {
                 "filename": "pca_scatter_plot.html", 
                 "description": "PC1 vs PC2 scatter plot colored by delinquency risk",
-                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/pca_scatter_plot.html"
+                "url": "/api/services/eda_outputs/pca_scatter_plot.html"
             },
             {
                 "filename": f"pca_biplot_pc1_vs_pc2.html",
                 "description": "Biplot showing feature contribution vectors",
-                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/pca_biplot_pc1_vs_pc2.html"
+                "url": "/api/services/eda_outputs/pca_biplot_pc1_vs_pc2.html"
             },
             {
                 "filename": "pca_feature_contributions.html",
                 "description": "Feature contributions to each principal component",
-                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/pca_feature_contributions.html"
+                "url": "/api/services/eda_outputs/pca_feature_contributions.html"
             },
             {
                 "filename": "feature_correlation_heatmap.html",
                 "description": "Correlation matrix heatmap of original features",
-                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/feature_correlation_heatmap.html"
+                "url": "/api/services/eda_outputs/feature_correlation_heatmap.html"
             },
             {
                 "filename": f"pca_clustering_k{n_clusters}.html",
                 "description": f"K-means clustering results (k={n_clusters}) on PCA components",
-                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/pca_clustering_k{n_clusters}.html"
+                "url": f"/api/services/eda_outputs/pca_clustering_k{n_clusters}.html"
             },
             {
                 "filename": "cluster_analysis_summary.csv",
                 "description": "Statistical summary of cluster analysis",
-                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/cluster_analysis_summary.csv"
+                "url": "/api/services/eda_outputs/cluster_analysis_summary.csv"
             },
             {
                 "filename": "eda_comprehensive_report.md",
                 "description": "Comprehensive analysis report with insights",
-                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/eda_comprehensive_report.md"
+                "url": "/api/services/eda_outputs/eda_comprehensive_report.md"
             },
             {
                 "filename": "eda_comprehensive_report.html",
                 "description": "Comprehensive analysis report (HTML format)",
-                "url": f"http://127.0.0.1:5000/api/services/eda_outputs/eda_comprehensive_report.html"
+                "url": "/api/services/eda_outputs/eda_comprehensive_report.html"
             }
         ]
         
@@ -839,20 +848,17 @@ def run_eda_reports():
         
         return jsonify(response), 200
         
-    except Exception as e:
+    except BaseException as e:
         import traceback
         error_response = {
-            "success": False,  
+            "success": False,
             "error": str(e),
             "message": "Failed to run EDA analysis",
             "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             "traceback": traceback.format_exc()
         }
-        
-        # Log the error for debugging
         print(f"EDA analysis error: {str(e)}")
         print(f"Traceback: {traceback.format_exc()}")
-        
         return jsonify(error_response), 500
 
 @app.route('/api/services/eda_outputs/<path:filename>')

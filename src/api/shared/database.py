@@ -9,9 +9,11 @@ from typing import List, Dict, Any
 
 class DatabaseManager:
     def __init__(self, db_path=None):
-        # Use custom path if provided, otherwise default to shared directory
+        # Priority: explicit arg > DB_PATH env var > default beside this file
         if db_path:
             self.db_filename = db_path
+        elif os.environ.get("DB_PATH"):
+            self.db_filename = os.environ["DB_PATH"]
         else:
             self.db_filename = os.path.join(os.path.dirname(__file__), "student_loan_data.db")
         

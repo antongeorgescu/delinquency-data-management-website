@@ -39,8 +39,8 @@ def run_eda_analysis_json(n_clusters=5, n_components=10):
     }
     
     try:
-        # Hardcode database path - always look in the shared folder relative to this script
-        db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'shared', 'student_loan_data.db'))
+        # Use DB_PATH env var if set (container), otherwise fall back to shared folder beside app
+        db_path = os.environ.get('DB_PATH', os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'shared', 'student_loan_data.db')))
         
         # Check if database exists
         if not os.path.exists(db_path):

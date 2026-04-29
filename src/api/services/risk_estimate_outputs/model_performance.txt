@@ -1,29 +1,29 @@
 DELINQUENCY ANALYSIS - MODEL PERFORMANCE REPORT
 ============================================================
-Generated: 2026-04-09 06:49:01
+Generated: 2026-04-29 11:38:59
 
 SUMMARY TABLE
 --------------------------------------------------------------------------------
 Model                Accuracy   Precision   Recall   F1-Score  AUC    
 -------------------- ---------- ----------- -------- --------- -------
-Random Forest        1.0000     1.0000      1.0000   1.0000    1.0000 
+SVM                  0.7700     0.8202      0.7700   0.7594    0.9524 
 
 
 DETAILED CROSS-VALIDATION RESULTS
 --------------------------------------------------------------------------------
 
-RANDOM FOREST
--------------
+SVM
+---
 Test Set Performance:
-  Accuracy:  1.0000
-  Precision: 1.0000
-  Recall:    1.0000
-  F1-Score:  1.0000
-  AUC Score: 1.0000
+  Accuracy:  0.7700
+  Precision: 0.8202
+  Recall:    0.7700
+  F1-Score:  0.7594
+  AUC Score: 0.9524
 
 Cross-Validation Performance (5-fold):
-  Accuracy:  0.9950 (+/- 0.0146)
-  Precision: 0.9952 (+/- 0.0140)
-  Recall:    0.9950 (+/- 0.0146)
-  F1-Score:  0.9950 (+/- 0.0146)
-  AUC:       1.0000 (+/- 0.0000)
+  Accuracy:  0.7812 (+/- 0.0506)
+  Precision: 0.8313 (+/- 0.0239)
+  Recall:    0.7812 (+/- 0.0506)
+  F1-Score:  0.7708 (+/- 0.0620)
+  AUC:       0.9543 (+/- 0.0291)

@@ -1417,8 +1417,10 @@ def calculate_risk_scores(model, X, scaler=None, model_name='', algorithm='rando
         
         print(f"  Total samples: {n_samples}")
         print(f"  Sample values at key positions:")
-        print(f"    Position 600 (60%): {sorted_probs[599]:.4f}")  # 60% mark
-        print(f"    Position 900 (90%): {sorted_probs[899]:.4f}")  # 90% mark
+        idx_60 = min(int(n_samples * 0.60), n_samples - 1)
+        idx_90 = min(int(n_samples * 0.90), n_samples - 1)
+        print(f"    Position {idx_60+1} (60%): {sorted_probs[idx_60]:.4f}")  # 60% mark
+        print(f"    Position {idx_90+1} (90%): {sorted_probs[idx_90]:.4f}")  # 90% mark
         
         # Calculate the actual threshold values using percentiles
         low_to_medium_threshold = np.percentile(risk_probabilities, 60)    # 60th percentile 

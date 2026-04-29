@@ -154,8 +154,8 @@ def run_risk_estimation_json(algorithm='random_forest'):
     Returns:
         dict: JSON-compatible results with analysis statistics and status
     """
-    # Hardcode database path - always look in the shared folder relative to this script
-    db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'shared', 'student_loan_data.db'))
+    # Use DB_PATH env var if set (container), otherwise fall back to shared folder beside app
+    db_path = os.environ.get('DB_PATH', os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'shared', 'student_loan_data.db')))
     
     results = {
         "success": False,

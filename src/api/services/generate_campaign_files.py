@@ -485,8 +485,9 @@ def generate_campaign_files_json():
     try:
         db_manager = DatabaseManager()
         
-        # Create campaigns folder
-        campaigns_dir = "campaigns"
+        # Create campaigns folder — use absolute path so files land in services/campaigns/
+        # which matches the download endpoint's lookup path
+        campaigns_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'campaigns')
         if not os.path.exists(campaigns_dir):
             os.makedirs(campaigns_dir)
         
